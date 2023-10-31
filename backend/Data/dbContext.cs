@@ -1,7 +1,7 @@
-using DotNetSQL.Models;
+using SocialMediaApp.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace SocialMediaAPI.Data;
+namespace SocialMediaApp.Data;
 
 public class DataContext : DbContext
 {

@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetSQL.Models;
+namespace SocialMediaApp.Models;
 
 [PrimaryKey(nameof(UserId), nameof(FriendId))]
 public class Friendships

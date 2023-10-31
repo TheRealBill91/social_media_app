@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Components.Web;
 
-namespace DotNetSQL.Models;
+namespace SocialMediaApp.Models;
 
 public class User_Profiles
 {

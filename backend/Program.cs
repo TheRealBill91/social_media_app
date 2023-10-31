@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using SocialMediaAPI.Data;
+using SocialMediaApp.Data;
+using SocialMediaApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +17,7 @@ else
 }
 
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(connection));
-
+builder.Services.AddScoped<PostService>();
 builder.Services.AddControllers();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
