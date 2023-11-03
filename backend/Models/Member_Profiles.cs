@@ -4,14 +4,13 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
-public class User_Profiles
+[Table("member_profile")]
+public class Member_Profiles
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [ForeignKey("Users")]
-    public Guid UserId { get; set; }
+    [Column("member_id")]
+    public Guid MemberId { get; set; }
 
-    public required Users Users { get; init; }
-
+    [Column("photo_url")]
     public required string PhotoURL { get; set; }
 }

@@ -29,7 +29,7 @@ public class PostsController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post([FromBody] Posts Post)
+    public async Task<IActionResult> CreatePost([FromBody] Posts Post)
     {
         try
         {

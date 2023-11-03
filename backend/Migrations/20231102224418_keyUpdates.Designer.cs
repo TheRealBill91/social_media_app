@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMediaApp.Data;
@@ -11,9 +12,11 @@ using SocialMediaApp.Data;
 namespace social_media_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231102224418_keyUpdates")]
+    partial class keyUpdates
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,10 +45,6 @@ namespace social_media_api.Migrations
                         .HasColumnName("time_stamp");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("CommentId");
 
                     b.ToTable("comment_upvote");
                 });
@@ -76,10 +75,6 @@ namespace social_media_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("PostId");
-
                     b.ToTable("comment");
                 });
 
@@ -94,8 +89,6 @@ namespace social_media_api.Migrations
                         .HasColumnName("receiver_id");
 
                     b.HasKey("RequesterId", "ReceiverId");
-
-                    b.HasIndex("ReceiverId");
 
                     b.ToTable("friend_request");
                 });
@@ -112,14 +105,13 @@ namespace social_media_api.Migrations
 
                     b.HasKey("MemberId", "FriendId");
 
-                    b.HasIndex("FriendId");
-
                     b.ToTable("friendship");
                 });
 
             modelBuilder.Entity("SocialMediaApp.Models.Member_Profiles", b =>
                 {
                     b.Property<Guid>("MemberId")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("member_id");
 
@@ -193,10 +185,6 @@ namespace social_media_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
-
-                    b.HasIndex("PostId");
-
                     b.ToTable("post_upvote");
                 });
 
@@ -233,102 +221,7 @@ namespace social_media_api.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AuthorId");
-
                     b.ToTable("post");
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Comment_Upvotes", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMediaApp.Models.Comments", null)
-                        .WithMany()
-                        .HasForeignKey("CommentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Comments", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMediaApp.Models.Posts", null)
-                        .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Friend_Requests", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("RequesterId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Friendships", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("FriendId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Member_Profiles", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithOne()
-                        .HasForeignKey("SocialMediaApp.Models.Member_Profiles", "MemberId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Post_Upvotes", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SocialMediaApp.Models.Posts", null)
-                        .WithMany()
-                        .HasForeignKey("PostId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("SocialMediaApp.Models.Posts", b =>
-                {
-                    b.HasOne("SocialMediaApp.Models.Members", null)
-                        .WithMany()
-                        .HasForeignKey("AuthorId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

@@ -5,18 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SocialMediaApp.Models;
 
+[Table("friend_request")]
 [PrimaryKey(nameof(RequesterId), nameof(ReceiverId))]
 public class Friend_Requests
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [ForeignKey("Users")]
+    [Column("requester_id")]
     public Guid RequesterId { get; set; }
 
-    public required Users Requester { get; init; }
-
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [ForeignKey("Users")]
+    [Column("receiver_id")]
     public Guid ReceiverId { get; set; }
-
-    public required Users Receiver { get; init; }
 }

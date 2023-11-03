@@ -17,8 +17,13 @@ else
 }
 
 builder.Services.AddDbContext<DataContext>(options => options.UseNpgsql(connection));
-builder.Services.AddScoped<PostService>();
-builder.Services.AddControllers();
+builder.Services.AddModelServices();
+builder.Services
+    .AddControllers()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        options.SuppressModelStateInvalidFilter = true;
+    });
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -32,6 +37,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseRouting();
 
 app.UseHttpsRedirection();
 

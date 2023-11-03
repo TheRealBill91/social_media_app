@@ -4,22 +4,20 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
+[Table("post_upvote")]
 public class Post_Upvotes
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("id")]
     public Guid Id { get; set; }
 
     [Required]
+    [Column("timestamp")]
     public required DateTime Timestamp { get; set; }
 
-    [ForeignKey("Users")]
+    [Column("author_id")]
     public Guid AuthorId { get; set; }
 
-    public required Users Users { get; init; }
-
-    [ForeignKey("Posts")]
+    [Column("post_id")]
     public Guid PostId { get; set; }
-
-    public required Posts Posts { get; init; }
 }

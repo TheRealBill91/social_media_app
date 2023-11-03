@@ -21,9 +21,10 @@ public class PostService
     {
         Post.Created = DateOnly.FromDateTime(DateTime.Now);
         Post.Modified = DateOnly.FromDateTime(DateTime.Now);
+        Guid newId = Guid.NewGuid();
 
         await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO Posts (Title, Content, Created, Modified) VALUES ({Post.Title}, {Post.Content}, {Post.Created}, {Post.Modified})"
+            $"INSERT INTO post (id, title, content, created, modified, author_id ) VALUES ( {newId},{Post.Title}, {Post.Content}, {Post.Created}, {Post.Modified}, {Post.AuthorId})"
         );
     }
 }

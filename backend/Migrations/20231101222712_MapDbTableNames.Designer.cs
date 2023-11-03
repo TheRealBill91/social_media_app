@@ -12,8 +12,8 @@ using SocialMediaApp.Data;
 namespace social_media_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    [Migration("20231027233612_models")]
-    partial class models
+    [Migration("20231101222712_MapDbTableNames")]
+    partial class MapDbTableNames
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,7 +25,7 @@ namespace social_media_api.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("DotNetSQL.Models.Comment_Upvotes", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Comment_Upvotes", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -49,7 +49,7 @@ namespace social_media_api.Migrations
                     b.ToTable("Comment_Upvote");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Comments", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Comments", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -77,7 +77,7 @@ namespace social_media_api.Migrations
                     b.ToTable("Comment");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Friend_Requests", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Friend_Requests", b =>
                 {
                     b.Property<Guid>("RequesterId")
                         .ValueGeneratedOnAdd()
@@ -94,9 +94,9 @@ namespace social_media_api.Migrations
                     b.ToTable("Friend_Request");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Friendships", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Friendships", b =>
                 {
-                    b.Property<Guid>("UserId")
+                    b.Property<Guid>("MemberId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
@@ -104,14 +104,62 @@ namespace social_media_api.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.HasKey("UserId", "FriendId");
+                    b.HasKey("MemberId", "FriendId");
 
                     b.HasIndex("FriendId");
 
                     b.ToTable("Friendship");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Post_Upvotes", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Member_Profiles", b =>
+                {
+                    b.Property<Guid>("MemberId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PhotoURL")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("MemberId");
+
+                    b.ToTable("Member_Profile");
+                });
+
+            modelBuilder.Entity("SocialMediaApp.Models.Members", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FirstName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("LastActive")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("UserName")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Member");
+                });
+
+            modelBuilder.Entity("SocialMediaApp.Models.Post_Upvotes", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -135,7 +183,7 @@ namespace social_media_api.Migrations
                     b.ToTable("Post_Upvote");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Posts", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Posts", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -146,7 +194,8 @@ namespace social_media_api.Migrations
 
                     b.Property<string>("Content")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(5000)
+                        .HasColumnType("character varying(5000)");
 
                     b.Property<DateOnly>("Created")
                         .HasColumnType("date");
@@ -156,7 +205,8 @@ namespace social_media_api.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
 
                     b.HasKey("Id");
 
@@ -165,60 +215,15 @@ namespace social_media_api.Migrations
                     b.ToTable("Post");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.User_Profiles", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Comment_Upvotes", b =>
                 {
-                    b.Property<Guid>("UserId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("PhotoURL")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("UserId");
-
-                    b.ToTable("User_Profile");
-                });
-
-            modelBuilder.Entity("DotNetSQL.Models.Users", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("FirstName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("LastActive")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("LastName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("UserName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("User");
-                });
-
-            modelBuilder.Entity("DotNetSQL.Models.Comment_Upvotes", b =>
-                {
-                    b.HasOne("DotNetSQL.Models.Users", "Users")
+                    b.HasOne("SocialMediaApp.Models.Members", "Members")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DotNetSQL.Models.Comments", "Comments")
+                    b.HasOne("SocialMediaApp.Models.Comments", "Comments")
                         .WithMany()
                         .HasForeignKey("CommentId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -226,37 +231,37 @@ namespace social_media_api.Migrations
 
                     b.Navigation("Comments");
 
-                    b.Navigation("Users");
+                    b.Navigation("Members");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Comments", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Comments", b =>
                 {
-                    b.HasOne("DotNetSQL.Models.Users", "Users")
+                    b.HasOne("SocialMediaApp.Models.Members", "Members")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DotNetSQL.Models.Posts", "Posts")
+                    b.HasOne("SocialMediaApp.Models.Posts", "Posts")
                         .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Posts");
+                    b.Navigation("Members");
 
-                    b.Navigation("Users");
+                    b.Navigation("Posts");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Friend_Requests", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Friend_Requests", b =>
                 {
-                    b.HasOne("DotNetSQL.Models.Users", "Receiver")
+                    b.HasOne("SocialMediaApp.Models.Members", "Receiver")
                         .WithMany()
                         .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DotNetSQL.Models.Users", "Requester")
+                    b.HasOne("SocialMediaApp.Models.Members", "Requester")
                         .WithMany()
                         .HasForeignKey("RequesterId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -267,64 +272,64 @@ namespace social_media_api.Migrations
                     b.Navigation("Requester");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Friendships", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Friendships", b =>
                 {
-                    b.HasOne("DotNetSQL.Models.Users", "Friend")
+                    b.HasOne("SocialMediaApp.Models.Members", "Friend")
                         .WithMany()
                         .HasForeignKey("FriendId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DotNetSQL.Models.Users", "User")
+                    b.HasOne("SocialMediaApp.Models.Members", "Member")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("MemberId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Friend");
 
-                    b.Navigation("User");
+                    b.Navigation("Member");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Post_Upvotes", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Member_Profiles", b =>
                 {
-                    b.HasOne("DotNetSQL.Models.Users", "Users")
+                    b.HasOne("SocialMediaApp.Models.Members", "Members")
+                        .WithMany()
+                        .HasForeignKey("MemberId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Members");
+                });
+
+            modelBuilder.Entity("SocialMediaApp.Models.Post_Upvotes", b =>
+                {
+                    b.HasOne("SocialMediaApp.Models.Members", "Members")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("DotNetSQL.Models.Posts", "Posts")
+                    b.HasOne("SocialMediaApp.Models.Posts", "Posts")
                         .WithMany()
                         .HasForeignKey("PostId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Posts");
+                    b.Navigation("Members");
 
-                    b.Navigation("Users");
+                    b.Navigation("Posts");
                 });
 
-            modelBuilder.Entity("DotNetSQL.Models.Posts", b =>
+            modelBuilder.Entity("SocialMediaApp.Models.Posts", b =>
                 {
-                    b.HasOne("DotNetSQL.Models.Users", "Users")
+                    b.HasOne("SocialMediaApp.Models.Members", "Members")
                         .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("DotNetSQL.Models.User_Profiles", b =>
-                {
-                    b.HasOne("DotNetSQL.Models.Users", "Users")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Users");
+                    b.Navigation("Members");
                 });
 #pragma warning restore 612, 618
         }

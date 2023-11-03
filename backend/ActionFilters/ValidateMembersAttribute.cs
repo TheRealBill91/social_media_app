@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 
 namespace SocialMediaApp.Filters;
 
-public class ValidateUsersAttribute : ActionFilterAttribute
+public class ValidateMembersAttribute : ActionFilterAttribute
 {
     public override void OnActionExecuting(ActionExecutingContext context)
     {

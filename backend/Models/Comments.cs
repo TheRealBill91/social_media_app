@@ -4,25 +4,24 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
+[Table("comment")]
 public class Comments
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Column("id")]
     public Guid Id { get; set; }
 
     [Required]
+    [Column("content")]
     public required string Content { get; set; }
 
     [Required]
+    [Column("created")]
     public required DateOnly Created { get; set; }
 
-    [ForeignKey("Users")]
+    [Column("author_id")]
     public Guid AuthorId { get; set; }
 
-    public required Users Users { get; init; }
-
-    [ForeignKey("Posts")]
+    [Column("post_id")]
     public Guid PostId { get; set; }
-
-    public required Posts Posts { get; init; }
 }

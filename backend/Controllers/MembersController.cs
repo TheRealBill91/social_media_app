@@ -5,22 +5,22 @@ using SocialMediaApp.Filters;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[ValidateUsers]
+[ValidateMembers]
 [Route("api/[controller]")]
-public class UsersController : Controller
+public class MembersController : Controller
 {
-    private readonly UserService _userService;
+    private readonly MemberService _memberService;
 
-    public UsersController(UserService userService)
+    public MembersController(MemberService memberService)
     {
-        _userService = userService;
+        _memberService = memberService;
     }
 
-    // GET: api/User/{id}
+    // GET: api/Member/{id}
     [HttpGet("{id}")]
     public async Task<IActionResult> Get(int id)
     {
-        var person = await _userService.GetByIdAsync(id);
+        var person = await _memberService.GetByIdAsync(id);
         if (person == null)
         {
             return NotFound();
@@ -29,12 +29,12 @@ public class UsersController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> User([FromBody] Users User)
+    public async Task<IActionResult> CreatMember([FromBody] Members Member)
     {
         try
         {
-            await _userService.AddAsync(User);
-            return CreatedAtAction(nameof(Get), new { id = User.Id }, User);
+            await _memberService.AddAsync(Member);
+            return CreatedAtAction(nameof(Get), new { id = Member.Id }, Member);
         }
         catch (DbUpdateException)
         {

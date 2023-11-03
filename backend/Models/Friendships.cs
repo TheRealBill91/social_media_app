@@ -5,18 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SocialMediaApp.Models;
 
-[PrimaryKey(nameof(UserId), nameof(FriendId))]
+[Table("friendship")]
+[PrimaryKey(nameof(MemberId), nameof(FriendId))]
 public class Friendships
 {
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [ForeignKey("Users")]
-    public Guid UserId { get; set; }
+    [Column("member_id")]
+    public Guid MemberId { get; set; }
 
-    public required Users User { get; init; }
-
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [ForeignKey("Users")]
+    [Column("friend_id")]
     public Guid FriendId { get; set; }
-
-    public required Users Friend { get; init; }
 }
