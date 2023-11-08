@@ -21,11 +21,17 @@ public class Posts
     [Column("content")]
     public required string Content { get; set; }
 
-    [Column("created")]
-    public DateOnly Created { get; set; }
+    [Required]
+    [Column("created_at")]
+    public required DateTime CreatedAt { get; set; }
 
-    [Column("modified")]
-    public DateOnly Modified { get; set; }
+    [Required]
+    [Column("updated_at")]
+    public required DateTime UpdatedAt { get; set; }
+
+    [Required]
+    [Column("deleted_at")]
+    public required DateTime DeletedAt { get; set; }
 
     [Column("author_id")]
     public Guid AuthorId { get; set; }

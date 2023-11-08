@@ -12,5 +12,26 @@ public class Member_Profiles
     public Guid MemberId { get; set; }
 
     [Column("photo_url")]
-    public required string PhotoURL { get; set; }
+    public string? PhotoURL { get; set; }
+
+    [Column("bio")]
+    public string? Bio { get; set; }
+
+    [Column("location")]
+    public string? Location { get; set; }
+
+    [Column("url")]
+    public string? URL { get; set; }
+
+    [Required]
+    [Column("created_at")]
+    public required DateTime CreatedAt { get; set; }
+
+    [Required]
+    [Column("updated_at")]
+    public required DateTime UpdatedAt { get; set; }
+
+    [Required]
+    [Column("deleted_at")]
+    public required DateTime DeletedAt { get; set; }
 }

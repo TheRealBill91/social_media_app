@@ -32,6 +32,15 @@ public class Members
     [Column("email")]
     public required string Email { get; set; }
 
-    [Column("last_active")]
-    public DateTime LastActive { get; set; }
+    [Required]
+    [Column("created_at")]
+    public required DateTime CreatedAt { get; set; }
+
+    [Required]
+    [Column("updated_at")]
+    public required DateTime UpdatedAt { get; set; }
+
+    [Required]
+    [Column("deleted_at")]
+    public required DateTime DeletedAt { get; set; }
 };

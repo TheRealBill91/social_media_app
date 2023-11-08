@@ -1,10 +1,23 @@
 using SocialMediaApp.Models;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace SocialMediaApp.Data;
 
+public enum FriendRequestStatus
+{
+    Pending,
+    Accepted,
+    Rejected
+}
+
 public class DataContext : DbContext
 {
+    static DataContext()
+    {
+        NpgsqlConnection.GlobalTypeMapper.MapEnum<FriendRequestStatus>();
+    }
+
     public DataContext(DbContextOptions<DataContext> options)
         : base(options) { }
 
@@ -23,6 +36,7 @@ public class DataContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.HasPostgresEnum<FriendRequestStatus>();
         modelBuilder.Entity<Posts>().HasOne<Members>().WithMany().HasForeignKey(p => p.AuthorId);
         modelBuilder
             .Entity<Post_Upvotes>()
@@ -67,5 +81,8 @@ public class DataContext : DbContext
             .HasOne<Comments>()
             .WithMany()
             .HasForeignKey(c => c.CommentId);
+        modelBuilder.Entity<Members>().HasIndex(m => m.Id);
+        modelBuilder.Entity<Members>().HasIndex(m => m.UserName).IsUnique();
+        modelBuilder.Entity<Members>().HasIndex(m => m.Email).IsUnique();
     }
 }

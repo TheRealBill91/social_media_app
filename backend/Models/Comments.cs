@@ -16,8 +16,16 @@ public class Comments
     public required string Content { get; set; }
 
     [Required]
-    [Column("created")]
-    public required DateOnly Created { get; set; }
+    [Column("created_at")]
+    public required DateTime CreatedAt { get; set; }
+
+    [Required]
+    [Column("updated_at")]
+    public required DateTime UpdatedAt { get; set; }
+
+    [Required]
+    [Column("deleted_at")]
+    public required DateTime DeletedAt { get; set; }
 
     [Column("author_id")]
     public Guid AuthorId { get; set; }

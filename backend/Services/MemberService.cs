@@ -19,11 +19,11 @@ public class MemberService
     // Create a member
     public async Task AddAsync(Members Member)
     {
-        Member.LastActive = DateTime.UtcNow;
+        Member.UpdatedAt = DateTime.UtcNow;
         Guid newId = Guid.NewGuid();
 
         await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO member ( id,first_name, last_name, username, email, last_active) VALUES ({newId},{Member.FirstName}, {Member.LastName}, {Member.UserName}, {Member.Email}, {Member.LastActive})"
+            $"INSERT INTO member ( id,first_name, last_name, username, email, last_active) VALUES ({newId},{Member.FirstName}, {Member.LastName}, {Member.UserName}, {Member.Email}, {Member.UpdatedAt})"
         );
     }
 }

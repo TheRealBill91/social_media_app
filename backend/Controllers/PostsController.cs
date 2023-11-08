@@ -18,9 +18,13 @@ public class PostsController : Controller
 
     // GET: api/Post/{id}
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> GetPost(Guid? id)
     {
-        var person = await _postService.GetByIdAsync(id);
+        if (id == null)
+        {
+            return NotFound();
+        }
+        var person = await _postService.GetByIdAsync((Guid)id);
         if (person == null)
         {
             return NotFound();
@@ -28,17 +32,47 @@ public class PostsController : Controller
         return Ok(person);
     }
 
-    [HttpPost]
+    [HttpPost("Create")]
     public async Task<IActionResult> CreatePost([FromBody] Posts Post)
     {
-        try
+        if (Post == null)
         {
-            await _postService.AddAsync(Post);
-            return CreatedAtAction(nameof(Get), new { id = Post.Id }, Post);
+            return NotFound();
         }
-        catch (DbUpdateException)
+
+        await _postService.AddAsync(Post);
+        return CreatedAtAction(nameof(GetPost), new { id = Post.Id }, Post);
+    }
+
+    [HttpPost("Delete/{id}")]
+    public async Task<IActionResult> DeletePost(Guid? id)
+    {
+        if (id == null)
         {
-            return StatusCode(500, "An error occurred while creating the post. Please try again.");
+            return NotFound();
         }
+
+        var result = await _postService.DeletePostAsync((Guid)id);
+        if (result > 0)
+        {
+            return NoContent();
+        }
+        else
+        {
+            // If no rows were affected, the post with the given ID was not found.
+            return NotFound();
+        }
+    }
+
+    [HttpPost("Update/{id}")]
+    public async Task<IActionResult> UpdatePost(Guid? id, [FromBody] Posts postToUpdate)
+    {
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        await _postService.UpdatePostAsync((Guid)id, postToUpdate);
+        return Ok(postToUpdate);
     }
 }

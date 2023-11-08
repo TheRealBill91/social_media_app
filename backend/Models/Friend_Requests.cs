@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.EntityFrameworkCore;
+using SocialMediaApp.Data;
 
 namespace SocialMediaApp.Models;
 
@@ -14,4 +15,7 @@ public class Friend_Requests
 
     [Column("receiver_id")]
     public Guid ReceiverId { get; set; }
+
+    [Column("status")]
+    public FriendRequestStatus Status {get; set;}
 }

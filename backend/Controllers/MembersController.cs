@@ -18,7 +18,7 @@ public class MembersController : Controller
 
     // GET: api/Member/{id}
     [HttpGet("{id}")]
-    public async Task<IActionResult> Get(int id)
+    public async Task<IActionResult> GetMember(int id)
     {
         var person = await _memberService.GetByIdAsync(id);
         if (person == null)
@@ -31,14 +31,7 @@ public class MembersController : Controller
     [HttpPost]
     public async Task<IActionResult> CreatMember([FromBody] Members Member)
     {
-        try
-        {
-            await _memberService.AddAsync(Member);
-            return CreatedAtAction(nameof(Get), new { id = Member.Id }, Member);
-        }
-        catch (DbUpdateException)
-        {
-            return StatusCode(500, "An error occurred while creating the post. Please try again.");
-        }
+        await _memberService.AddAsync(Member);
+        return CreatedAtAction(nameof(GetMember), new { id = Member.Id }, Member);
     }
 }

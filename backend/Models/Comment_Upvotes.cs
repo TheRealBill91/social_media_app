@@ -12,8 +12,12 @@ public class Comment_Upvotes
     public Guid Id { get; set; }
 
     [Required]
-    [Column("time_stamp")]
-    public required DateTime Timestamp { get; set; }
+    [Column("created_at")]
+    public required DateTime CreatedAt { get; set; }
+
+    [Required]
+    [Column("updated_at")]
+    public required DateTime UpdatedAt { get; set; }
 
     [Column("author_id")]
     public Guid AuthorId { get; set; }
