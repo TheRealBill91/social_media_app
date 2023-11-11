@@ -4,13 +4,18 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
-public class Comments
+public class MemberProfiles
 {
     [Key]
-    public Guid Id { get; set; }
+    public Guid MemberId { get; set; }
 
-    [Required]
-    public string Content { get; set; } = null!;
+    public string? PhotoURL { get; set; }
+
+    public string? Bio { get; set; }
+
+    public string? Location { get; set; }
+
+    public string? URL { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; }
@@ -19,8 +24,4 @@ public class Comments
     public DateTime UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
-
-    public Guid AuthorId { get; set; }
-
-    public Guid PostId { get; set; }
 }

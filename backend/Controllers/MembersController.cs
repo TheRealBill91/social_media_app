@@ -2,12 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using SocialMediaApp.Services;
 using SocialMediaApp.Models;
 using SocialMediaApp.Filters;
-using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[ValidateMembers]
+[ValidateModel]
 [Route("api/[controller]")]
-public class MembersController : Controller
+public class MembersController : ControllerBase
 {
     private readonly MemberService _memberService;
 

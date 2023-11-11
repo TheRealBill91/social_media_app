@@ -26,19 +26,19 @@ public class PostService
     // Create a single post
     public async Task AddAsync(Posts Post)
     {
-        Post.CreatedAt = DateTime.Now;
-        Post.UpdatedAt = DateTime.Now;
+        Post.CreatedAt = DateTime.UtcNow;
+        Post.UpdatedAt = DateTime.UtcNow;
         Post.Id = Guid.NewGuid();
 
         await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO post (id, title, content, created, modified, author_id ) VALUES ( {Post.Id},{Post.Title}, {Post.Content}, {Post.CreatedAt}, {Post.UpdatedAt}, {Post.AuthorId})"
+            $"INSERT INTO post (id, title, content, created_at, updated_at, author_id ) VALUES ( {Post.Id},{Post.Title}, {Post.Content}, {Post.CreatedAt}, {Post.UpdatedAt}, {Post.AuthorId})"
         );
     }
 
     // Delete a single post
     public async Task<int> DeletePostAsync(Guid id)
     {
-        var result = await _context.Database.ExecuteSqlAsync($"DELETE FROM post WHERE id = {id}");
+        var result = await _context.Database.ExecuteSqlAsync($"DELETE FROM Post WHERE Id = {id}");
 
         return result;
     }
@@ -47,7 +47,7 @@ public class PostService
     public async Task UpdatePostAsync(Guid id, Posts postToUpdate)
     {
         await _context.Database.ExecuteSqlAsync(
-            $"UPDATE post SET title = {postToUpdate.Title}, content = {postToUpdate.Content} WHERE id = {id} "
+            $"UPDATE Post SET Title = {postToUpdate.Title}, Content = {postToUpdate.Content} WHERE Id = {id} "
         );
     }
 }

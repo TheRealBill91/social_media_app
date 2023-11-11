@@ -6,16 +6,12 @@ using SocialMediaApp.Data;
 
 namespace SocialMediaApp.Models;
 
-[Table("friend_request")]
 [PrimaryKey(nameof(RequesterId), nameof(ReceiverId))]
-public class Friend_Requests
+public class FriendRequests
 {
-    [Column("requester_id")]
     public Guid RequesterId { get; set; }
 
-    [Column("receiver_id")]
     public Guid ReceiverId { get; set; }
 
-    [Column("status")]
-    public FriendRequestStatus Status {get; set;}
+    public FriendRequestStatus Status { get; set; }
 }

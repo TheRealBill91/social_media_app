@@ -6,5 +6,6 @@ public static class ServiceModelRegistration
     {
         services.AddScoped<PostService>();
         services.AddScoped<MemberService>();
+        services.AddScoped<AuthService>();
     }
 }

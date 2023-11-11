@@ -14,7 +14,10 @@ public class MemberService
     }
 
     // Get a single member
-    public async Task<Members> GetByIdAsync(int id) => await _context.Member.FindAsync(id);
+    public async Task<Members> GetByIdAsync(int id)
+    {
+        return await _context.Member.FindAsync(id);
+    }
 
     // Create a member
     public async Task AddAsync(Members Member)

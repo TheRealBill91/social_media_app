@@ -1,6 +1,10 @@
 using SocialMediaApp.Models;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore.Migrations;
+using System.Buffers;
 
 namespace SocialMediaApp.Data;
 
@@ -11,7 +15,7 @@ public enum FriendRequestStatus
     Rejected
 }
 
-public class DataContext : DbContext
+public class DataContext : IdentityDbContext<Members, IdentityRole<Guid>, Guid>
 {
     static DataContext()
     {
@@ -25,30 +29,60 @@ public class DataContext : DbContext
     public DbSet<Posts> Post { get; set; }
     public DbSet<Comments> Comment { get; set; }
 
-    public DbSet<Comment_Upvotes> Comment_Upvote { get; set; }
-    public DbSet<Friend_Requests> Friend_Request { get; set; }
+    public DbSet<CommentUpvotes> CommentUpvote { get; set; }
+    public DbSet<FriendRequests> FriendRequest { get; set; }
 
     public DbSet<Friendships> Friendship { get; set; }
 
-    public DbSet<Member_Profiles> Member_Profile { get; set; }
+    public DbSet<MemberProfiles> MemberProfile { get; set; }
 
-    public DbSet<Post_Upvotes> Post_Upvote { get; set; }
+    public DbSet<PostUpvotes> PostUpvote { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<Members>().ToTable("members");
+
+        // Rename ASP.NET Identity table names to snake case
+        modelBuilder.Entity<IdentityRoleClaim<Guid>>(b =>
+        {
+            b.ToTable("asp_net_role_claims");
+        });
+        modelBuilder.Entity<IdentityRole<Guid>>(b =>
+        {
+            b.ToTable("asp_net_roles");
+        });
+        modelBuilder.Entity<IdentityUserClaim<Guid>>(b =>
+        {
+            b.ToTable("asp_net_user_claims");
+        });
+        modelBuilder.Entity<IdentityUserLogin<Guid>>(b =>
+        {
+            b.ToTable("asp_net_user_logins");
+        });
+        modelBuilder.Entity<IdentityUserRole<Guid>>(b =>
+        {
+            b.ToTable("asp_net_user_roles");
+        });
+        modelBuilder.Entity<IdentityUserToken<Guid>>(b =>
+        {
+            b.ToTable("asp_net_user_tokens");
+        });
+
         modelBuilder.HasPostgresEnum<FriendRequestStatus>();
         modelBuilder.Entity<Posts>().HasOne<Members>().WithMany().HasForeignKey(p => p.AuthorId);
         modelBuilder
-            .Entity<Post_Upvotes>()
+            .Entity<PostUpvotes>()
             .HasOne<Members>()
             .WithMany()
             .HasForeignKey(p => p.AuthorId);
-        modelBuilder.Entity<Post_Upvotes>().HasOne<Posts>().WithMany().HasForeignKey(p => p.PostId);
+        modelBuilder.Entity<PostUpvotes>().HasOne<Posts>().WithMany().HasForeignKey(p => p.PostId);
         modelBuilder
-            .Entity<Member_Profiles>()
+            .Entity<MemberProfiles>()
             .HasOne<Members>()
             .WithOne()
-            .HasForeignKey<Member_Profiles>("MemberId");
+            .HasForeignKey<MemberProfiles>("MemberId");
         modelBuilder
             .Entity<Friendships>()
             .HasOne<Members>()
@@ -60,24 +94,24 @@ public class DataContext : DbContext
             .WithMany()
             .HasForeignKey(f => f.FriendId);
         modelBuilder
-            .Entity<Friend_Requests>()
+            .Entity<FriendRequests>()
             .HasOne<Members>()
             .WithMany()
             .HasForeignKey(f => f.RequesterId);
         modelBuilder
-            .Entity<Friend_Requests>()
+            .Entity<FriendRequests>()
             .HasOne<Members>()
             .WithMany()
             .HasForeignKey(f => f.ReceiverId);
         modelBuilder.Entity<Comments>().HasOne<Members>().WithMany().HasForeignKey(c => c.AuthorId);
         modelBuilder.Entity<Comments>().HasOne<Posts>().WithMany().HasForeignKey(c => c.PostId);
         modelBuilder
-            .Entity<Comment_Upvotes>()
+            .Entity<CommentUpvotes>()
             .HasOne<Members>()
             .WithMany()
             .HasForeignKey(c => c.AuthorId);
         modelBuilder
-            .Entity<Comment_Upvotes>()
+            .Entity<CommentUpvotes>()
             .HasOne<Comments>()
             .WithMany()
             .HasForeignKey(c => c.CommentId);

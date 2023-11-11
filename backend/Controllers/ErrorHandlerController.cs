@@ -2,9 +2,9 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
 [ApiController]
+[ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorController : ControllerBase
 {
-    [ApiExplorerSettings(IgnoreApi = true)]
     [Route("/error")]
     public IActionResult HandleError() => Problem();
 

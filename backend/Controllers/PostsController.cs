@@ -5,7 +5,7 @@ using SocialMediaApp.Filters;
 using Microsoft.EntityFrameworkCore;
 
 [ApiController]
-[ValidatePosts]
+[ValidateModel]
 [Route("api/[controller]")]
 public class PostsController : Controller
 {

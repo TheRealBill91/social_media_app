@@ -4,24 +4,18 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
-[Table("comment_upvote")]
-public class Comment_Upvotes
+public class CommentUpvotes
 {
     [Key]
-    [Column("id")]
     public Guid Id { get; set; }
 
     [Required]
-    [Column("created_at")]
-    public required DateTime CreatedAt { get; set; }
+    public DateTime CreatedAt { get; set; }
 
     [Required]
-    [Column("updated_at")]
-    public required DateTime UpdatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
 
-    [Column("author_id")]
     public Guid AuthorId { get; set; }
 
-    [Column("comment_id")]
     public Guid CommentId { get; set; }
 }
