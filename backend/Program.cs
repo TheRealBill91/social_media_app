@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using SocialMediaApp.Data;
@@ -28,7 +27,6 @@ builder.Services.AddDbContext<DataContext>(
             .UseSnakeCaseNamingConvention()
 );
 
-builder.Services.AddModelServices();
 builder.Services
     .AddControllers()
     .ConfigureApiBehaviorOptions(options =>
@@ -36,7 +34,12 @@ builder.Services
         options.SuppressModelStateInvalidFilter = true;
     });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(3);
+});
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -58,10 +61,18 @@ builder.Services
 
         // User settings
         options.User.RequireUniqueEmail = true;
+        options.SignIn.RequireConfirmedEmail = true;
+
+        options.Tokens.ProviderMap.Add(
+            "CustomEmailConfirmation",
+            new TokenProviderDescriptor(typeof(CustomEmailConfirmationTokenProvider<Members>))
+        );
+        options.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
     })
     .AddEntityFrameworkStores<DataContext>()
     .AddDefaultTokenProviders();
-;
+
+builder.Services.AddModelServices();
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -71,7 +82,7 @@ builder.Services.ConfigureApplicationCookie(options =>
         return Task.CompletedTask;
     };
 
-    options.ExpireTimeSpan = TimeSpan.FromDays(1);
+    options.ExpireTimeSpan = TimeSpan.FromDays(3);
     options.SlidingExpiration = true;
 
     options.Cookie.SameSite = builder.Environment.IsDevelopment()

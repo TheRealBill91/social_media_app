@@ -1,6 +1,7 @@
 using SocialMediaApp.Models;
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
+using Microsoft.AspNetCore.Authorization;
 
 namespace SocialMediaApp.Services;
 
@@ -24,6 +25,7 @@ public class PostService
     }
 
     // Create a single post
+    [Authorize]
     public async Task AddAsync(Posts Post)
     {
         Post.CreatedAt = DateTime.UtcNow;
@@ -38,7 +40,7 @@ public class PostService
     // Delete a single post
     public async Task<int> DeletePostAsync(Guid id)
     {
-        var result = await _context.Database.ExecuteSqlAsync($"DELETE FROM Post WHERE Id = {id}");
+        var result = await _context.Database.ExecuteSqlAsync($"DELETE FROM post WHERE id = {id}");
 
         return result;
     }
@@ -47,7 +49,7 @@ public class PostService
     public async Task UpdatePostAsync(Guid id, Posts postToUpdate)
     {
         await _context.Database.ExecuteSqlAsync(
-            $"UPDATE Post SET Title = {postToUpdate.Title}, Content = {postToUpdate.Content} WHERE Id = {id} "
+            $"UPDATE post SET title = {postToUpdate.Title}, content = {postToUpdate.Content} WHERE id = {id} "
         );
     }
 }

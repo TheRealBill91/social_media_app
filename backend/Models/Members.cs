@@ -21,4 +21,7 @@ public class Members : IdentityUser<Guid>
     public DateTime UpdatedAt { get; set; }
 
     public DateTime? DeletedAt { get; set; }
+
+    public int EmailConfirmationSentCount { get; set; }
+    public DateTime LastEmailConfirmationSentDate { get; set; }
 };

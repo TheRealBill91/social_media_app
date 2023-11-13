@@ -42,7 +42,7 @@ public class DataContext : IdentityDbContext<Members, IdentityRole<Guid>, Guid>
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<Members>().ToTable("members");
+        modelBuilder.Entity<Members>().ToTable("member");
 
         // Rename ASP.NET Identity table names to snake case
         modelBuilder.Entity<IdentityRoleClaim<Guid>>(b =>

@@ -14,9 +14,13 @@ public class MemberService
     }
 
     // Get a single member
-    public async Task<Members> GetByIdAsync(int id)
+    public async Task<Members?> GetMemberAsync(Guid id)
     {
-        return await _context.Member.FindAsync(id);
+        var member = await _context.Member
+            .FromSql($"SELECT * FROM member WHERE id = {id}")
+            .FirstOrDefaultAsync();
+
+        return member;
     }
 
     // Create a member
@@ -28,5 +32,14 @@ public class MemberService
         await _context.Database.ExecuteSqlAsync(
             $"INSERT INTO member ( id,first_name, last_name, username, email, last_active) VALUES ({newId},{Member.FirstName}, {Member.LastName}, {Member.UserName}, {Member.Email}, {Member.UpdatedAt})"
         );
+    }
+
+    // Update last email confirmation send date
+    public async Task UpdateEmailConfirmationSendDate(Guid id)
+    {
+        DateTime updatedDateTime = DateTime.UtcNow;
+        /* return await _context.Database.ExecuteSqlAsync(
+            $"UPDATE member SET"
+        ) */
     }
 }

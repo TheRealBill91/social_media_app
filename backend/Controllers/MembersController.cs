@@ -17,9 +17,9 @@ public class MembersController : ControllerBase
 
     // GET: api/Member/{id}
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetMember(int id)
+    public async Task<IActionResult> GetMember(Guid id)
     {
-        var person = await _memberService.GetByIdAsync(id);
+        var person = await _memberService.GetMemberAsync(id);
         if (person == null)
         {
             return NotFound();
