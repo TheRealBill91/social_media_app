@@ -38,8 +38,19 @@ public class MemberService
     public async Task UpdateEmailConfirmationSendDate(Guid id)
     {
         DateTime updatedDateTime = DateTime.UtcNow;
-        /* return await _context.Database.ExecuteSqlAsync(
-            $"UPDATE member SET"
-        ) */
+         await _context.Database.ExecuteSqlAsync(
+            $"UPDATE member SET last_email_confirmation_sent_date = {updatedDateTime} WHERE id = {id}"
+        );
+    }
+
+    // Update email confirmation send count
+    public async Task UpdateEmailConfirmationSendCount(int emailConfirmationSendCount, Guid id)
+    {
+        emailConfirmationSendCount++;
+        var newEmailConfirmationSendCount = emailConfirmationSendCount;
+
+        await _context.Database.ExecuteSqlAsync(
+            $"UPDATE member SET email_confirmation_sent_count = {newEmailConfirmationSendCount} WHERE id = {id}"
+        );
     }
 }

@@ -1,24 +1,26 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
+using SocialMediaApp.Models;
 
 namespace SocialMediaApp.Services;
 
 public class AuthService
 {
     private readonly DataContext _context;
-    private readonly MemberService _memberService;
+    private readonly UserManager<Members> _userManager;
 
-    public AuthService(DataContext context, MemberService memberService)
+    public AuthService(DataContext context, UserManager<Members> userManager)
     {
         _context = context;
-        _memberService = memberService;
+        _userManager = userManager;
     }
 
     public async Task UpdateUserLastActivityDateAsync(Guid userId)
     {
         var lastActivityDate = DateTime.UtcNow;
         await _context.Database.ExecuteSqlAsync(
-            $"UPDATE members SET updated_at = {lastActivityDate} WHERE id = {userId} "
+            $"UPDATE member SET updated_at = {lastActivityDate} WHERE id = {userId} "
         );
     }
 
@@ -33,9 +35,9 @@ public class AuthService
         return htmlContent.Replace("{callbackUrl}", callbackUrl);
     }
 
-    public async Task<bool> CanSendNewConfirmationEmail(Guid userId)
+    public async Task<bool> CanSendNewConfirmationEmail(string userId)
     {
-        var user = await _memberService.GetMemberAsync(userId);
+        var user = await _userManager.FindByIdAsync(userId);
         if (user != null)
         {
             DateTime LastEmailConfirmationSentDate = user.LastEmailConfirmationSentDate;
@@ -45,11 +47,11 @@ public class AuthService
             var twentyFourHoursPassed =
                 (CurrentDateTime - LastEmailConfirmationSentDate) > TimeSpan.FromHours(24);
 
-            if (!twentyFourHoursPassed && emailConfirmationSentCount >= 2)
+            if (!twentyFourHoursPassed && emailConfirmationSentCount >= 3)
             {
                 return false;
             }
-            else if (twentyFourHoursPassed)
+            else
             {
                 return true;
             }

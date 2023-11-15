@@ -1,10 +1,14 @@
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
+using SendGrid.Helpers.Errors.Model;
 using SocialMediaApp.Filters;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
@@ -20,6 +24,8 @@ public class AuthController : ControllerBase
 
     private readonly IEmailSender _emailSender;
 
+    private readonly MemberService _memberService;
+
     private readonly IConfiguration _configuration;
 
     public AuthController(
@@ -27,6 +33,7 @@ public class AuthController : ControllerBase
         UserManager<Members> userManager,
         AuthService authService,
         IEmailSender emailSender,
+        MemberService memberService,
         IConfiguration configuration
     )
     {
@@ -34,6 +41,7 @@ public class AuthController : ControllerBase
         _userManager = userManager;
         _authService = authService;
         _emailSender = emailSender;
+        _memberService = memberService;
         _configuration = configuration;
     }
 
@@ -94,7 +102,8 @@ public class AuthController : ControllerBase
             LastName = form.LastName,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            LastEmailConfirmationSentDate = DateTime.UtcNow
+            LastEmailConfirmationSentDate = DateTime.UtcNow,
+            EmailConfirmationSentCount = 1
         };
 
         var createUserResult = await _userManager.CreateAsync(user, form.Password);
@@ -163,18 +172,86 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
-    [HttpPost("resendEmailConfirmation")]
-    [Authorize]
-    public async Task<IActionResult> ResendEmailConfirmation()
+    [HttpPost("resendemailconfirmation")]
+    [ValidateModel]
+    public async Task<IActionResult> ResendEmailConfirmation(
+        [FromBody] ResendEmailConfirmationDTO form
+    )
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!string.IsNullOrEmpty(userId))
+        var userEmail = form.Email;
+        var user = await _userManager.FindByEmailAsync(userEmail);
+
+        if (user != null)
         {
+            var userId = user.Id.ToString();
             bool canRequestEmailConfirmation = await _authService.CanSendNewConfirmationEmail(
-                Guid.Parse(userId)
+                userId
             );
+
+            if (canRequestEmailConfirmation && user != null)
+            {
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+                var baseUrl = _configuration["ApiSettings:BaseUrl"];
+
+                var callbackURL =
+                    $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+
+                string emailHTML = await _authService.GetEmailConfirmationHtml(callbackURL);
+
+                await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", emailHTML);
+
+                await _memberService.UpdateEmailConfirmationSendDate(Guid.Parse(userId));
+
+                await _memberService.UpdateEmailConfirmationSendCount(
+                    user.EmailConfirmationSentCount,
+                    Guid.Parse(userId)
+                );
+
+                return Ok();
+            }
+            else
+            {
+                return StatusCode(429, "Too many email confirmations sent today, try tomorrow");
+            }
         }
 
         return NotFound();
+    }
+
+    [HttpGet("google-login")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GoogleLogin(string returnUrl = null)
+    {
+        returnUrl ??= Url.Content("~/"); // Fallback to home page if no returnUrl is specified
+        var properties = new AuthenticationProperties
+        {
+            RedirectUri = Url.Action("GoogleResponse", "Auth"),
+            Items = { { "returnUrl", returnUrl } }
+        };
+
+        return Challenge(properties, GoogleDefaults.AuthenticationScheme);
+    }
+
+    [AllowAnonymous]
+    [HttpGet]
+    public async Task<IActionResult> GoogleResponse()
+    {
+        var result = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+
+        var claims = result.Principal.Identities
+            .FirstOrDefault()
+            .Claims.Select(
+                claim =>
+                    new
+                    {
+                        claim.Issuer,
+                        claim.OriginalIssuer,
+                        claim.Type,
+                        claim.Value
+                    }
+            );
+
+        return Ok();
     }
 }

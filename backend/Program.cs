@@ -1,4 +1,8 @@
+using System.Net;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using SocialMediaApp.Data;
@@ -86,14 +90,23 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.SlidingExpiration = true;
 
     options.Cookie.SameSite = builder.Environment.IsDevelopment()
-        ? SameSiteMode.None
+        ? SameSiteMode.Lax
         : SameSiteMode.Lax;
 
-    if (!builder.Environment.IsDevelopment())
-    {
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-    }
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        googleOptions.CallbackPath = new PathString("/signin-google");
+    });
 
 var app = builder.Build();
 
@@ -109,6 +122,7 @@ else if (app.Environment.IsProduction())
     app.UseExceptionHandler("/error");
 }
 
+// app.UseHsts();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
