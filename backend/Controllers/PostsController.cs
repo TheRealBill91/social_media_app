@@ -33,15 +33,15 @@ public class PostsController : Controller
     }
 
     [HttpPost("Create")]
-    public async Task<IActionResult> CreatePost([FromBody] Posts Post)
+    public async Task<IActionResult> CreatePost([FromBody] Post post)
     {
-        if (Post == null)
+        if (post == null)
         {
             return NotFound();
         }
 
-        await _postService.AddAsync(Post);
-        return CreatedAtAction(nameof(GetPost), new { id = Post.Id }, Post);
+        await _postService.AddAsync(post);
+        return CreatedAtAction(nameof(GetPost), new { id = post.Id }, post);
     }
 
     [HttpPost("Delete/{id}")]
@@ -65,7 +65,7 @@ public class PostsController : Controller
     }
 
     [HttpPost("Update/{id}")]
-    public async Task<IActionResult> UpdatePost(Guid? id, [FromBody] Posts postToUpdate)
+    public async Task<IActionResult> UpdatePost(Guid? id, [FromBody] Post postToUpdate)
     {
         if (id == null)
         {

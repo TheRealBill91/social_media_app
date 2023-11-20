@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SocialMediaApp.Models;
 
-public class Members : IdentityUser<Guid>
+public class Member : IdentityUser<Guid>
 {
     [Required(ErrorMessage = "First name is required.")]
     [MaxLength(50, ErrorMessage = "Maximum length of 50 characters exceeded.")]
@@ -24,4 +24,8 @@ public class Members : IdentityUser<Guid>
 
     public int EmailConfirmationSentCount { get; set; }
     public DateTime LastEmailConfirmationSentDate { get; set; }
+
+    public int PasswordResetEmailSentCount { get; set; }
+
+    public DateTime LastPasswordResetEmailSentDate { get; set; }
 };

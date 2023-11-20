@@ -7,7 +7,7 @@ using SocialMediaApp.Data;
 namespace SocialMediaApp.Models;
 
 [PrimaryKey(nameof(RequesterId), nameof(ReceiverId))]
-public class FriendRequests
+public class FriendRequest
 {
     public Guid RequesterId { get; set; }
 

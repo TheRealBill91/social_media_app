@@ -1,8 +1,5 @@
-using System.Net;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using SocialMediaApp.Data;
@@ -22,6 +19,15 @@ else
 {
     connection = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
 }
+
+builder.Services.AddHttpLogging(logging =>
+{
+    logging.LoggingFields =
+        Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestMethod
+        | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestPath
+        | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestProtocol
+        | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseStatusCode;
+});
 
 builder.Services.AddDbContext<DataContext>(
     options =>
@@ -48,7 +54,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services
-    .AddIdentity<Members, IdentityRole<Guid>>(options =>
+    .AddIdentity<Member, IdentityRole<Guid>>(options =>
     {
         // Password settings
         options.Password.RequireDigit = true;
@@ -69,7 +75,7 @@ builder.Services
 
         options.Tokens.ProviderMap.Add(
             "CustomEmailConfirmation",
-            new TokenProviderDescriptor(typeof(CustomEmailConfirmationTokenProvider<Members>))
+            new TokenProviderDescriptor(typeof(CustomEmailConfirmationTokenProvider<Member>))
         );
         options.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
     })
@@ -77,6 +83,16 @@ builder.Services
     .AddDefaultTokenProviders();
 
 builder.Services.AddModelServices();
+
+builder.Services
+    .AddAuthentication()
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        googleOptions.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
+        googleOptions.CallbackPath = new PathString("/signin-google");
+    });
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -96,19 +112,9 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
 });
 
-builder.Services
-    .AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    })
-    .AddGoogle(googleOptions =>
-    {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
-        googleOptions.CallbackPath = new PathString("/signin-google");
-    });
-
 var app = builder.Build();
+
+app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -119,10 +125,10 @@ if (app.Environment.IsDevelopment())
 }
 else if (app.Environment.IsProduction())
 {
+    app.UseHsts();
     app.UseExceptionHandler("/error");
 }
 
-// app.UseHsts();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();

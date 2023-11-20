@@ -4,10 +4,18 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
-public class PostUpvotes
+public class MemberProfile
 {
     [Key]
-    public Guid Id { get; set; }
+    public Guid MemberId { get; set; }
+
+    public string? PhotoURL { get; set; }
+
+    public string? Bio { get; set; }
+
+    public string? Location { get; set; }
+
+    public string? URL { get; set; }
 
     [Required]
     public DateTime CreatedAt { get; set; }
@@ -15,7 +23,5 @@ public class PostUpvotes
     [Required]
     public DateTime UpdatedAt { get; set; }
 
-    public Guid AuthorId { get; set; }
-
-    public Guid PostId { get; set; }
+    public DateTime? DeletedAt { get; set; }
 }

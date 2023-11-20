@@ -15,7 +15,7 @@ public class PostService
     }
 
     // Get a single post
-    public async Task<Posts?> GetByIdAsync(Guid id)
+    public async Task<Post?> GetByIdAsync(Guid id)
     {
         var post = await _context.Post
             .FromSql($"SELECT * FROM post WHERE id = {id}")
@@ -26,14 +26,14 @@ public class PostService
 
     // Create a single post
     [Authorize]
-    public async Task AddAsync(Posts Post)
+    public async Task AddAsync(Post post)
     {
-        Post.CreatedAt = DateTime.UtcNow;
-        Post.UpdatedAt = DateTime.UtcNow;
-        Post.Id = Guid.NewGuid();
+        post.CreatedAt = DateTime.UtcNow;
+        post.UpdatedAt = DateTime.UtcNow;
+        post.Id = Guid.NewGuid();
 
         await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO post (id, title, content, created_at, updated_at, author_id ) VALUES ( {Post.Id},{Post.Title}, {Post.Content}, {Post.CreatedAt}, {Post.UpdatedAt}, {Post.AuthorId})"
+            $"INSERT INTO post (id, title, content, created_at, updated_at, author_id ) VALUES ( {post.Id},{post.Title}, {post.Content}, {post.CreatedAt}, {post.UpdatedAt}, {post.AuthorId})"
         );
     }
 
@@ -46,7 +46,7 @@ public class PostService
     }
 
     // Update a single post
-    public async Task UpdatePostAsync(Guid id, Posts postToUpdate)
+    public async Task UpdatePostAsync(Guid id, Post postToUpdate)
     {
         await _context.Database.ExecuteSqlAsync(
             $"UPDATE post SET title = {postToUpdate.Title}, content = {postToUpdate.Content} WHERE id = {id} "

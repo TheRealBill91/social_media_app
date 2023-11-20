@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 namespace SocialMediaApp.Models;
 
 [PrimaryKey(nameof(MemberId), nameof(FriendId))]
-public class Friendships
+public class Friendship
 {
     public Guid MemberId { get; set; }
 

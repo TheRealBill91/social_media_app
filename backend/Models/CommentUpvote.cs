@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Components.Web;
 
 namespace SocialMediaApp.Models;
 
-public class CommentUpvotes
+public class CommentUpvote
 {
     [Key]
     public Guid Id { get; set; }

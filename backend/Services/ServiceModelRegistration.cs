@@ -11,6 +11,6 @@ public static class ServiceModelRegistration
         services.AddScoped<MemberService>();
         services.AddScoped<AuthService>();
         services.AddTransient<IEmailSender, EmailSender>();
-        services.AddTransient<CustomEmailConfirmationTokenProvider<Members>>();
+        services.AddTransient<CustomEmailConfirmationTokenProvider<Member>>();
     }
 }

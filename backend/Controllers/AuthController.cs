@@ -17,8 +17,8 @@ using SocialMediaApp.Services;
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly SignInManager<Members> _signInManager;
-    private readonly UserManager<Members> _userManager;
+    private readonly SignInManager<Member> _signInManager;
+    private readonly UserManager<Member> _userManager;
 
     private readonly AuthService _authService;
 
@@ -29,8 +29,8 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
 
     public AuthController(
-        SignInManager<Members> signInManager,
-        UserManager<Members> userManager,
+        SignInManager<Member> signInManager,
+        UserManager<Member> userManager,
         AuthService authService,
         IEmailSender emailSender,
         MemberService memberService,
@@ -94,7 +94,37 @@ public class AuthController : ControllerBase
     [ValidateModel]
     public async Task<IActionResult> SignUp([FromBody] SignUpDTO form)
     {
-        var user = new Members
+        var user = await _userManager.FindByEmailAsync(form.Email);
+
+        if (user != null)
+        {
+            var logins = await _userManager.GetLoginsAsync(user);
+            var googleLoginExists = logins.FirstOrDefault(
+                l => l.LoginProvider == GoogleDefaults.AuthenticationScheme
+            );
+
+            bool passwordSet = await _userManager.HasPasswordAsync(user);
+
+            if (googleLoginExists != null && !passwordSet)
+            {
+                var addPasswordResult = await _userManager.AddPasswordAsync(user, form.Password);
+                if (addPasswordResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(addPasswordResult.Errors);
+                }
+            }
+            else
+            {
+                return BadRequest("A user with this email already exists");
+            }
+        }
+
+        var newUser = new Member
         {
             UserName = form.UserName,
             Email = form.Email,
@@ -106,24 +136,27 @@ public class AuthController : ControllerBase
             EmailConfirmationSentCount = 1
         };
 
-        var createUserResult = await _userManager.CreateAsync(user, form.Password);
+        var createUserResult = await _userManager.CreateAsync(newUser, form.Password);
         if (!createUserResult.Succeeded)
         {
             return BadRequest(createUserResult.Errors);
         }
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 
         var baseUrl = _configuration["ApiSettings:BaseUrl"];
 
         var callbackURL =
-            $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+            $"{baseUrl}/auth/confirmemail?userId={newUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-        string emailHTML = await _authService.GetEmailConfirmationHtml(callbackURL);
+        string emailHTML = await _authService.GetEmailConfirmationHtml(
+            callbackURL,
+            "EmailConfirmationTemplate.html"
+        );
 
-        await _emailSender.SendEmailAsync(user.Email, "Confirm your email", emailHTML);
+        await _emailSender.SendEmailAsync(newUser.Email, "Confirm your email", emailHTML);
 
-        return Ok(new { UserId = user.Id });
+        return Ok(new { UserId = newUser.Id });
     }
 
     [HttpGet("confirmemail")]
@@ -178,26 +211,32 @@ public class AuthController : ControllerBase
         [FromBody] ResendEmailConfirmationDTO form
     )
     {
-        var userEmail = form.Email;
+        string userEmail = form.Email;
         var user = await _userManager.FindByEmailAsync(userEmail);
 
         if (user != null)
         {
-            var userId = user.Id.ToString();
-            bool canRequestEmailConfirmation = await _authService.CanSendNewConfirmationEmail(
-                userId
-            );
-
-            if (canRequestEmailConfirmation && user != null)
+            var emailIsVerified = await _userManager.IsEmailConfirmedAsync(user);
+            if (emailIsVerified)
             {
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                return StatusCode(409, "Email is already verified. No new confirmation link sent.");
+            }
+            string userId = user.Id.ToString();
+            bool canRequestEmailConfirmation = await _authService.CanSendNewConfirmationEmail(user);
 
-                var baseUrl = _configuration["ApiSettings:BaseUrl"];
+            if (canRequestEmailConfirmation)
+            {
+                string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                var callbackURL =
+                string baseUrl = _configuration["ApiSettings:BaseUrl"]!;
+
+                string callbackURL =
                     $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                string emailHTML = await _authService.GetEmailConfirmationHtml(callbackURL);
+                string emailHTML = await _authService.GetEmailConfirmationHtml(
+                    callbackURL,
+                    "EmailConfirmationTemplate.html"
+                );
 
                 await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", emailHTML);
 
@@ -216,19 +255,18 @@ public class AuthController : ControllerBase
             }
         }
 
-        return NotFound();
+        return NotFound("Issue sending email confirmation");
     }
 
     [HttpGet("google-login")]
     [AllowAnonymous]
     public async Task<IActionResult> GoogleLogin(string returnUrl = null)
     {
-        returnUrl ??= Url.Content("~/"); // Fallback to home page if no returnUrl is specified
-        var properties = new AuthenticationProperties
-        {
-            RedirectUri = Url.Action("GoogleResponse", "Auth"),
-            Items = { { "returnUrl", returnUrl } }
-        };
+        var redirectUrl = Url.Action("GoogleResponse", "Auth");
+        var properties = _signInManager.ConfigureExternalAuthenticationProperties(
+            GoogleDefaults.AuthenticationScheme,
+            redirectUrl
+        );
 
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
@@ -237,21 +275,200 @@ public class AuthController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GoogleResponse()
     {
-        var result = await HttpContext.AuthenticateAsync(IdentityConstants.ExternalScheme);
+        var externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
 
-        var claims = result.Principal.Identities
-            .FirstOrDefault()
-            .Claims.Select(
-                claim =>
-                    new
-                    {
-                        claim.Issuer,
-                        claim.OriginalIssuer,
-                        claim.Type,
-                        claim.Value
-                    }
+        if (externalLoginInfo == null)
+        {
+            return BadRequest();
+        }
+
+        var signInResult = await _signInManager.ExternalLoginSignInAsync(
+            externalLoginInfo.LoginProvider,
+            externalLoginInfo.ProviderKey,
+            isPersistent: true
+        );
+
+        var claims = externalLoginInfo.Principal.Claims;
+        Claim emailClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        Claim firstNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
+        Claim lastNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
+        string userName = await _authService.GenerateUniqueUserName(
+            firstNameClaim.Value,
+            lastNameClaim.Value
+        );
+
+        if (signInResult.Succeeded)
+        {
+            return Redirect("http://localhost:5151/swagger/index.html");
+
+            // return Ok();
+        }
+        else if (signInResult.IsLockedOut)
+        {
+            return BadRequest("Too many failed login attempts, please try in 30 minutes");
+        }
+        else
+        {
+            var user = await _userManager.FindByEmailAsync(emailClaim.Value);
+
+            if (user != null)
+            {
+                IdentityResult externalLinkResult = await _authService.LinkExternalLogin(
+                    user,
+                    externalLoginInfo
+                );
+                if (externalLinkResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(externalLinkResult.Errors);
+                }
+            }
+            else
+            {
+                var newUser = new Member
+                {
+                    UserName = userName,
+                    Email = emailClaim.Value,
+                    FirstName = firstNameClaim.Value,
+                    LastName = lastNameClaim.Value,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow,
+                    EmailConfirmationSentCount = 0
+                };
+                var externalCreatationLoginResult = await _authService.CreateAndLinkExternalLogin(
+                    newUser,
+                    externalLoginInfo
+                );
+                if (externalCreatationLoginResult.Succeeded)
+                {
+                    await _signInManager.SignInAsync(newUser, isPersistent: true);
+                    return Ok();
+                }
+                else
+                {
+                    return BadRequest(externalCreatationLoginResult.Errors);
+                }
+            }
+        }
+    }
+
+    [HttpPost("passwordresetrequest")]
+    [ValidateModel]
+    public async Task<IActionResult> RequestPasswordResetEmail(
+        [FromBody] RequestPasswordResetDTO form
+    )
+    {
+        string userEmail = form.Email;
+        var user = await _userManager.FindByEmailAsync(userEmail);
+
+        if (user != null)
+        {
+            var userId = user.Id.ToString();
+            bool canRequestPasswordResetEmail = await _authService.CanSendNewPasswordResetEmail(
+                user
             );
 
-        return Ok();
+            if (canRequestPasswordResetEmail)
+            {
+                user.PasswordResetEmailSentCount = 0;
+                string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+
+                string baseUrl = _configuration["ApiSettings:BaseUrl"];
+
+                string callbackURL =
+                    $"{baseUrl}/auth/validate-password-reset-token?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+
+                string emailHTML = await _authService.GetEmailConfirmationHtml(
+                    callbackURL,
+                    "EmailPasswordResetTemplate.html"
+                );
+
+                await _emailSender.SendEmailAsync(user.Email!, "Reset your password", emailHTML);
+
+                await _memberService.UpdatePasswordResetSendDate(Guid.Parse(userId));
+
+                await _memberService.UpdatePasswordResetSendCount(
+                    user.PasswordResetEmailSentCount,
+                    Guid.Parse(userId)
+                );
+
+                return Ok();
+            }
+            else
+            {
+                return StatusCode(429, "Too many password reset emails sent today, try tomorrow");
+            }
+        }
+        return NotFound("Issue sending email confirmation");
+    }
+
+    [HttpGet("validate-password-reset-token")]
+    public async Task<IActionResult> ValidatePasswordResetToken(Guid userId, string code)
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+
+        if (user == null)
+        {
+            return NotFound("User not found");
+        }
+
+        var decodedCode = WebEncoders.Base64UrlDecode(code);
+        var passwordResetTokenValid = await _userManager.VerifyUserTokenAsync(
+            user,
+            "Default",
+            "ResetPassword",
+            Encoding.UTF8.GetString(decodedCode)
+        );
+
+        if (passwordResetTokenValid)
+        {
+            return Ok("Password reset token is valid");
+        }
+        else if (!passwordResetTokenValid)
+        {
+            return BadRequest("Invalid password reset token.");
+        }
+        else
+        {
+            throw new Exception("Some other issue is going on...");
+        }
+    }
+
+    [HttpPost("resetpassword")]
+    [ValidateModel]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordDTO form,
+        Guid userId,
+        string code
+    )
+    {
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user != null)
+        {
+            var decodedCode = WebEncoders.Base64UrlDecode(code);
+            var passwordResetResult = await _userManager.ResetPasswordAsync(
+                user,
+                Encoding.UTF8.GetString(decodedCode),
+                form.NewPassword
+            );
+
+            if (passwordResetResult.Succeeded)
+            {
+                await _authService.UpdateUserLastActivityDateAsync(user.Id);
+                return Ok("Password reset successful");
+            }
+            else
+            {
+                return BadRequest(passwordResetResult.Errors);
+            }
+        }
+        else
+        {
+            return BadRequest("User was not found");
+        }
     }
 }
