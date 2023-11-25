@@ -20,6 +20,8 @@ public class AuthController : ControllerBase
     private readonly SignInManager<Member> _signInManager;
     private readonly UserManager<Member> _userManager;
 
+    private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+
     private readonly AuthService _authService;
 
     private readonly IEmailSender _emailSender;
@@ -31,6 +33,7 @@ public class AuthController : ControllerBase
     public AuthController(
         SignInManager<Member> signInManager,
         UserManager<Member> userManager,
+        RoleManager<IdentityRole<Guid>> roleManager,
         AuthService authService,
         IEmailSender emailSender,
         MemberService memberService,
@@ -39,6 +42,7 @@ public class AuthController : ControllerBase
     {
         _signInManager = signInManager;
         _userManager = userManager;
+        _roleManager = roleManager;
         _authService = authService;
         _emailSender = emailSender;
         _memberService = memberService;
@@ -55,7 +59,12 @@ public class AuthController : ControllerBase
         }
 
         // Find the user by email
-        var user = await _userManager.FindByEmailAsync(form.Email);
+        Member? user;
+
+        user = await _userManager.FindByEmailAsync(form.EmailOrUsername);
+
+        // checks if user is null before finding by username
+        user ??= await _userManager.FindByNameAsync(form.EmailOrUsername);
 
         if (user == null || user.UserName == null)
         {
@@ -105,6 +114,7 @@ public class AuthController : ControllerBase
 
             bool passwordSet = await _userManager.HasPasswordAsync(user);
 
+            // google external account exists but no password set on it (yet)
             if (googleLoginExists != null && !passwordSet)
             {
                 var addPasswordResult = await _userManager.AddPasswordAsync(user, form.Password);
@@ -120,6 +130,7 @@ public class AuthController : ControllerBase
             }
             else
             {
+                // User with local account (no google linked login) already exists
                 return BadRequest("A user with this email already exists");
             }
         }
@@ -133,7 +144,8 @@ public class AuthController : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             LastEmailConfirmationSentDate = DateTime.UtcNow,
-            EmailConfirmationSentCount = 1
+            EmailConfirmationSentCount = 1,
+            PasswordResetEmailSentCount = 0
         };
 
         var createUserResult = await _userManager.CreateAsync(newUser, form.Password);
@@ -470,5 +482,54 @@ public class AuthController : ControllerBase
         {
             return BadRequest("User was not found");
         }
+    }
+
+    [HttpPost("admin-signup")]
+    [ValidateModel]
+    public async Task<IActionResult> AdminSignUp([FromBody] SignUpDTO form)
+    {
+        // Check if admin role exists, create if not
+        if (!await _roleManager.RoleExistsAsync("Admin"))
+        {
+            await _roleManager.CreateAsync(new IdentityRole<Guid>("Admin"));
+        }
+
+        var adminUser = new Member
+        {
+            UserName = form.UserName,
+            Email = form.Email,
+            FirstName = form.FirstName,
+            LastName = form.LastName,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            LastEmailConfirmationSentDate = DateTime.UtcNow,
+            EmailConfirmationSentCount = 1,
+            PasswordResetEmailSentCount = 0
+        };
+
+        var result = await _userManager.CreateAsync(adminUser, form.Password);
+
+        if (!result.Succeeded)
+        {
+            return BadRequest(result.Errors);
+        }
+
+        await _userManager.AddToRoleAsync(adminUser, "Admin");
+
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(adminUser);
+
+        var baseUrl = _configuration["ApiSettings:BaseUrl"];
+
+        var callbackURL =
+            $"{baseUrl}/auth/confirmemail?userId={adminUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+
+        string emailHTML = await _authService.GetEmailConfirmationHtml(
+            callbackURL,
+            "EmailConfirmationTemplate.html"
+        );
+
+        await _emailSender.SendEmailAsync(adminUser.Email, "Confirm your email", emailHTML);
+
+        return Ok(new { UserId = adminUser.Id });
     }
 }
