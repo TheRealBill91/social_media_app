@@ -44,8 +44,15 @@ public class PostController : Controller
             return NotFound("Can't find the user");
         }
 
-        var postId = await _postService.CreatePost(post, user.Id);
-        return CreatedAtAction(nameof(CreatePost), new { id = postId }, post);
+        var result = await _postService.CreatePost(post, user.Id);
+        if (result.Success)
+        {
+            return CreatedAtAction(nameof(GetPost), new { id = result.PostCreationId }, result);
+        }
+        else
+        {
+            return BadRequest(result.Message);
+        }
     }
 
     [Authorize]
@@ -93,12 +100,20 @@ public class PostController : Controller
             return Forbid();
         }
 
-        await _postService.UpdatePostAsync(postId, postToUpdate);
-        return Ok();
+        var result = await _postService.UpdatePostAsync(postId, postToUpdate);
+
+        if (result.Success)
+        {
+            return Ok(result.Message);
+        }
+        else
+        {
+            return BadRequest(result.Message);
+        }
     }
 
     [Authorize]
-    [HttpPatch("{id}")]
+    [HttpDelete("{id}")]
     public async Task<IActionResult> DeletePost(Guid? id)
     {
         if (id == null)
@@ -124,14 +139,13 @@ public class PostController : Controller
         }
 
         var result = await _postService.DeletePostAsync(postId);
-        if (result > 0)
+        if (result.Success)
         {
-            return NoContent();
+            return Ok(result.Message);
         }
         else
         {
-            // If no rows were affected, the post with the given ID was not found.
-            return NotFound();
+            return BadRequest(result.Message);
         }
     }
 }

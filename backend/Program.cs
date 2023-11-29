@@ -70,8 +70,12 @@ builder.Services
         options.Lockout.AllowedForNewUsers = true;
 
         // User settings
-        //options.User.RequireUniqueEmail = true;
-        options.SignIn.RequireConfirmedEmail = true;
+        if (builder.Environment.IsProduction())
+        {
+            options.SignIn.RequireConfirmedEmail = true;
+        }
+
+        options.User.RequireUniqueEmail = true;
 
         options.Tokens.ProviderMap.Add(
             "CustomEmailConfirmation",
@@ -84,12 +88,20 @@ builder.Services
 
 builder.Services.AddModelServices();
 
+string? googleClientId = builder.Environment.IsDevelopment()
+    ? builder.Configuration["Authentication:Google:ClientId"]
+    : Environment.GetEnvironmentVariable("Authentication:Google:ClientId");
+
+string? googleClientSecret = builder.Environment.IsDevelopment()
+    ? builder.Configuration["Authentication:Google:ClientSecret"]
+    : Environment.GetEnvironmentVariable("Authentication:Google:ClientSecret");
+
 builder.Services
     .AddAuthentication()
     .AddGoogle(googleOptions =>
     {
-        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
-        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
+        googleOptions.ClientId = googleClientId!;
+        googleOptions.ClientSecret = googleClientSecret!;
         googleOptions.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
         googleOptions.CallbackPath = new PathString("/signin-google");
     });

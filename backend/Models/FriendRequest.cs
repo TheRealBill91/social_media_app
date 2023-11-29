@@ -13,5 +13,9 @@ public class FriendRequest
 
     public Guid ReceiverId { get; set; }
 
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
+
     public FriendRequestStatus Status { get; set; }
 }

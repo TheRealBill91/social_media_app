@@ -44,8 +44,20 @@ public class CommentController : Controller
             return NotFound("Can't find the user");
         }
 
-        var commentId = await _commentService.CreateComment(comment, user.Id, postId);
-        return CreatedAtAction(nameof(CreateComment), new { id = commentId }, comment);
+        var result = await _commentService.CreateComment(comment, user.Id, postId);
+
+        if (result.Success)
+        {
+            return CreatedAtAction(
+                nameof(GetComment),
+                new { id = result.CommentCreationId },
+                result
+            );
+        }
+        else
+        {
+            return BadRequest(result.Message);
+        }
     }
 
     [Authorize]
@@ -54,7 +66,6 @@ public class CommentController : Controller
     {
         if (id == null)
         {
-            Console.WriteLine(id);
             return NotFound();
         }
 
@@ -96,8 +107,15 @@ public class CommentController : Controller
             return Forbid();
         }
 
-        await _commentService.UpdateCommentAsync(commentId, commentToUpdate);
-        return Ok();
+        var result = await _commentService.UpdateCommentAsync(commentId, commentToUpdate);
+        if (result.Success)
+        {
+            return Ok(result.Message);
+        }
+        else
+        {
+            return BadRequest(result.Message);
+        }
     }
 
     [Authorize]
@@ -127,14 +145,13 @@ public class CommentController : Controller
         }
 
         var result = await _commentService.DeleteCommentAsync(commentId);
-        if (result > 0)
+        if (result.Success)
         {
-            return NoContent();
+            return Ok(result.Message);
         }
         else
         {
-            // If no rows were affected, the post with the given ID was not found.
-            return NotFound();
+            return BadRequest(result.Message);
         }
     }
 }

@@ -10,6 +10,8 @@ public static class ServiceModelRegistration
         services.AddScoped<PostService>();
         services.AddScoped<MemberService>();
         services.AddScoped<CommentService>();
+        services.AddScoped<FriendRequestService>();
+        services.AddScoped<FriendshipService>();
         services.AddScoped<AuthService>();
         services.AddTransient<IEmailSender, EmailSender>();
         services.AddTransient<CustomEmailConfirmationTokenProvider<Member>>();
