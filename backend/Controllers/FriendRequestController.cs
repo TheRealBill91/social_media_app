@@ -76,7 +76,7 @@ public class FriendRequestController : Controller
     {
         if (friendRequestId == null)
         {
-            return NotFound();
+            return BadRequest("No friend request id is available");
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -100,7 +100,7 @@ public class FriendRequestController : Controller
 
         if (friendRequest == null)
         {
-            return BadRequest("No friend request exists between you and the user");
+            return NotFound("No friend request exists between you and the user");
         }
 
         // reject if signed in user id does not equal the friend request receiver id
@@ -116,11 +116,23 @@ public class FriendRequestController : Controller
 
         if (result.Success)
         {
-            return CreatedAtAction(
-                nameof(GetFriendRequest),
-                new { friendRequestId = result.FriendshipAcceptId },
-                result
+            string? friendshipUrl = Url.Action(
+                nameof(FriendshipController.GetFriendship),
+                "Friendship",
+                new { friendId = result.FriendshipAcceptId },
+                Request.Scheme
             );
+
+            if (friendshipUrl == null)
+            {
+                // Handle the case where the URL could not be generated
+                return StatusCode(
+                    StatusCodes.Status500InternalServerError,
+                    "Could not generate URL for the new friendship"
+                );
+            }
+
+            return Created(friendshipUrl, result);
         }
         else
         {
@@ -161,5 +173,167 @@ public class FriendRequestController : Controller
         }
 
         return Ok(friendRequest);
+    }
+
+    // Gets all incoming friend requests for the logged in user
+    [Authorize]
+    [HttpGet("incoming")]
+    public async Task<IActionResult> IncomingFriendRequests()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var incomingFriendRequests = await _friendRequestService.IncomingFriendRequests(
+            Guid.Parse(userId)
+        );
+
+        return Ok(incomingFriendRequests);
+    }
+
+    // Gets all outgoing friend requests for the logged in user
+    [Authorize]
+    [HttpGet("outgoing")]
+    public async Task<IActionResult> OutgoingFriendRequests()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var outgoingFriendRequests = await _friendRequestService.OutgoingFriendRequests(
+            Guid.Parse(userId)
+        );
+
+        return Ok(outgoingFriendRequests);
+    }
+
+    // Removes friend request from perspective of user who sent it
+    [Authorize]
+    [HttpDelete("{friendRequestId}/cancel")]
+    public async Task<IActionResult> CancelFriendRequest(Guid? friendRequestId)
+    {
+        if (friendRequestId == null)
+        {
+            return BadRequest("No friend request id is available");
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var friendRequest = await _friendRequestService.GetFriendRequest(
+            friendRequestId.Value,
+            Guid.Parse(userId)
+        );
+
+        if (friendRequest == null)
+        {
+            return NotFound("No friend request exists between you and the user");
+        }
+
+        // reject if signed in user id does not equal the friend requester id
+        if (userId != friendRequest.RequesterId.ToString())
+        {
+            return Forbid();
+        }
+
+        var result = await _friendRequestService.CancelFriendRequest(
+            friendRequestId.Value,
+            Guid.Parse(userId)
+        );
+
+        if (result.Success)
+        {
+            return Ok(result.Message);
+        }
+        else
+        {
+            return BadRequest(result.Message);
+        }
+    }
+
+    // Recipient rejects the friend request
+    [Authorize]
+    [HttpPatch("{friendRequestId}/reject")]
+    public async Task<IActionResult> RejectFriendRequest(Guid? friendRequestId)
+    {
+        if (friendRequestId == null)
+        {
+            return BadRequest("No friend request id is available");
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var friendRequest = await _friendRequestService.GetFriendRequest(
+            friendRequestId.Value,
+            Guid.Parse(userId)
+        );
+
+        if (friendRequest == null)
+        {
+            return NotFound("No friend request exists between you and the user");
+        }
+
+        // reject if signed in user id does not equal the friend request receiver id
+        if (userId != friendRequest.ReceiverId.ToString())
+        {
+            return Forbid();
+        }
+
+        var result = await _friendRequestService.RejectFriendRequest(
+            friendRequestId.Value,
+            Guid.Parse(userId)
+        );
+
+        if (result.Success)
+        {
+            return Ok(result.Message);
+        }
+        else
+        {
+            return BadRequest(result.Message);
+        }
     }
 }

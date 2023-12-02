@@ -1,7 +1,6 @@
 using SocialMediaApp.Models;
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
-using Microsoft.AspNetCore.Authorization;
 
 namespace SocialMediaApp.Services;
 
@@ -14,7 +13,7 @@ public class PostService
         _context = context;
     }
 
-    public async Task<PostCreationResult> CreatePost(PostDTO post, Guid userId)
+    public async Task<PostCreationResponse> CreatePost(PostDTO post, Guid userId)
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = DateTime.UtcNow;
@@ -27,7 +26,7 @@ public class PostService
 
         if (result > 0)
         {
-            return new PostCreationResult
+            return new PostCreationResponse
             {
                 Success = true,
                 Message = "Post created successfully",
@@ -36,7 +35,7 @@ public class PostService
         }
         else
         {
-            return new PostCreationResult
+            return new PostCreationResponse
             {
                 Success = false,
                 Message = "Post creation unsuccessful",
@@ -54,7 +53,36 @@ public class PostService
         return post;
     }
 
-    public async Task<PostUpdateResult> UpdatePostAsync(Guid id, PostDTO postToUpdate)
+    public async Task<List<Post>> GetPosts(int page)
+    {
+        int PageSize = 10;
+        int totalPosts = await _context.Database
+            .SqlQuery<int>($"SELECT COUNT(id) AS \"Value\" FROM post")
+            .SingleAsync();
+
+        int totalPages = (int)Math.Ceiling(totalPosts / (double)PageSize);
+
+        if (page > totalPages)
+        {
+            page = totalPages;
+        }
+        else if (page < 1)
+        {
+            page = 1;
+        }
+
+        int pagesToSkip = PageSize * (page - 1);
+
+        var posts = await _context.Post
+            .FromSql(
+                $"SELECT * FROM post ORDER BY created_at DESC LIMIT {PageSize} OFFSET {pagesToSkip}"
+            )
+            .ToListAsync();
+
+        return posts;
+    }
+
+    public async Task<PostUpdateResponse> UpdatePostAsync(Guid id, PostDTO postToUpdate)
     {
         var updatedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
@@ -63,16 +91,16 @@ public class PostService
 
         if (result > 0)
         {
-            return new PostUpdateResult { Success = true, Message = "Post successfully updated" };
+            return new PostUpdateResponse { Success = true, Message = "Post successfully updated" };
         }
         else
         {
-            return new PostUpdateResult { Success = false, Message = "Failed to update post" };
+            return new PostUpdateResponse { Success = false, Message = "Failed to update post" };
         }
     }
 
     // Apply a soft delete to the target post document
-    public async Task<PostDeletionResult> DeletePostAsync(Guid id)
+    public async Task<PostDeletionResponse> DeletePostAsync(Guid id)
     {
         var deletedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
@@ -81,11 +109,15 @@ public class PostService
 
         if (result > 0)
         {
-            return new PostDeletionResult { Success = true, Message = "Post successfully deleted" };
+            return new PostDeletionResponse
+            {
+                Success = true,
+                Message = "Post successfully deleted"
+            };
         }
         else
         {
-            return new PostDeletionResult { Success = false, Message = "Post deletion failed" };
+            return new PostDeletionResponse { Success = false, Message = "Post deletion failed" };
         }
     }
 }

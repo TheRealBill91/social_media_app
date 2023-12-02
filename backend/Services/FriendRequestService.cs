@@ -18,7 +18,7 @@ public class FriendRequestService
     }
 
     // Send a friend request
-    public async Task<FriendRequestCreationResult> CreateFriendRequest(
+    public async Task<FriendRequestCreationResponse> CreateFriendRequest(
         Guid requesterId,
         Guid receiverId
     )
@@ -32,7 +32,7 @@ public class FriendRequestService
 
         if (result > 0)
         {
-            return new FriendRequestCreationResult
+            return new FriendRequestCreationResponse
             {
                 Success = true,
                 Message = "Sucessfully created friend request",
@@ -41,7 +41,7 @@ public class FriendRequestService
         }
         else
         {
-            return new FriendRequestCreationResult
+            return new FriendRequestCreationResponse
             {
                 Success = false,
                 Message = "Failed to create friend request",
@@ -50,13 +50,22 @@ public class FriendRequestService
         }
     }
 
-    public async Task<FriendRequestAcceptResult> AcceptFriendRequest(
+    public async Task<FriendRequestAcceptResponse> AcceptFriendRequest(
         Guid friendRequestId,
         Guid currentUserId
     )
     {
+        var friendship = await _friendshipService.GetFriendship(currentUserId, friendRequestId);
 
-        // TODO: check if friendship already exists
+        if (friendship != null)
+        {
+            return new FriendRequestAcceptResponse
+            {
+                Success = false,
+                Message = "Friendship already exists",
+                FriendshipAcceptId = null
+            };
+        }
 
         var result = await _friendshipService.CreateFriendship(currentUserId, friendRequestId);
 
@@ -66,16 +75,16 @@ public class FriendRequestService
             var acceptFriendRequest = await _context.Database.ExecuteSqlAsync(
                 $"UPDATE friend_request SET status = 'accepted', updated_at = {updatedAt}"
             );
-            return new FriendRequestAcceptResult
+            return new FriendRequestAcceptResponse
             {
                 Success = true,
-                Message = "Successfully created the friend request",
+                Message = result.Message,
                 FriendshipAcceptId = result.FriendshipCreationId
             };
         }
         else
         {
-            return new FriendRequestAcceptResult
+            return new FriendRequestAcceptResponse
             {
                 Success = false,
                 Message = "Failed to accept and/or create the friendship",
@@ -97,11 +106,89 @@ public class FriendRequestService
             return null;
         }
 
+        // Check if the current user is involved in the friend request
         if (friendRequest.RequesterId == currentUserId || friendRequest.ReceiverId == currentUserId)
         {
             return friendRequest;
         }
 
         return null;
+    }
+
+    public async Task<List<FriendRequest>> IncomingFriendRequests(Guid currentUserId)
+    {
+        var incomingFriendRequests = await _context.FriendRequest
+            .FromSql(
+                $"SELECT * FROM friend_request WHERE receiver_id = {currentUserId} AND status = 'pending' ORDER BY created_at DESC"
+            )
+            .ToListAsync();
+
+        return incomingFriendRequests;
+    }
+
+    public async Task<List<FriendRequest>> OutgoingFriendRequests(Guid currentUserId)
+    {
+        var outgoingFriendRequests = await _context.FriendRequest
+            .FromSql(
+                $"SELECT * FROM friend_request WHERE requester_id = {currentUserId} AND status = 'pending' ORDER BY created_at DESC"
+            )
+            .ToListAsync();
+
+        return outgoingFriendRequests;
+    }
+
+    public async Task<FriendRequestCancelResponse> CancelFriendRequest(
+        Guid friendRequestId,
+        Guid currentUserId
+    )
+    {
+        var result = await _context.Database.ExecuteSqlAsync(
+            $"DELETE FROM friend_request WHERE (requester_id = {currentUserId} AND receiver_id = {friendRequestId})"
+        );
+
+        if (result > 0)
+        {
+            return new FriendRequestCancelResponse
+            {
+                Success = true,
+                Message = "Successfully cancelled the friend request"
+            };
+        }
+        else
+        {
+            return new FriendRequestCancelResponse
+            {
+                Success = false,
+                Message = "Failed to cancel the friend request"
+            };
+        }
+    }
+
+    public async Task<FriendRequestRejectResponse> RejectFriendRequest(
+        Guid friendRequestId,
+        Guid currentUserId
+    )
+    {
+        var updatedAt = DateTime.UtcNow;
+        var result = await _context.Database.ExecuteSqlAsync(
+            $"UPDATE friend_request SET status = 'rejected', updated_at = {updatedAt} WHERE receiver_id = {currentUserId} AND requester_id = {friendRequestId}"
+        );
+
+        if (result > 0)
+        {
+            return new FriendRequestRejectResponse
+            {
+                Success = true,
+                Message = "Successfully rejected the friend request"
+            };
+        }
+        else
+        {
+            return new FriendRequestRejectResponse
+            {
+                Success = false,
+                Message = "Failed to reject the friend request"
+            };
+        }
     }
 }

@@ -1,4 +1,4 @@
-public class PostDeletionResult
+public class CommentUpdateResponse
 {
     public bool Success { get; set; }
     public string Message { get; set; }

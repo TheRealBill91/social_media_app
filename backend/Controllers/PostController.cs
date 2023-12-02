@@ -56,6 +56,16 @@ public class PostController : Controller
     }
 
     [Authorize]
+    [HttpGet]
+    public async Task<IActionResult> GetAllPosts(int page)
+    {
+        //TODO: check if user has permission to get all the posts
+        var posts = await _postService.GetPosts(page);
+
+        return Ok(posts);
+    }
+
+    [Authorize]
     [HttpGet("{id}")]
     public async Task<IActionResult> GetPost(Guid? id)
     {

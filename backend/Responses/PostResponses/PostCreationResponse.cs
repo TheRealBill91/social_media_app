@@ -1,4 +1,4 @@
-public class PostCreationResult
+public class PostCreationResponse
 {
     public bool Success { get; set; }
     public string Message { get; set; }

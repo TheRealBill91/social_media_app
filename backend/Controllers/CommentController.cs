@@ -22,6 +22,28 @@ public class CommentController : Controller
     }
 
     [Authorize]
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetComment(Guid? id)
+    {
+        // TODO: check if user has permission to get the comment
+
+        if (id == null)
+        {
+            return NotFound();
+        }
+
+        var commentId = id.Value;
+
+        var comment = await _commentService.GetComment(commentId);
+        if (comment == null)
+        {
+            return NotFound("Comment does not exist");
+        }
+
+        return Ok(comment);
+    }
+
+    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateComment([FromBody] CommentDTO comment, Guid postId)
     {
@@ -45,12 +67,12 @@ public class CommentController : Controller
         }
 
         var result = await _commentService.CreateComment(comment, user.Id, postId);
-
+        Console.WriteLine(result.CommentCreationId);
         if (result.Success)
         {
             return CreatedAtAction(
                 nameof(GetComment),
-                new { id = result.CommentCreationId },
+                new { postId, id = result.CommentCreationId },
                 result
             );
         }
@@ -61,23 +83,18 @@ public class CommentController : Controller
     }
 
     [Authorize]
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetComment(Guid? id)
+    [HttpGet]
+    public async Task<IActionResult> GetAllComments(int page, Guid? postId)
     {
-        if (id == null)
+        // TODO: check if user has permission to get all the comments
+        if (postId == null)
         {
-            return NotFound();
+            return BadRequest();
         }
 
-        var commentId = id.Value;
+        var comments = await _commentService.GetComments(page, postId.Value);
 
-        var comment = await _commentService.GetComment(commentId);
-        if (comment == null)
-        {
-            return NotFound("Comment does not exist");
-        }
-
-        return Ok(comment);
+        return Ok(comments);
     }
 
     [Authorize]

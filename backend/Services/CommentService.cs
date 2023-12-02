@@ -14,7 +14,7 @@ public class CommentService
     }
 
     // Create a single comment
-    public async Task<CommentCreationResult> CreateComment(
+    public async Task<CommentCreationResponse> CreateComment(
         CommentDTO comment,
         Guid userId,
         Guid postId
@@ -31,7 +31,7 @@ public class CommentService
 
         if (result > 0)
         {
-            return new CommentCreationResult
+            return new CommentCreationResponse
             {
                 Success = true,
                 Message = "Comment created successfully",
@@ -40,7 +40,7 @@ public class CommentService
         }
         else
         {
-            return new CommentCreationResult
+            return new CommentCreationResponse
             {
                 Success = false,
                 Message = "Failed to create comment",
@@ -58,7 +58,36 @@ public class CommentService
         return comment;
     }
 
-    public async Task<CommentUpdateResult> UpdateCommentAsync(Guid id, CommentDTO commentToUpdate)
+    public async Task<List<Comment>> GetComments(int page, Guid postId)
+    {
+        int PageSize = 10;
+        int totalComments = await _context.Database
+            .SqlQuery<int>($"SELECT COUNT(id) AS \"Value\" FROM comment WHERE post_id = {postId}")
+            .SingleAsync();
+
+        int totalPages = (int)Math.Ceiling(totalComments / (double)PageSize);
+
+        if (page > totalPages)
+        {
+            page = totalPages;
+        }
+        else if (page < 1)
+        {
+            page = 1;
+        }
+
+        int pagesToSkip = PageSize * (page - 1);
+
+        var comments = await _context.Comment
+            .FromSql(
+                $"SELECT * FROM comment WHERE post_id = {postId} ORDER BY created_at DESC LIMIT {PageSize} OFFSET {pagesToSkip} "
+            )
+            .ToListAsync();
+
+        return comments;
+    }
+
+    public async Task<CommentUpdateResponse> UpdateCommentAsync(Guid id, CommentDTO commentToUpdate)
     {
         var updatedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
@@ -67,7 +96,7 @@ public class CommentService
 
         if (result > 0)
         {
-            return new CommentUpdateResult
+            return new CommentUpdateResponse
             {
                 Success = true,
                 Message = "Comment Updated Successfully"
@@ -75,7 +104,7 @@ public class CommentService
         }
         else
         {
-            return new CommentUpdateResult
+            return new CommentUpdateResponse
             {
                 Success = false,
                 Message = "Failed to update comment"
@@ -84,7 +113,7 @@ public class CommentService
     }
 
     // Apply a soft delete to the target comment document
-    public async Task<CommentDeletionResult> DeleteCommentAsync(Guid id)
+    public async Task<CommentDeletionResponse> DeleteCommentAsync(Guid id)
     {
         var deletedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
@@ -93,7 +122,7 @@ public class CommentService
 
         if (result > 0)
         {
-            return new CommentDeletionResult
+            return new CommentDeletionResponse
             {
                 Success = true,
                 Message = "Comment deleted successfully"
@@ -101,7 +130,7 @@ public class CommentService
         }
         else
         {
-            return new CommentDeletionResult
+            return new CommentDeletionResponse
             {
                 Success = false,
                 Message = "Comment deletion failed"

@@ -1,4 +1,4 @@
-public class FriendshipCreationResult
+public class FriendshipCreationResponse
 {
     public bool Success { get; set; }
     public string Message { get; set; }

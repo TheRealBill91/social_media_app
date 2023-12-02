@@ -1,4 +1,4 @@
-public class FriendRequestAcceptResult
+public class FriendRequestAcceptResponse
 {
     public bool Success { get; set; }
     public required string Message { get; set; }
