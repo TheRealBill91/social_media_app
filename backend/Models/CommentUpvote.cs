@@ -1,14 +1,13 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.EntityFrameworkCore;
 
 namespace SocialMediaApp.Models;
 
+[PrimaryKey(nameof(AuthorId), nameof(CommentId))]
 public class CommentUpvote
 {
-    [Key]
-    public Guid Id { get; set; }
-
     [Required]
     public DateTime CreatedAt { get; set; }
 

@@ -8,27 +8,28 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[Route("/api/posts/{postId}/comments/{commentId}")]
-public class CommentUpvoteController : Controller
+[Route("/api/posts/{postId}")]
+public class PostUpvoteController : Controller
 {
     private readonly UserManager<Member> _userManager;
 
-    private readonly CommentUpvoteService _commentUpvoteService;
+    private readonly PostUpvoteService _postUpvoteService;
 
-    public CommentUpvoteController(
+    public PostUpvoteController(
         UserManager<Member> userManager,
-        CommentUpvoteService commentUpvoteService
+        PostUpvoteService postUpvoteService
     )
     {
         _userManager = userManager;
-        _commentUpvoteService = commentUpvoteService;
+
+        _postUpvoteService = postUpvoteService;
     }
 
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> ToggleCommentUpvote(Guid? postId, Guid? commentId)
+    public async Task<IActionResult> TogglePostUpvote(Guid? postId)
     {
-        if (postId == null || commentId == null)
+        if (postId == null)
         {
             return BadRequest();
         }
@@ -47,17 +48,14 @@ public class CommentUpvoteController : Controller
             return NotFound("Can't find the user");
         }
 
-        // check for existing comment upvote for the current user
-        var commentUpvote = await _commentUpvoteService.GetCommentUpvote(
-            commentId,
-            Guid.Parse(userId)
-        );
+        //check for existing post upvote for the current user
+        var postUpvote = await _postUpvoteService.GetPostUpvote(postId, Guid.Parse(userId));
 
-        if (commentUpvote != null)
+        if (postUpvote != null)
         {
-            // delete comment upvote and return 200
-            var upvoteDeletionResponse = await _commentUpvoteService.DeleteCommentUpvote(
-                commentId,
+            // delete post upvote and return 200
+            var upvoteDeletionResponse = await _postUpvoteService.DeletePostUpvote(
+                postId,
                 Guid.Parse(userId)
             );
 
@@ -71,9 +69,9 @@ public class CommentUpvoteController : Controller
             }
         }
 
-        // create the comment upvote since it is not null
-        var upvoteCreationReponse = await _commentUpvoteService.CreateCommentUpvote(
-            commentId,
+        // create the post upvote since it is not null
+        var upvoteCreationReponse = await _postUpvoteService.CreatePostUpvote(
+            postId,
             Guid.Parse(userId)
         );
 

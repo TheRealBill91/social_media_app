@@ -13,12 +13,11 @@ public class PostService
         _context = context;
     }
 
-    public async Task<PostCreationResponse> CreatePost(PostDTO post, Guid userId)
+    public async Task<PostCreationResponse> CreatePost(PostDTO post, Guid authorId)
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = DateTime.UtcNow;
         var Id = Guid.NewGuid();
-        Guid authorId = userId;
 
         var result = await _context.Database.ExecuteSqlAsync(
             $"INSERT INTO post (id, title, content, created_at, updated_at, author_id ) VALUES ( {Id},{post.Title}, {post.Content}, {createdAt}, {updatedAt}, {authorId})"
@@ -44,16 +43,34 @@ public class PostService
         }
     }
 
-    public async Task<Post?> GetPost(Guid id)
+    public async Task<PostWithUpvoteCount?> GetPost(Guid id)
     {
-        var post = await _context.Post
-            .FromSql($"SELECT * FROM post WHERE id = {id} AND deleted_at IS NULL")
+        var postWithUpvotes = await _context.Post
+            .Where(p => p.Id == id && p.DeletedAt == null)
+            .GroupJoin(
+                _context.PostUpvote,
+                post => post.Id,
+                upvote => upvote.PostId,
+                (post, upvotes) => new { Post = post, Upvotes = upvotes }
+            )
+            .Select(
+                pu =>
+                    new PostWithUpvoteCount
+                    {
+                        Title = pu.Post.Title,
+                        Content = pu.Post.Content,
+                        CreatedAt = pu.Post.CreatedAt,
+                        UpdatedAt = pu.Post.UpdatedAt,
+                        AuthorId = pu.Post.AuthorId,
+                        PostUpvoteCount = pu.Upvotes.Count()
+                    }
+            )
             .FirstOrDefaultAsync();
 
-        return post;
+        return postWithUpvotes;
     }
 
-    public async Task<List<Post>> GetPosts(int page)
+    public async Task<List<PostWithUpvoteCount>> GetPosts(int page)
     {
         int PageSize = 10;
         int totalPosts = await _context.Database
@@ -73,13 +90,32 @@ public class PostService
 
         int pagesToSkip = PageSize * (page - 1);
 
-        var posts = await _context.Post
-            .FromSql(
-                $"SELECT * FROM post ORDER BY created_at DESC LIMIT {PageSize} OFFSET {pagesToSkip}"
+        var postWithUpvotes = await _context.Post
+            .Where(p => p.DeletedAt == null)
+            .GroupJoin(
+                _context.PostUpvote,
+                post => post.Id,
+                upvote => upvote.PostId,
+                (post, upvotes) => new { Post = post, Upvotes = upvotes }
             )
+            .Select(
+                pu =>
+                    new PostWithUpvoteCount
+                    {
+                        Title = pu.Post.Title,
+                        Content = pu.Post.Content,
+                        CreatedAt = pu.Post.CreatedAt,
+                        UpdatedAt = pu.Post.UpdatedAt,
+                        AuthorId = pu.Post.AuthorId,
+                        PostUpvoteCount = pu.Upvotes.Count()
+                    }
+            )
+            .OrderByDescending(pu => pu.CreatedAt)
+            .Skip(pagesToSkip)
+            .Take(PageSize)
             .ToListAsync();
 
-        return posts;
+        return postWithUpvotes;
     }
 
     public async Task<PostUpdateResponse> UpdatePostAsync(Guid id, PostDTO postToUpdate)

@@ -16,14 +16,13 @@ public class CommentService
     // Create a single comment
     public async Task<CommentCreationResponse> CreateComment(
         CommentDTO comment,
-        Guid userId,
+        Guid authorId,
         Guid postId
     )
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
         var Id = Guid.NewGuid();
-        Guid authorId = userId;
 
         var result = await _context.Database.ExecuteSqlAsync(
             $"INSERT INTO comment (id, content, created_at, updated_at, author_id, post_id) VALUES ( {Id},  {comment.Content}, {createdAt}, {updatedAt}, {authorId}, {postId} )"
@@ -49,16 +48,38 @@ public class CommentService
         }
     }
 
-    public async Task<Comment?> GetComment(Guid id)
+    public async Task<CommentWithUpvoteCount?> GetComment(Guid id)
     {
-        var comment = await _context.Comment
-            .FromSql($"SELECT * FROM comment WHERE id = {id} AND deleted_at IS NULL")
+        var commentWithUpvotes = await _context.Comment
+            // First, filter the comments
+            .Where(c => c.Id == id && c.DeletedAt == null)
+            // Then, perform the left join with CommentUpvotes
+            .GroupJoin(
+                _context.CommentUpvote,
+                comment => comment.Id,
+                upvote => upvote.CommentId,
+                (comment, upvotes) => new { Comment = comment, Upvotes = upvotes }
+            )
+            // Now, select the data into a new shape
+            .Select(
+                cu =>
+                    new CommentWithUpvoteCount
+                    {
+                        Content = cu.Comment.Content,
+                        CreatedAt = cu.Comment.CreatedAt,
+                        UpdatedAt = cu.Comment.UpdatedAt,
+                        AuthorId = cu.Comment.AuthorId,
+                        PostId = cu.Comment.PostId,
+                        CommentUpvoteCount = cu.Upvotes.Count() // This is how you'd count the upvotes
+                    }
+            )
+            // Finally, get the first or default result asynchronously
             .FirstOrDefaultAsync();
 
-        return comment;
+        return commentWithUpvotes;
     }
 
-    public async Task<List<Comment>> GetComments(int page, Guid postId)
+    public async Task<List<CommentWithUpvoteCount>?> GetComments(int page, Guid postId)
     {
         int PageSize = 10;
         int totalComments = await _context.Database
@@ -78,13 +99,32 @@ public class CommentService
 
         int pagesToSkip = PageSize * (page - 1);
 
-        var comments = await _context.Comment
-            .FromSql(
-                $"SELECT * FROM comment WHERE post_id = {postId} ORDER BY created_at DESC LIMIT {PageSize} OFFSET {pagesToSkip} "
+        var commentsWithUpvotes = await _context.Comment
+            .Where(c => c.PostId == postId)
+            .GroupJoin(
+                _context.CommentUpvote,
+                comment => comment.Id,
+                upvote => upvote.CommentId,
+                (comment, upvotes) => new { Comment = comment, Upvotes = upvotes }
             )
+            .Select(
+                cu =>
+                    new CommentWithUpvoteCount
+                    {
+                        Content = cu.Comment.Content,
+                        CreatedAt = cu.Comment.CreatedAt,
+                        UpdatedAt = cu.Comment.UpdatedAt,
+                        AuthorId = cu.Comment.AuthorId,
+                        PostId = cu.Comment.PostId,
+                        CommentUpvoteCount = cu.Upvotes.Count()
+                    }
+            )
+            .OrderByDescending(cu => cu.CreatedAt)
+            .Skip(pagesToSkip)
+            .Take(PageSize)
             .ToListAsync();
 
-        return comments;
+        return commentsWithUpvotes;
     }
 
     public async Task<CommentUpdateResponse> UpdateCommentAsync(Guid id, CommentDTO commentToUpdate)

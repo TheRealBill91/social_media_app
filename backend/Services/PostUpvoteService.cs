@@ -4,30 +4,30 @@ using SocialMediaApp.Models;
 
 namespace SocialMediaApp.Services;
 
-public class CommentUpvoteService
+public class PostUpvoteService
 {
     private readonly DataContext _context;
 
-    public CommentUpvoteService(DataContext context)
+    public PostUpvoteService(DataContext context)
     {
         _context = context;
     }
 
-    public async Task<CommentUpvote?> GetCommentUpvote(Guid? commentId, Guid? authorId)
+    public async Task<PostUpvote?> GetPostUpvote(Guid? postId, Guid? authorId)
     {
-        var commentUpvote = await _context.CommentUpvote
+        var postUpvote = await _context.PostUpvote
             .FromSql(
-                $"SELECT * FROM comment_upvote WHERE comment_id = {commentId} AND author_id = {authorId}  "
+                $"SELECT * FROM post_upvote WHERE post_id = {postId} AND author_id = {authorId}"
             )
             .FirstOrDefaultAsync();
 
-        return commentUpvote;
+        return postUpvote;
     }
 
-    public async Task<UpvoteDeletionResponse> DeleteCommentUpvote(Guid? commentId, Guid? authorId)
+    public async Task<UpvoteDeletionResponse> DeletePostUpvote(Guid? postId, Guid? authorId)
     {
         var result = await _context.Database.ExecuteSqlAsync(
-            $"DELETE from comment_upvote WHERE (comment_id = {commentId} AND author_id = {authorId})"
+            $"DELETE from post_upvote WHERE (post_id = {postId} AND author_id = {authorId})"
         );
 
         if (result > 0)
@@ -35,7 +35,7 @@ public class CommentUpvoteService
             return new UpvoteDeletionResponse
             {
                 Success = true,
-                Message = "Comment Upvote successfully deleted"
+                Message = "Post upvote successfully deleted"
             };
         }
         else
@@ -43,18 +43,18 @@ public class CommentUpvoteService
             return new UpvoteDeletionResponse
             {
                 Success = false,
-                Message = "Failed to delete the comment upvote"
+                Message = "Failed to delete the post upvote"
             };
         }
     }
 
-    public async Task<UpvoteCreationResponse> CreateCommentUpvote(Guid? commentId, Guid authorId)
+    public async Task<UpvoteCreationResponse> CreatePostUpvote(Guid? postId, Guid? authorId)
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
 
         var result = await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO comment_upvote (created_at, updated_at, author_id, comment_id) VALUES ( {createdAt},{updatedAt}, {authorId},{commentId} )"
+            $"INSERT INTO post_upvote (created_at, updated_at, author_id, post_id) VALUES ( {createdAt},{updatedAt},{authorId},{postId})"
         );
 
         if (result > 0)
@@ -62,7 +62,7 @@ public class CommentUpvoteService
             return new UpvoteCreationResponse
             {
                 Success = true,
-                Message = "Comment upvote successfully created"
+                Message = "Post upvote created successfully"
             };
         }
         else
@@ -70,7 +70,7 @@ public class CommentUpvoteService
             return new UpvoteCreationResponse
             {
                 Success = false,
-                Message = "Failed to create the comment upvote"
+                Message = "Failed to create the post upvote"
             };
         }
     }

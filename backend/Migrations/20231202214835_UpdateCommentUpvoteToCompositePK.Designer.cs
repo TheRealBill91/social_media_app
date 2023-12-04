@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SocialMediaApp.Data;
@@ -11,9 +12,11 @@ using SocialMediaApp.Data;
 namespace social_media_api.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20231202214835_UpdateCommentUpvoteToCompositePK")]
+    partial class UpdateCommentUpvoteToCompositePK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -532,24 +535,32 @@ namespace social_media_api.Migrations
 
             modelBuilder.Entity("SocialMediaApp.Models.PostUpvote", b =>
                 {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uuid")
                         .HasColumnName("author_id");
-
-                    b.Property<Guid>("PostId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("post_id");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("post_id");
+
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("updated_at");
 
-                    b.HasKey("AuthorId", "PostId")
+                    b.HasKey("Id")
                         .HasName("pk_post_upvote");
+
+                    b.HasIndex("AuthorId")
+                        .HasDatabaseName("ix_post_upvote_author_id");
 
                     b.HasIndex("PostId")
                         .HasDatabaseName("ix_post_upvote_post_id");
