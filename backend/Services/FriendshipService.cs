@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using SocialMediaApp.Data;
 using SocialMediaApp.Models;
 
@@ -50,5 +51,40 @@ public class FriendshipService
             .FirstOrDefaultAsync();
 
         return friendship;
+    }
+
+    public async Task<FriendshipDeletionResponse> DeleteFriendship(Guid memberId, Guid friendId)
+    {
+        var friendshipDeletionResult = await _context.Database.ExecuteSqlAsync(
+            $"DELETE from friendship WHERE (member_id = {memberId} AND friend_id = {friendId})"
+        );
+
+        if (friendshipDeletionResult > 0)
+        {
+            return new FriendshipDeletionResponse
+            {
+                Success = true,
+                Message = "Successfully deleted the friendship"
+            };
+        }
+        else
+        {
+            return new FriendshipDeletionResponse
+            {
+                Success = false,
+                Message = "Failed to delete the friendship"
+            };
+        }
+    }
+
+    public async Task<IEnumerable<Guid>> GetFriendsIds(Guid currentUserId)
+    {
+        var friendIds = await _context.Friendship
+            .Where(f => f.MemberId == currentUserId || f.FriendId == currentUserId)
+            .Select(f => f.MemberId == currentUserId ? f.FriendId : f.MemberId)
+            .Distinct()
+            .ToListAsync();
+
+        return friendIds;
     }
 }

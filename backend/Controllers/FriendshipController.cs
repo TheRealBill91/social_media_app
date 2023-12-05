@@ -14,13 +14,17 @@ public class FriendshipController : Controller
     private readonly UserManager<Member> _userManager;
     private readonly FriendshipService _friendshipService;
 
+    private readonly FriendRequestService _friendRequestService;
+
     public FriendshipController(
         UserManager<Member> userManager,
-        FriendshipService friendshipService
+        FriendshipService friendshipService,
+        FriendRequestService friendRequestService
     )
     {
         _friendshipService = friendshipService;
         _userManager = userManager;
+        _friendRequestService = friendRequestService;
     }
 
     [Authorize]
@@ -29,7 +33,7 @@ public class FriendshipController : Controller
     {
         if (friendId == null)
         {
-            return NotFound("friendId does not exist");
+            return NotFound("No friendship id available");
         }
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -54,5 +58,61 @@ public class FriendshipController : Controller
         }
 
         return Ok(friendship);
+    }
+
+    [Authorize]
+    [HttpDelete("{friendId}")]
+    public async Task<IActionResult> DeleteFriendship(Guid? friendId)
+    {
+        if (friendId == null)
+        {
+            return NotFound("No friendship id available");
+        }
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), friendId.Value);
+
+        if (friendship == null)
+        {
+            return NotFound("Friendship does not exist");
+        }
+
+        var friendshipDeletionResult = await _friendshipService.DeleteFriendship(
+            Guid.Parse(userId),
+            friendId.Value
+        );
+
+        if (friendshipDeletionResult.Success)
+        {
+            var friendRequestDeletionResult = await _friendRequestService.DeleteFriendRequest(
+                friendId.Value,
+                Guid.Parse(userId)
+            );
+
+            if (!friendRequestDeletionResult.Success)
+            {
+                // should not get here
+                return BadRequest("Failed to delete friend request when deleting friendship");
+            }
+
+            return Ok(friendshipDeletionResult.Message);
+        }
+        else
+        {
+            return BadRequest(friendshipDeletionResult.Message);
+        }
     }
 }

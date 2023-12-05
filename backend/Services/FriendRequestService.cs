@@ -73,7 +73,7 @@ public class FriendRequestService
         {
             var updatedAt = DateTime.UtcNow;
             var acceptFriendRequest = await _context.Database.ExecuteSqlAsync(
-                $"UPDATE friend_request SET status = 'accepted', updated_at = {updatedAt}"
+                $"UPDATE friend_request SET status = 'accepted', updated_at = {updatedAt} WHERE requester_id = {friendRequestId} AND receiver_id = {currentUserId}"
             );
             return new FriendRequestAcceptResponse
             {
@@ -97,7 +97,7 @@ public class FriendRequestService
     {
         var friendRequest = await _context.FriendRequest
             .FromSql(
-                $"SELECT * FROM friend_request WHERE (requester_id = {friendRequestId} OR receiver_id = {friendRequestId}) AND status != 'rejected'"
+                $"SELECT * FROM friend_request WHERE (requester_id = {friendRequestId} AND receiver_id = {currentUserId}) OR (requester_id = {currentUserId} AND receiver_id = {friendRequestId}) AND status != 'rejected'"
             )
             .FirstOrDefaultAsync();
 
@@ -188,6 +188,34 @@ public class FriendRequestService
             {
                 Success = false,
                 Message = "Failed to reject the friend request"
+            };
+        }
+    }
+
+    // Completely removes friend request from database (e.g., after removing friendship)
+    public async Task<FriendRequestCancelResponse> DeleteFriendRequest(
+        Guid friendRequestId,
+        Guid currentUserId
+    )
+    {
+        var friendRequestDeletionResult = await _context.Database.ExecuteSqlAsync(
+            $"DELETE FROM friend_request WHERE (receiver_id = {currentUserId} AND requester_id = {friendRequestId}) OR (receiver_id = {friendRequestId} AND requester_id = {currentUserId})"
+        );
+
+        if (friendRequestDeletionResult > 0)
+        {
+            return new FriendRequestCancelResponse
+            {
+                Success = true,
+                Message = "Successfully deleted the friend request"
+            };
+        }
+        else
+        {
+            return new FriendRequestCancelResponse
+            {
+                Success = false,
+                Message = "Failed to delete the friend request"
             };
         }
     }

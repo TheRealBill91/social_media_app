@@ -8,9 +8,12 @@ public class PostService
 {
     private readonly DataContext _context;
 
-    public PostService(DataContext context)
+    private readonly FriendshipService _friendshipService;
+
+    public PostService(DataContext context, FriendshipService friendshipService)
     {
         _context = context;
+        _friendshipService = friendshipService;
     }
 
     public async Task<PostCreationResponse> CreatePost(PostDTO post, Guid authorId)
@@ -155,5 +158,13 @@ public class PostService
         {
             return new PostDeletionResponse { Success = false, Message = "Post deletion failed" };
         }
+    }
+
+    // Get posts for logged in users home feed
+    public async Task<List<PostWithUpvoteCount> GetHomeFeedPosts ()
+    {
+        var homeFeedPosts = await _context.Post(
+            
+        )
     }
 }
