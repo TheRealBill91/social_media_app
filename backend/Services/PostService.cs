@@ -161,10 +161,33 @@ public class PostService
     }
 
     // Get posts for logged in users home feed
-    public async Task<List<PostWithUpvoteCount> GetHomeFeedPosts ()
+    public async Task<List<PostWithUpvoteCount>> GetHomeFeedPosts(Guid currentUserId)
     {
-        var homeFeedPosts = await _context.Post(
-            
-        )
+        var friendIds = await _friendshipService.GetFriendsIds(currentUserId);
+        var homeFeedPosts = await _context.Post
+            .Where(p => friendIds.Contains(p.AuthorId) && p.DeletedAt == null)
+            .GroupJoin(
+                _context.PostUpvote,
+                post => post.Id,
+                upvote => upvote.PostId,
+                (post, upvotes) => new { Post = post, Upvotes = upvotes }
+            )
+            .Select(
+                pu =>
+                    new PostWithUpvoteCount
+                    {
+                        Title = pu.Post.Title,
+                        Content = pu.Post.Content,
+                        CreatedAt = pu.Post.CreatedAt,
+                        UpdatedAt = pu.Post.UpdatedAt,
+                        AuthorId = pu.Post.AuthorId,
+                        PostUpvoteCount = pu.Upvotes.Count()
+                    }
+            )
+            .OrderByDescending(pu => pu.CreatedAt)
+            .Take(10)
+            .ToListAsync();
+
+        return homeFeedPosts;
     }
 }

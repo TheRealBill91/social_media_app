@@ -18,6 +18,7 @@ using SocialMediaApp.Services;
 public class AuthController : ControllerBase
 {
     private readonly SignInManager<Member> _signInManager;
+
     private readonly UserManager<Member> _userManager;
 
     private readonly RoleManager<IdentityRole<Guid>> _roleManager;
@@ -26,9 +27,11 @@ public class AuthController : ControllerBase
 
     private readonly IEmailSender _emailSender;
 
+    private readonly IConfiguration _configuration;
+
     private readonly MemberService _memberService;
 
-    private readonly IConfiguration _configuration;
+    private readonly MemberProfileService _memberProfileService;
 
     public AuthController(
         SignInManager<Member> signInManager,
@@ -36,8 +39,9 @@ public class AuthController : ControllerBase
         RoleManager<IdentityRole<Guid>> roleManager,
         AuthService authService,
         IEmailSender emailSender,
+        IConfiguration configuration,
         MemberService memberService,
-        IConfiguration configuration
+        MemberProfileService memberProfileService
     )
     {
         _signInManager = signInManager;
@@ -45,15 +49,16 @@ public class AuthController : ControllerBase
         _roleManager = roleManager;
         _authService = authService;
         _emailSender = emailSender;
-        _memberService = memberService;
         _configuration = configuration;
+        _memberService = memberService;
+        _memberProfileService = memberProfileService;
     }
 
     [HttpPost("signin")]
     [ValidateModel]
     public async Task<IActionResult> Login([FromBody] SignInDTO form)
     {
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity!.IsAuthenticated)
         {
             return BadRequest("User is already authenticated");
         }
@@ -186,6 +191,14 @@ public class AuthController : ControllerBase
 
         if (result.Succeeded)
         {
+            // create member profile
+            var memberProfileCreation = await _memberProfileService.CreateMemberProfile(userId);
+            if (!memberProfileCreation.Success)
+            {
+                // should not get here
+                return BadRequest("failed to create the member profile");
+            }
+
             await _authService.UpdateUserLastActivityDateAsync(user.Id);
             return Ok("Email confirmed successfully");
         }
@@ -272,7 +285,7 @@ public class AuthController : ControllerBase
 
     [HttpGet("google-login")]
     [AllowAnonymous]
-    public async Task<IActionResult> GoogleLogin(string returnUrl = null)
+    public IActionResult GoogleLogin(string? returnUrl = null)
     {
         var redirectUrl = Url.Action("GoogleResponse", "Auth");
         var properties = _signInManager.ConfigureExternalAuthenticationProperties(
@@ -301,6 +314,7 @@ public class AuthController : ControllerBase
         );
 
         var claims = externalLoginInfo.Principal.Claims;
+
         Claim emailClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
         Claim firstNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
         Claim lastNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
@@ -357,6 +371,15 @@ public class AuthController : ControllerBase
                 );
                 if (externalCreatationLoginResult.Succeeded)
                 {
+                    // create member profile
+                    var memberProfileCreation = await _memberProfileService.CreateMemberProfile(
+                        newUser.Id
+                    );
+                    if (!memberProfileCreation.Success)
+                    {
+                        // should not get here
+                        return BadRequest("failed to create the member profile");
+                    }
                     await _signInManager.SignInAsync(newUser, isPersistent: true);
                     return Ok();
                 }

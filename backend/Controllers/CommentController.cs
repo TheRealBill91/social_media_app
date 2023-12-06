@@ -13,11 +13,22 @@ public class CommentController : Controller
 {
     private readonly CommentService _commentService;
 
+    private readonly PostService _postService;
+
+    private readonly FriendshipService _friendshipService;
+
     private readonly UserManager<Member> _userManager;
 
-    public CommentController(CommentService commentService, UserManager<Member> userManager)
+    public CommentController(
+        CommentService commentService,
+        PostService postService,
+        FriendshipService friendshipService,
+        UserManager<Member> userManager
+    )
     {
         _commentService = commentService;
+        _postService = postService;
+        _friendshipService = friendshipService;
         _userManager = userManager;
     }
 
@@ -86,10 +97,41 @@ public class CommentController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAllComments(int page, Guid? postId)
     {
-        // TODO: check if user has permission to get all the comments
         if (postId == null)
         {
             return BadRequest();
+        }
+
+        var post = await _postService.GetPost(postId.Value);
+
+        if (post == null)
+        {
+            return BadRequest("Post does not exist");
+        }
+
+        var postAuthorId = post.AuthorId;
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+
+        // return 403 if users aren't friends or the logged in user is not the author
+        // of the post
+        if (friendship == null || post.AuthorId.ToString() != userId)
+        {
+            return Forbid();
         }
 
         var comments = await _commentService.GetComments(page, postId.Value);

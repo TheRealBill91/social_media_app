@@ -15,10 +15,17 @@ public class HomeFeedController : Controller
 
     private readonly FriendshipService _friendshipService;
 
-    public HomeFeedController(UserManager<Member> userManager, FriendshipService friendshipService)
+    private readonly PostService _postService;
+
+    public HomeFeedController(
+        UserManager<Member> userManager,
+        FriendshipService friendshipService,
+        PostService postService
+    )
     {
         _userManager = userManager;
         _friendshipService = friendshipService;
+        _postService = postService;
     }
 
     [Authorize]
@@ -38,5 +45,9 @@ public class HomeFeedController : Controller
         {
             return NotFound("Can't find the user");
         }
+
+        var homeFeedPosts = await _postService.GetHomeFeedPosts(Guid.Parse(userId));
+
+        return Ok(homeFeedPosts);
     }
 }

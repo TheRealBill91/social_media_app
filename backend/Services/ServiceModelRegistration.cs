@@ -16,6 +16,7 @@ public static class ServiceModelRegistration
 
         services.AddScoped<FriendRequestService>();
         services.AddScoped<FriendshipService>();
+        services.AddScoped<MemberProfileService>();
         services.AddScoped<MemberService>();
         services.AddScoped<PostService>();
         services.AddScoped<PostUpvoteService>();

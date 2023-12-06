@@ -28,7 +28,7 @@ public class MembersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreatMember([FromBody] Member member)
+    public async Task<IActionResult> CreateMember([FromBody] Member member)
     {
         await _memberService.AddAsync(member);
         return CreatedAtAction(nameof(GetMember), new { id = member.Id }, member);
