@@ -28,7 +28,7 @@ public class FriendshipController : Controller
     }
 
     [Authorize]
-    [HttpGet("{friendId}")]
+    [HttpGet("{friendId:guid}")]
     public async Task<IActionResult> GetFriendship(Guid? friendId)
     {
         if (friendId == null)
@@ -61,7 +61,7 @@ public class FriendshipController : Controller
     }
 
     [Authorize]
-    [HttpDelete("{friendId}")]
+    [HttpDelete("{friendId:guid}")]
     public async Task<IActionResult> DeleteFriendship(Guid? friendId)
     {
         if (friendId == null)

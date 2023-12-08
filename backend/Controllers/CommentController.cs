@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using SocialMediaApp.Services;
-using SocialMediaApp.Models;
-using SocialMediaApp.Filters;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using SocialMediaApp.Filters;
+using SocialMediaApp.Models;
+using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
@@ -33,7 +33,7 @@ public class CommentController : Controller
     }
 
     [Authorize]
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetComment(Guid? id)
     {
         // TODO: check if user has permission to get the comment
@@ -129,7 +129,7 @@ public class CommentController : Controller
 
         // return 403 if users aren't friends or the logged in user is not the author
         // of the post
-        if (friendship == null || post.AuthorId.ToString() != userId)
+        if (friendship == null && post.AuthorId.ToString() != userId)
         {
             return Forbid();
         }
@@ -140,7 +140,7 @@ public class CommentController : Controller
     }
 
     [Authorize]
-    [HttpPatch("{id}")]
+    [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateComment(Guid? id, [FromBody] CommentDTO commentToUpdate)
     {
         if (id == null)
@@ -178,7 +178,7 @@ public class CommentController : Controller
     }
 
     [Authorize]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteComment(Guid? id)
     {
         if (id == null)

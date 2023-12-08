@@ -8,7 +8,7 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[Route("/api/posts/{postId}/comments/{commentId}")]
+[Route("/api/posts/{postId:guid}/comments/{commentId:guid}")]
 public class CommentUpvoteController : Controller
 {
     private readonly UserManager<Member> _userManager;

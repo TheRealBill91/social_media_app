@@ -9,6 +9,7 @@ public class SignInDTO
     public required string EmailOrUsername { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
+    [DataType(DataType.Password)]
     public required string Password { get; set; }
 
     public Boolean? RememberMe { get; set; }

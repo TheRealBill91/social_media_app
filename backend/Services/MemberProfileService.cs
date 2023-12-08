@@ -18,9 +18,11 @@ public class MemberProfileService
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
-        var profileCreationResult = await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO member_profile (member_id, photo_url, bio, location, url, created_at, updated_at, deleted_at) VALUES ({memberId}, null, null, null, null, {createdAt}, {updatedAt}, null)"
-        );
+        var profileCreationResult = await _context
+            .Database
+            .ExecuteSqlAsync(
+                $"INSERT INTO member_profile (member_id, photo_url, bio, location, url, created_at, updated_at, deleted_at) VALUES ({memberId}, null, null, null, null, {createdAt}, {updatedAt}, null)"
+            );
 
         if (profileCreationResult > 0)
         {
@@ -42,7 +44,8 @@ public class MemberProfileService
 
     public async Task<MemberProfileInfoResponse?> GetMemberProfile(Guid memberId)
     {
-        var memberProfile = await _context.MemberProfile
+        var memberProfile = await _context
+            .MemberProfile
             .Where(mp => mp.MemberId == memberId && mp.DeletedAt == null)
             .Join(
                 _context.Member,
@@ -67,5 +70,44 @@ public class MemberProfileService
             .FirstOrDefaultAsync();
 
         return memberProfile;
+    }
+
+    public async Task<bool> UpdateMemberProfile(Guid memberId, MemberProfileUpdateDTO updatedInfo)
+    {
+        using var transaction = await _context.Database.BeginTransactionAsync();
+
+        try
+        {
+            var member = await _context.Member.FirstOrDefaultAsync(m => m.Id == memberId);
+            if (member == null)
+                return false;
+
+            member.FirstName = updatedInfo.FirstName;
+            member.LastName = updatedInfo.LastName;
+            member.UserName = updatedInfo.UserName;
+            member.UpdatedAt = DateTime.UtcNow;
+
+            var memberProfile = await _context
+                .MemberProfile
+                .FirstOrDefaultAsync(mp => mp.MemberId == memberId);
+            if (memberProfile == null)
+                return false;
+
+            memberProfile.PhotoURL = updatedInfo.Photo_url;
+            memberProfile.Bio = updatedInfo.Bio;
+            memberProfile.Location = updatedInfo.Location;
+            memberProfile.URL = updatedInfo.Url;
+            memberProfile.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return true;
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 }

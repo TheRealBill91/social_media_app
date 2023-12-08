@@ -14,10 +14,15 @@ public class AuthService
 
     private readonly SignInManager<Member> _signInManager;
 
-    public AuthService(DataContext context, UserManager<Member> userManager)
+    public AuthService(
+        DataContext context,
+        UserManager<Member> userManager,
+        SignInManager<Member> signInManager
+    )
     {
         _context = context;
         _userManager = userManager;
+        _signInManager = signInManager;
     }
 
     public async Task UpdateUserLastActivityDateAsync(Guid userId)

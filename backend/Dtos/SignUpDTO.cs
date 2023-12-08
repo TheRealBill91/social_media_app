@@ -23,9 +23,11 @@ public class SignUpDTO
 
     [Required(ErrorMessage = "Password is required")]
     [StringLength(20, ErrorMessage = "{0} length must be between {2} and {1}.", MinimumLength = 8)]
+    [DataType(DataType.Password)]
     public string Password { get; set; } = null!;
 
     [Required(ErrorMessage = "Password confirmation is required")]
     [Compare("Password", ErrorMessage = "Passwords do not match")]
+    [DataType(DataType.Password)]
     public required string ConfirmPassword { get; set; }
 }

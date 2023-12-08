@@ -1,10 +1,10 @@
-using Microsoft.AspNetCore.Mvc;
-using SocialMediaApp.Services;
-using SocialMediaApp.Models;
-using SocialMediaApp.Filters;
-using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using SocialMediaApp.Filters;
+using SocialMediaApp.Models;
+using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
@@ -66,7 +66,7 @@ public class PostController : Controller
     }
 
     [Authorize]
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetPost(Guid? id)
     {
         if (id == null)
@@ -85,7 +85,7 @@ public class PostController : Controller
     }
 
     [Authorize]
-    [HttpPatch("{id}")]
+    [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdatePost(Guid? id, [FromBody] PostDTO postToUpdate)
     {
         if (id == null)
@@ -123,7 +123,7 @@ public class PostController : Controller
     }
 
     [Authorize]
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeletePost(Guid? id)
     {
         if (id == null)

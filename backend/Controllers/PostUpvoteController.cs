@@ -8,7 +8,7 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[Route("/api/posts/{postId}")]
+[Route("/api/posts/{postId:guid}")]
 public class PostUpvoteController : Controller
 {
     private readonly UserManager<Member> _userManager;

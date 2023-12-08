@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using SocialMediaApp.Services;
-using SocialMediaApp.Models;
 using SocialMediaApp.Filters;
+using SocialMediaApp.Models;
+using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
@@ -16,7 +16,7 @@ public class MembersController : ControllerBase
     }
 
     // GET: api/Member/{id}
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetMember(Guid id)
     {
         var person = await _memberService.GetMemberAsync(id);

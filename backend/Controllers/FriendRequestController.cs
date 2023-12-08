@@ -25,7 +25,7 @@ public class FriendRequestController : Controller
     }
 
     [Authorize]
-    [HttpPost("{receiverId}/create")]
+    [HttpPost("{receiverId:guid}/create")]
     public async Task<IActionResult> CreateFriendRequest(Guid receiverId)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -71,7 +71,7 @@ public class FriendRequestController : Controller
     }
 
     [Authorize]
-    [HttpPost("{friendRequestId}/accept")]
+    [HttpPost("{friendRequestId:guid}/accept")]
     public async Task<IActionResult> AcceptFriendRequest(Guid? friendRequestId)
     {
         if (friendRequestId == null)
@@ -141,7 +141,7 @@ public class FriendRequestController : Controller
     }
 
     [Authorize]
-    [HttpGet("{friendRequestId}")]
+    [HttpGet("{friendRequestId:guid}")]
     public async Task<IActionResult> GetFriendRequest(Guid? friendRequestId)
     {
         if (friendRequestId == null)
@@ -229,7 +229,7 @@ public class FriendRequestController : Controller
 
     // Removes friend request from perspective of user who sent it
     [Authorize]
-    [HttpDelete("{friendRequestId}/cancel")]
+    [HttpDelete("{friendRequestId:guid}/cancel")]
     public async Task<IActionResult> CancelFriendRequest(Guid? friendRequestId)
     {
         if (friendRequestId == null)
@@ -284,7 +284,7 @@ public class FriendRequestController : Controller
 
     // Recipient rejects the friend request
     [Authorize]
-    [HttpPatch("{friendRequestId}/reject")]
+    [HttpPatch("{friendRequestId:guid}/reject")]
     public async Task<IActionResult> RejectFriendRequest(Guid? friendRequestId)
     {
         if (friendRequestId == null)
