@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
 using SendGrid.Helpers.Errors.Model;
 using SocialMediaApp.Filters;
@@ -14,6 +15,7 @@ using SocialMediaApp.Models;
 using SocialMediaApp.Services;
 
 [ApiController]
+[EnableRateLimiting("GeneralFixed")]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
@@ -204,7 +206,8 @@ public class AuthController : ControllerBase
         }
         else
         {
-            bool tokenExpired = result.Errors
+            bool tokenExpired = result
+                .Errors
                 .Select(e => e.Description)
                 .Any(e => e.Contains("invalid token.", StringComparison.OrdinalIgnoreCase));
 

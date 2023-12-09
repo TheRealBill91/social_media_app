@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SocialMediaApp.Filters;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
+[EnableRateLimiting("GeneralFixed")]
 [Route("api/[controller]")]
 public class MembersController : ControllerBase
 {

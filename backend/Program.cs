@@ -21,6 +21,8 @@ else
     connection = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
 }
 
+builder.Services.AddCustomRateLimiting(builder.Configuration);
+
 builder
     .Services
     .AddHttpLogging(logging =>
@@ -150,6 +152,8 @@ builder
 
 var app = builder.Build();
 
+app.UseRateLimiter();
+
 app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
@@ -164,8 +168,6 @@ else if (app.Environment.IsProduction())
     app.UseHsts();
     app.UseExceptionHandler("/error");
 }
-
-app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
