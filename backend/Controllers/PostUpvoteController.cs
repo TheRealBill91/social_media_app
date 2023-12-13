@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("/api/posts/{postId:guid}")]
 public class PostUpvoteController : Controller
 {
@@ -17,16 +16,27 @@ public class PostUpvoteController : Controller
 
     private readonly PostUpvoteService _postUpvoteService;
 
+    private readonly PostService _postService;
+
+    private readonly FriendshipService _friendshipService;
+
     public PostUpvoteController(
         UserManager<Member> userManager,
-        PostUpvoteService postUpvoteService
+        PostUpvoteService postUpvoteService,
+        PostService postService,
+        FriendshipService friendshipService
     )
     {
         _userManager = userManager;
 
         _postUpvoteService = postUpvoteService;
+
+        _postService = postService;
+
+        _friendshipService = friendshipService;
     }
 
+    [EnableRateLimiting("resourceUpvoteTokenBucket")]
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> TogglePostUpvote(Guid? postId)
@@ -35,6 +45,15 @@ public class PostUpvoteController : Controller
         {
             return BadRequest();
         }
+
+        var post = await _postService.GetPost(postId.Value);
+
+        if (post == null)
+        {
+            return BadRequest("Post does not exist");
+        }
+
+        var postAuthorId = post.AuthorId;
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -48,6 +67,15 @@ public class PostUpvoteController : Controller
         if (user == null)
         {
             return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+
+        // return 403 if users aren't friends or the logged in user is not the author
+        // of the post
+        if (friendship == null && post.AuthorId.ToString() != userId)
+        {
+            return Forbid();
         }
 
         //check for existing post upvote for the current user

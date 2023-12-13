@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("/api/homefeed")]
 public class HomeFeedController : Controller
 {
@@ -30,6 +29,7 @@ public class HomeFeedController : Controller
         _postService = postService;
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetHomeFeedPosts()

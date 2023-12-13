@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("api/posts")]
 public class PostController : Controller
 {
@@ -17,12 +16,20 @@ public class PostController : Controller
 
     private readonly UserManager<Member> _userManager;
 
-    public PostController(PostService postService, UserManager<Member> userManager)
+    private readonly FriendshipService _friendshipService;
+
+    public PostController(
+        PostService postService,
+        UserManager<Member> userManager,
+        FriendshipService friendshipService
+    )
     {
         _postService = postService;
         _userManager = userManager;
+        _friendshipService = friendshipService;
     }
 
+    [EnableRateLimiting("createResourceSlidingWindow")]
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreatePost([FromBody] PostDTO post)
@@ -57,6 +64,7 @@ public class PostController : Controller
         }
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllPosts(int page)
@@ -67,6 +75,7 @@ public class PostController : Controller
         return Ok(posts);
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetPost(Guid? id)
@@ -83,9 +92,36 @@ public class PostController : Controller
         {
             return NotFound("Post does not exist");
         }
+
+        var postAuthorId = post.AuthorId;
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+
+        // return 403 if users aren't friends or the logged in user is not the author
+        // of the post
+        if (friendship == null && post.AuthorId.ToString() != userId)
+        {
+            return Forbid();
+        }
+
         return Ok(post);
     }
 
+    [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdatePost(Guid? id, [FromBody] PostDTO postToUpdate)
@@ -124,6 +160,7 @@ public class PostController : Controller
         }
     }
 
+    [EnableRateLimiting("deleteResourceSlidingWindow")]
     [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeletePost(Guid? id)

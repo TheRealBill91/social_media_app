@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("/api/friendships")]
 public class FriendshipController : Controller
 {
@@ -29,6 +28,7 @@ public class FriendshipController : Controller
         _friendRequestService = friendRequestService;
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("{friendId:guid}")]
     public async Task<IActionResult> GetFriendship(Guid? friendId)
@@ -62,6 +62,7 @@ public class FriendshipController : Controller
         return Ok(friendship);
     }
 
+    [EnableRateLimiting("deleteResourceSlidingWindow")]
     [Authorize]
     [HttpDelete("{friendId:guid}")]
     public async Task<IActionResult> DeleteFriendship(Guid? friendId)

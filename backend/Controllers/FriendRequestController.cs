@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("/api/friend-requests")]
 public class FriendRequestController : Controller
 {
@@ -26,6 +25,7 @@ public class FriendRequestController : Controller
         _friendRequestService = friendRequestService;
     }
 
+    [EnableRateLimiting("createResourceSlidingWindow")]
     [Authorize]
     [HttpPost("{receiverId:guid}/create")]
     public async Task<IActionResult> CreateFriendRequest(Guid receiverId)
@@ -72,6 +72,7 @@ public class FriendRequestController : Controller
         }
     }
 
+    [EnableRateLimiting("createResourceSlidingWindow")]
     [Authorize]
     [HttpPost("{friendRequestId:guid}/accept")]
     public async Task<IActionResult> AcceptFriendRequest(Guid? friendRequestId)
@@ -142,6 +143,7 @@ public class FriendRequestController : Controller
         }
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("{friendRequestId:guid}")]
     public async Task<IActionResult> GetFriendRequest(Guid? friendRequestId)
@@ -178,6 +180,7 @@ public class FriendRequestController : Controller
     }
 
     // Gets all incoming friend requests for the logged in user
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("incoming")]
     public async Task<IActionResult> IncomingFriendRequests()
@@ -204,6 +207,7 @@ public class FriendRequestController : Controller
     }
 
     // Gets all outgoing friend requests for the logged in user
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("outgoing")]
     public async Task<IActionResult> OutgoingFriendRequests()
@@ -230,6 +234,7 @@ public class FriendRequestController : Controller
     }
 
     // Removes friend request from perspective of user who sent it
+    [EnableRateLimiting("deleteResourceSlidingWindow")]
     [Authorize]
     [HttpDelete("{friendRequestId:guid}/cancel")]
     public async Task<IActionResult> CancelFriendRequest(Guid? friendRequestId)
@@ -285,6 +290,7 @@ public class FriendRequestController : Controller
     }
 
     // Recipient rejects the friend request
+    [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{friendRequestId:guid}/reject")]
     public async Task<IActionResult> RejectFriendRequest(Guid? friendRequestId)

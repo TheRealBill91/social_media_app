@@ -85,6 +85,7 @@ public class MemberProfileService
             member.FirstName = updatedInfo.FirstName;
             member.LastName = updatedInfo.LastName;
             member.UserName = updatedInfo.UserName;
+            member.NormalizedUserName = updatedInfo.UserName.ToUpperInvariant();
             member.UpdatedAt = DateTime.UtcNow;
 
             var memberProfile = await _context

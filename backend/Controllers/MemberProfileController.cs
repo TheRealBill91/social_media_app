@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("/api/user-profile")]
 public class MemberProfileController : Controller
 {
@@ -39,6 +38,7 @@ public class MemberProfileController : Controller
     }
 
     // retrieves the profile information for the user
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("{memberId?}")]
     public async Task<IActionResult> GetProfileInformation(Guid? memberId)
@@ -71,6 +71,7 @@ public class MemberProfileController : Controller
 
     // When clicking on your own user profile, exclude memberID
     // If clicking on any other user profile, include memberID
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("posts/{memberId?}")]
     public async Task<IActionResult> GetProfilePosts(Guid? memberId)
@@ -118,6 +119,7 @@ public class MemberProfileController : Controller
         return Ok(currentUserProfilePosts);
     }
 
+    [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{memberId:guid}")]
     public async Task<IActionResult> UpdateMemberProfile(

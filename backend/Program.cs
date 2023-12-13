@@ -152,8 +152,6 @@ builder
 
 var app = builder.Build();
 
-app.UseRateLimiter();
-
 app.UseHttpLogging();
 
 // Configure the HTTP request pipeline.
@@ -168,6 +166,8 @@ else if (app.Environment.IsProduction())
     app.UseHsts();
     app.UseExceptionHandler("/error");
 }
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 

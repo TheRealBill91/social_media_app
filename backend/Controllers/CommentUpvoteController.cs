@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("/api/posts/{postId:guid}/comments/{commentId:guid}")]
 public class CommentUpvoteController : Controller
 {
@@ -17,15 +16,24 @@ public class CommentUpvoteController : Controller
 
     private readonly CommentUpvoteService _commentUpvoteService;
 
+    private readonly PostService _postService;
+
+    private readonly FriendshipService _friendshipService;
+
     public CommentUpvoteController(
         UserManager<Member> userManager,
-        CommentUpvoteService commentUpvoteService
+        CommentUpvoteService commentUpvoteService,
+        PostService postService,
+        FriendshipService friendshipService
     )
     {
         _userManager = userManager;
         _commentUpvoteService = commentUpvoteService;
+        _postService = postService;
+        _friendshipService = friendshipService;
     }
 
+    [EnableRateLimiting("resourceUpvoteTokenBucket")]
     [Authorize]
     [HttpPost]
     public async Task<IActionResult> ToggleCommentUpvote(Guid? postId, Guid? commentId)
@@ -34,6 +42,15 @@ public class CommentUpvoteController : Controller
         {
             return BadRequest();
         }
+
+        var post = await _postService.GetPost(postId.Value);
+
+        if (post == null)
+        {
+            return BadRequest("Post does not exist");
+        }
+
+        var postAuthorId = post.AuthorId;
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -47,6 +64,15 @@ public class CommentUpvoteController : Controller
         if (user == null)
         {
             return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+
+        // return 403 if users aren't friends or the logged in user is not the author
+        // of the post
+        if (friendship == null && post.AuthorId.ToString() != userId)
+        {
+            return Forbid();
         }
 
         // check for existing comment upvote for the current user

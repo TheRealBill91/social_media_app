@@ -6,7 +6,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("api/[controller]")]
 public class MembersController : ControllerBase
 {
@@ -17,7 +16,7 @@ public class MembersController : ControllerBase
         _memberService = memberService;
     }
 
-    // GET: api/Member/{id}
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetMember(Guid id)
     {
@@ -29,6 +28,7 @@ public class MembersController : ControllerBase
         return Ok(person);
     }
 
+    [EnableRateLimiting("createResourceSlidingWindow")]
     [HttpPost]
     public async Task<IActionResult> CreateMember([FromBody] Member member)
     {

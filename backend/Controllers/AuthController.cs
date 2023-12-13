@@ -1,7 +1,5 @@
 using System.Security.Claims;
 using System.Text;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -9,13 +7,11 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
-using SendGrid.Helpers.Errors.Model;
 using SocialMediaApp.Filters;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
 
 [ApiController]
-[EnableRateLimiting("GeneralFixed")]
 [Route("api/auth")]
 public class AuthController : ControllerBase
 {
@@ -56,9 +52,10 @@ public class AuthController : ControllerBase
         _memberProfileService = memberProfileService;
     }
 
+    [EnableRateLimiting("signInSlidingWindow")]
     [HttpPost("signin")]
     [ValidateModel]
-    public async Task<IActionResult> Login([FromBody] SignInDTO form)
+    public async Task<IActionResult> Signin([FromBody] SignInDTO form)
     {
         if (User.Identity!.IsAuthenticated)
         {
@@ -94,7 +91,7 @@ public class AuthController : ControllerBase
         }
         else if (result.IsLockedOut)
         {
-            return BadRequest("Too many failed login attempts, please try in 30 minutes");
+            return BadRequest("Too many failed signin attempts, please try in 30 minutes");
         }
         else if (result.IsNotAllowed)
         {
@@ -106,6 +103,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    [EnableRateLimiting("signUpSlidingWindow")]
     [HttpPost("signup")]
     [ValidateModel]
     public async Task<IActionResult> SignUp([FromBody] SignUpDTO form)
@@ -178,6 +176,7 @@ public class AuthController : ControllerBase
         return Ok(new { UserId = newUser.Id });
     }
 
+    [EnableRateLimiting("confirmEmailSlidingWindow")]
     [HttpGet("confirmemail")]
     public async Task<IActionResult> ConfirmEmail(Guid userId, string code)
     {
@@ -220,9 +219,10 @@ public class AuthController : ControllerBase
         }
     }
 
+    [EnableRateLimiting("signoutSlidingWindow")]
     [HttpPost("signout")]
     [Authorize]
-    public async Task<IActionResult> Logout()
+    public async Task<IActionResult> Signout()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!string.IsNullOrEmpty(userId))
@@ -233,6 +233,7 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
+    [EnableRateLimiting("resendEmailConfirmationSlidingWindow")]
     [HttpPost("resendemailconfirmation")]
     [ValidateModel]
     public async Task<IActionResult> ResendEmailConfirmation(
@@ -286,9 +287,10 @@ public class AuthController : ControllerBase
         return NotFound("Issue sending email confirmation");
     }
 
-    [HttpGet("google-login")]
+    [EnableRateLimiting("signInSlidingWindow")]
+    [HttpGet("google-sign-in")]
     [AllowAnonymous]
-    public IActionResult GoogleLogin(string? returnUrl = null)
+    public IActionResult GoogleSignin(string? returnUrl = null)
     {
         var redirectUrl = Url.Action("GoogleResponse", "Auth");
         var properties = _signInManager.ConfigureExternalAuthenticationProperties(
@@ -299,31 +301,32 @@ public class AuthController : ControllerBase
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
 
+    [EnableRateLimiting("signInSlidingWindow")]
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GoogleResponse()
     {
-        var externalLoginInfo = await _signInManager.GetExternalLoginInfoAsync();
+        var externalSigninInfo = await _signInManager.GetExternalLoginInfoAsync();
 
-        if (externalLoginInfo == null)
+        if (externalSigninInfo == null)
         {
             return BadRequest();
         }
 
         var signInResult = await _signInManager.ExternalLoginSignInAsync(
-            externalLoginInfo.LoginProvider,
-            externalLoginInfo.ProviderKey,
+            externalSigninInfo.LoginProvider,
+            externalSigninInfo.ProviderKey,
             isPersistent: true
         );
 
-        var claims = externalLoginInfo.Principal.Claims;
+        var claims = externalSigninInfo.Principal.Claims;
 
-        Claim emailClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-        Claim firstNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
-        Claim lastNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
+        Claim? emailClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
+        Claim? firstNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
+        Claim? lastNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
         string userName = await _authService.GenerateUniqueUserName(
-            firstNameClaim.Value,
-            lastNameClaim.Value
+            firstNameClaim!.Value,
+            lastNameClaim!.Value
         );
 
         if (signInResult.Succeeded)
@@ -344,7 +347,7 @@ public class AuthController : ControllerBase
             {
                 IdentityResult externalLinkResult = await _authService.LinkExternalLogin(
                     user,
-                    externalLoginInfo
+                    externalSigninInfo
                 );
                 if (externalLinkResult.Succeeded)
                 {
@@ -370,7 +373,7 @@ public class AuthController : ControllerBase
                 };
                 var externalCreatationLoginResult = await _authService.CreateAndLinkExternalLogin(
                     newUser,
-                    externalLoginInfo
+                    externalSigninInfo
                 );
                 if (externalCreatationLoginResult.Succeeded)
                 {
@@ -394,6 +397,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpPost("passwordresetrequest")]
     [ValidateModel]
     public async Task<IActionResult> RequestPasswordResetEmail(
@@ -415,7 +419,7 @@ public class AuthController : ControllerBase
                 user.PasswordResetEmailSentCount = 0;
                 string code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
-                string baseUrl = _configuration["ApiSettings:BaseUrl"];
+                string? baseUrl = _configuration["ApiSettings:BaseUrl"];
 
                 string callbackURL =
                     $"{baseUrl}/auth/validate-password-reset-token?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
@@ -444,6 +448,7 @@ public class AuthController : ControllerBase
         return NotFound("Issue sending email confirmation");
     }
 
+    [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpGet("validate-password-reset-token")]
     public async Task<IActionResult> ValidatePasswordResetToken(Guid userId, string code)
     {
@@ -476,6 +481,7 @@ public class AuthController : ControllerBase
         }
     }
 
+    [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpPost("resetpassword")]
     [ValidateModel]
     public async Task<IActionResult> ResetPassword(
@@ -510,52 +516,52 @@ public class AuthController : ControllerBase
         }
     }
 
-    [HttpPost("admin-signup")]
-    [ValidateModel]
-    public async Task<IActionResult> AdminSignUp([FromBody] SignUpDTO form)
-    {
-        // Check if admin role exists, create if not
-        if (!await _roleManager.RoleExistsAsync("Admin"))
-        {
-            await _roleManager.CreateAsync(new IdentityRole<Guid>("Admin"));
-        }
-
-        var adminUser = new Member
-        {
-            UserName = form.UserName,
-            Email = form.Email,
-            FirstName = form.FirstName,
-            LastName = form.LastName,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            LastEmailConfirmationSentDate = DateTime.UtcNow,
-            EmailConfirmationSentCount = 1,
-            PasswordResetEmailSentCount = 0
-        };
-
-        var result = await _userManager.CreateAsync(adminUser, form.Password);
-
-        if (!result.Succeeded)
-        {
-            return BadRequest(result.Errors);
-        }
-
-        await _userManager.AddToRoleAsync(adminUser, "Admin");
-
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(adminUser);
-
-        var baseUrl = _configuration["ApiSettings:BaseUrl"];
-
-        var callbackURL =
-            $"{baseUrl}/auth/confirmemail?userId={adminUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
-
-        string emailHTML = await _authService.GetEmailConfirmationHtml(
-            callbackURL,
-            "EmailConfirmationTemplate.html"
-        );
-
-        await _emailSender.SendEmailAsync(adminUser.Email, "Confirm your email", emailHTML);
-
-        return Ok(new { UserId = adminUser.Id });
-    }
+    /*  [HttpPost("admin-signup")]
+     [ValidateModel]
+     public async Task<IActionResult> AdminSignUp([FromBody] SignUpDTO form)
+     {
+         // Check if admin role exists, create if not
+         if (!await _roleManager.RoleExistsAsync("Admin"))
+         {
+             await _roleManager.CreateAsync(new IdentityRole<Guid>("Admin"));
+         }
+ 
+         var adminUser = new Member
+         {
+             UserName = form.UserName,
+             Email = form.Email,
+             FirstName = form.FirstName,
+             LastName = form.LastName,
+             CreatedAt = DateTime.UtcNow,
+             UpdatedAt = DateTime.UtcNow,
+             LastEmailConfirmationSentDate = DateTime.UtcNow,
+             EmailConfirmationSentCount = 1,
+             PasswordResetEmailSentCount = 0
+         };
+ 
+         var result = await _userManager.CreateAsync(adminUser, form.Password);
+ 
+         if (!result.Succeeded)
+         {
+             return BadRequest(result.Errors);
+         }
+ 
+         await _userManager.AddToRoleAsync(adminUser, "Admin");
+ 
+         var code = await _userManager.GenerateEmailConfirmationTokenAsync(adminUser);
+ 
+         var baseUrl = _configuration["ApiSettings:BaseUrl"];
+ 
+         var callbackURL =
+             $"{baseUrl}/auth/confirmemail?userId={adminUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+ 
+         string emailHTML = await _authService.GetEmailConfirmationHtml(
+             callbackURL,
+             "EmailConfirmationTemplate.html"
+         );
+ 
+         await _emailSender.SendEmailAsync(adminUser.Email, "Confirm your email", emailHTML);
+ 
+         return Ok(new { UserId = adminUser.Id });
+     } */
 }

@@ -9,7 +9,6 @@ using SocialMediaApp.Services;
 
 [ApiController]
 [ValidateModel]
-[EnableRateLimiting("GeneralFixed")]
 [Route("api/posts/{postId}/comments")]
 public class CommentController : Controller
 {
@@ -34,12 +33,11 @@ public class CommentController : Controller
         _userManager = userManager;
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetComment(Guid? id)
     {
-        // TODO: check if user has permission to get the comment
-
         if (id == null)
         {
             return NotFound();
@@ -48,22 +46,13 @@ public class CommentController : Controller
         var commentId = id.Value;
 
         var comment = await _commentService.GetComment(commentId);
+
         if (comment == null)
         {
             return NotFound("Comment does not exist");
         }
 
-        return Ok(comment);
-    }
-
-    [Authorize]
-    [HttpPost]
-    public async Task<IActionResult> CreateComment([FromBody] CommentDTO comment, Guid postId)
-    {
-        if (comment == null)
-        {
-            return NotFound();
-        }
+        var commentAuthorId = comment.AuthorId;
 
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -77,6 +66,63 @@ public class CommentController : Controller
         if (user == null)
         {
             return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            commentAuthorId
+        );
+
+        // return 403 if users aren't friends or the logged in user is not the author
+        // of the post
+        if (friendship == null && comment.AuthorId.ToString() != userId)
+        {
+            return Forbid();
+        }
+
+        return Ok(comment);
+    }
+
+    [EnableRateLimiting("createResourceSlidingWindow")]
+    [Authorize]
+    [HttpPost]
+    public async Task<IActionResult> CreateComment([FromBody] CommentDTO comment, Guid postId)
+    {
+        if (comment == null)
+        {
+            return NotFound();
+        }
+
+        var post = await _postService.GetPost(postId);
+
+        if (post == null)
+        {
+            return BadRequest("Post does not exist");
+        }
+
+        var postAuthorId = post.AuthorId;
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            return NotFound("No user id available");
+        }
+
+        var user = await _userManager.FindByIdAsync(userId);
+
+        if (user == null)
+        {
+            return NotFound("Can't find the user");
+        }
+
+        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+
+        // return 403 if users aren't friends or the logged in user is not the author
+        // of the post
+        if (friendship == null && post.AuthorId.ToString() != userId)
+        {
+            return Forbid();
         }
 
         var result = await _commentService.CreateComment(comment, user.Id, postId);
@@ -95,6 +141,7 @@ public class CommentController : Controller
         }
     }
 
+    [EnableRateLimiting("getResourceSlidingWindow")]
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllComments(int page, Guid? postId)
@@ -141,6 +188,7 @@ public class CommentController : Controller
         return Ok(comments);
     }
 
+    [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateComment(Guid? id, [FromBody] CommentDTO commentToUpdate)
@@ -179,6 +227,7 @@ public class CommentController : Controller
         }
     }
 
+    [EnableRateLimiting("deleteResourceSlidingWindow")]
     [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteComment(Guid? id)
