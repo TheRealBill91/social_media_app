@@ -404,3 +404,19 @@ cookies.txt
 .config
 
 
+
+
+
+# Remix 
+
+node_modules
+
+/.cache
+/functions/\[\[path\]\].js
+/functions/\[\[path\]\].js.map
+/functions/metafile.*
+/functions/version.txt
+/public/build
+.dev.vars
+
+

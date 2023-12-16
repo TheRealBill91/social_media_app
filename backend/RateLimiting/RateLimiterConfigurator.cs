@@ -60,6 +60,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // signup sliding window rate limit configuration
@@ -112,6 +113,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // confirm email sliding window rate limit configuration
@@ -165,6 +167,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // logout sliding window rate limit configuration
@@ -218,6 +221,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // resend email confirmation sliding window rate limit configuration
@@ -273,6 +277,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // password reset request sliding window rate limit configuration
@@ -329,6 +334,8 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // Rate limiting policies for getting a single resource (single comment or multiple posts)
@@ -382,6 +389,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // Rate limiting policy for creating (POST) resources (creating a post or comment)
@@ -435,6 +443,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // Rate limiting policy for updating (PATCH) resources (updating a comment or post)
@@ -488,6 +497,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // Rate limiting policy for updating (PATCH) resources (updating a comment or post)
@@ -541,6 +551,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         // Rate limiting policy for upvoting a comment and post
@@ -571,7 +582,7 @@ public static class RateLimiterConfigurator
                                     TokenLimit = ResourceUpvoteTokenBucketOptions.TokenLimit,
                                     TokensPerPeriod =
                                         ResourceUpvoteTokenBucketOptions.TokensPerPeriod,
-                                    ReplenishmentPeriod = TimeSpan.FromMinutes(
+                                    ReplenishmentPeriod = TimeSpan.FromSeconds(
                                         ResourceUpvoteTokenBucketOptions.ReplenishmentPeriod
                                     ),
                                     QueueLimit = ResourceUpvoteTokenBucketOptions.QueueLimit
@@ -586,7 +597,7 @@ public static class RateLimiterConfigurator
                             {
                                 TokenLimit = 15,
                                 TokensPerPeriod = ResourceUpvoteTokenBucketOptions.TokensPerPeriod,
-                                ReplenishmentPeriod = TimeSpan.FromMinutes(
+                                ReplenishmentPeriod = TimeSpan.FromSeconds(
                                     ResourceUpvoteTokenBucketOptions.ReplenishmentPeriod
                                 ),
                                 QueueLimit = ResourceUpvoteTokenBucketOptions.QueueLimit
@@ -594,6 +605,7 @@ public static class RateLimiterConfigurator
                     );
                 }
             );
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
         return services;
