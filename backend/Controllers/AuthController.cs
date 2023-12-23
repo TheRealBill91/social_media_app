@@ -331,14 +331,15 @@ public class AuthController : ControllerBase
 
         if (signInResult.Succeeded)
         {
-            return Redirect("http://localhost:5151/swagger/index.html");
+            // return Redirect("http://localhost:5151/swagger/index.html");
 
-            // return Ok();
+            return Ok();
         }
         else if (signInResult.IsLockedOut)
         {
             return BadRequest("Too many failed login attempts, please try in 30 minutes");
         }
+        // local account with same email does not exist, sign user up using google account
         else
         {
             var user = await _userManager.FindByEmailAsync(emailClaim.Value);

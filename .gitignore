@@ -412,10 +412,20 @@ cookies.txt
 node_modules
 
 /.cache
+/functions/**/*.js
+/functions/**/*.js.map
 /functions/\[\[path\]\].js
 /functions/\[\[path\]\].js.map
 /functions/metafile.*
 /functions/version.txt
+/frontend/functions/\[\[path\]\].js
+/frontend/functions/\[\[path\]\].js.map
+/frontend/functions/metafile.*
+/frontend/functions/version.txt
+/frontend/functions/\[\[path\]\].js.map
+
+/frontend/public/build
+/functions
 /public/build
 .dev.vars
 

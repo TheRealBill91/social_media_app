@@ -9,7 +9,12 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-export const links: LinksFunction = () => [{ rel: "stylesheet", href: styles }];
+import { href as Spinner } from "./components/icons/icon.tsx";
+
+export const links: LinksFunction = () => [
+  { rel: "stylesheet", href: styles },
+  { rel: "preload", href: Spinner, as: "image" },
+];
 
 export default function App() {
   return (

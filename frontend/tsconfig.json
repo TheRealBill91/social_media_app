@@ -1,5 +1,5 @@
 {
-  "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx", "prettier.config.js"],
+  "include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx", "prettier.config.cjs"],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "isolatedModules": true,
@@ -9,7 +9,9 @@
     "resolveJsonModule": true,
     "target": "ES2022",
     "strict": true,
+    "strictNullChecks": true,
     "allowJs": true,
+    "allowImportingTsExtensions": true,
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
