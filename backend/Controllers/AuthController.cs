@@ -108,7 +108,30 @@ public class AuthController : ControllerBase
     [ValidateModel]
     public async Task<IActionResult> SignUp([FromBody] SignUpDTO form)
     {
+        var newUser = new Member
+        {
+            UserName = form.UserName,
+            Email = form.Email,
+            FirstName = form.FirstName,
+            LastName = form.LastName,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            LastEmailConfirmationSentDate = DateTime.UtcNow,
+            EmailConfirmationSentCount = 1,
+            PasswordResetEmailSentCount = 0
+        };
+
         var user = await _userManager.FindByEmailAsync(form.Email);
+
+        var passwordValidator = new PasswordValidator<Member>();
+        var userValidator = new UserValidator<Member>();
+
+        var passwordResult = await passwordValidator.ValidateAsync(
+            _userManager,
+            newUser,
+            form.Password
+        );
+        var userResult = await userValidator.ValidateAsync(_userManager, newUser);
 
         if (user != null)
         {
@@ -136,22 +159,37 @@ public class AuthController : ControllerBase
             else
             {
                 // User with local account (no google linked login) already exists
-                return BadRequest("A user with this email already exists");
+                if (!passwordResult.Succeeded || !userResult.Succeeded)
+                {
+                    if (!passwordResult.Succeeded)
+                    {
+                        foreach (var error in passwordResult.Errors)
+                        {
+                            ModelState.AddModelError("password", error.Description);
+                        }
+                    }
+                    if (!userResult.Succeeded)
+                    {
+                        foreach (var error in userResult.Errors)
+                        {
+                            ModelState.AddModelError(error.Code, error.Description);
+                        }
+                    }
+                }
+
+                return BadRequest(ModelState);
             }
         }
 
-        var newUser = new Member
+        if (!passwordResult.Succeeded || !userResult.Succeeded)
         {
-            UserName = form.UserName,
-            Email = form.Email,
-            FirstName = form.FirstName,
-            LastName = form.LastName,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-            LastEmailConfirmationSentDate = DateTime.UtcNow,
-            EmailConfirmationSentCount = 1,
-            PasswordResetEmailSentCount = 0
-        };
+            var errors = passwordResult.Errors.Concat(userResult.Errors);
+            foreach (var error in errors)
+            {
+                ModelState.AddModelError("", error.Description);
+            }
+            return BadRequest(ModelState);
+        }
 
         var createUserResult = await _userManager.CreateAsync(newUser, form.Password);
         if (!createUserResult.Succeeded)

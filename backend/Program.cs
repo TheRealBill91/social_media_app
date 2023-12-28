@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
@@ -150,7 +151,18 @@ builder
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
+// builder.ConfigureHostFiltering();
+
 var app = builder.Build();
+
+app.UseHostFiltering();
+
+app.UseForwardedHeaders(
+    new ForwardedHeadersOptions
+    {
+        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+    }
+);
 
 app.UseHttpLogging();
 
