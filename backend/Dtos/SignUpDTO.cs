@@ -29,5 +29,5 @@ public class SignUpDTO
     [Required(ErrorMessage = "Password confirmation is required")]
     [Compare("Password", ErrorMessage = "Passwords do not match")]
     [DataType(DataType.Password)]
-    public required string ConfirmPassword { get; set; }
+    public required string PasswordConfirmation { get; set; }
 }

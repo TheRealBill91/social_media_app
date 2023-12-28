@@ -24,11 +24,11 @@ export const signUpSchema = z
       .refine((val) => val.length >= 8 && val.length <= 20, {
         message: "Password must be between 8 and 20 characters.",
       }),
-    confirmPassword: z.string({
+    passwordConfirmation: z.string({
       required_error: "Password confirmation is required",
     }),
   })
-  .refine((data) => data.password === data.confirmPassword, {
+  .refine((data) => data.password === data.passwordConfirmation, {
     message: "Passwords do not match",
-    path: ["confirmPassword"],
+    path: ["passwordConfirmation"],
   });

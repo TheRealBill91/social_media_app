@@ -7,7 +7,7 @@ export async function createAccount(
   firstName: string,
   lastName: string,
   password: string,
-  confirmPassword: string,
+  passwordConfirmation: string,
 ) {
   const signUpResponse = await fetch(`${context.env.API_URL}/api/auth/signup`, {
     method: "POST",
@@ -18,7 +18,7 @@ export async function createAccount(
       firstName,
       lastName,
       password,
-      confirmPassword,
+      passwordConfirmation,
     }),
   });
 

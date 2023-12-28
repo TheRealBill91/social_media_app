@@ -6,9 +6,13 @@ import { ActionFunctionArgs, json } from "@remix-run/cloudflare";
 import { BackButton } from "../../components/ui/BackButton";
 import { tw } from "../../utils/tw-identity-helper";
 import { AuthButton } from "../../components/ui/AuthButton";
-import { useId } from "react";
+import { useId, useState } from "react";
 import * as Checkbox from "@radix-ui/react-checkbox";
-import { default as Check } from "../../components/icons/icon.tsx";
+import {
+  default as Check,
+  default as EyeOpen,
+  default as EyeNone,
+} from "../../components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -18,7 +22,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const firstName = String(formData.get("firstName"));
   const lastName = String(formData.get("lastName"));
   const password = String(formData.get("password"));
-  const confirmPassword = String(formData.get("confirmPassword"));
+  const passwordConfirmation = String(formData.get("passwordConfirmation"));
 
   const submission = parse(formData, { schema: signUpSchema });
 
@@ -29,7 +33,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     firstName,
     lastName,
     password,
-    confirmPassword,
+    passwordConfirmation,
   );
 
   if (!signUpResponse.ok) {
@@ -54,10 +58,15 @@ export default function Signup() {
   const navigation = useNavigation();
   const submitting = navigation.state === "submitting";
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirmation, setShowPasswordConfirmation] =
+    useState(false);
+
+  const togglePasswordReveal = () => {};
+
   const signUpButtonName = submitting ? "Signing up..." : "Sign up";
 
   const lastSubmission = useActionData<typeof action>();
-  console.log("last submission: " + lastSubmission);
   console.log(JSON.stringify(lastSubmission, null, 2));
 
   const id = useId();
@@ -178,10 +187,22 @@ export default function Signup() {
                 <label className="self-start capitalize" htmlFor="password">
                   password
                 </label>
-                <input
-                  className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.password, { type: "password" })}
-                />
+                <div className="relative flex w-full justify-center">
+                  <input
+                    className="w-full rounded-md border border-gray-400 bg-gray-100 px-2 py-[6px]  pr-10"
+                    {...conform.input(fields.password, { type: "password" })}
+                  />
+                  {showPassword ? (
+                    <button className="absolute ">
+                      <EyeNone icon="eye-none" className="size-4" />
+                    </button>
+                  ) : (
+                    <button className="absolute right-4 top-2">
+                      <EyeOpen icon="eye-open" className="size-5" />
+                    </button>
+                  )}
+                </div>
+
                 <span
                   className={tw`${
                     fields.password.errors?.length ? "opacity-100" : "opacity-0"
@@ -195,25 +216,25 @@ export default function Signup() {
               <div className="mb-2 flex flex-col items-center gap-[6px] px-3">
                 <label
                   className="self-start capitalize"
-                  htmlFor="confirmPassword"
+                  htmlFor="passwordConfirmation"
                 >
                   Password confirmation
                 </label>
                 <input
                   className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.confirmPassword, {
+                  {...conform.input(fields.passwordConfirmation, {
                     type: "password",
                   })}
                 />
                 <span
                   className={tw`${
-                    fields.confirmPassword.errors?.length
+                    fields.passwordConfirmation.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
                   }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
-                  id={fields.confirmPassword.errorId}
+                  id={fields.passwordConfirmation.errorId}
                 >
-                  {fields.confirmPassword.errors}
+                  {fields.passwordConfirmation.errors}
                 </span>
               </div>
             </fieldset>

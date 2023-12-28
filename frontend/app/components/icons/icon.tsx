@@ -12,6 +12,8 @@ export default function Icon({ icon, ...props}: SVGProps<SVGSVGElement> & { icon
 
 export const iconNames = [
   "check",
+  "eye-none",
+  "eye-open",
   "spinner",
 ] as const;
 export type IconName = typeof iconNames[number];

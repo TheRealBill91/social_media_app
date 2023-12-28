@@ -9,12 +9,19 @@ import {
   ScrollRestoration,
 } from "@remix-run/react";
 
-import { href as Spinner, href as Check } from "./components/icons/icon.tsx";
+import {
+  href as Spinner,
+  href as Check,
+  href as EyeOpen,
+  href as EyeNone,
+} from "./components/icons/icon.tsx";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
   { rel: "preload", href: Spinner, as: "image" },
   { rel: "preload", href: Check, as: "image" },
+  { rel: "preload", href: EyeOpen, as: "image" },
+  { rel: "preload", href: EyeNone, as: "image" },
 ];
 
 export default function App() {

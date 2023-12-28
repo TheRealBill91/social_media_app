@@ -405,7 +405,8 @@ cookies.txt
 
 
 
-
+appsettings.Development.json
+backend/appsettings.Development.json
 
 # Remix 
 
@@ -428,5 +429,6 @@ node_modules
 /functions
 /public/build
 .dev.vars
+/frontend/.dev.vars
 
 
