@@ -24,6 +24,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const password = String(formData.get("password"));
   const passwordConfirmation = String(formData.get("passwordConfirmation"));
 
+  console.log("logging something in the action");
+
   const submission = parse(formData, { schema: signUpSchema });
 
   const signUpResponse = await createAccount(
@@ -62,7 +64,18 @@ export default function Signup() {
   const [showPasswordConfirmation, setShowPasswordConfirmation] =
     useState(false);
 
-  const togglePasswordReveal = () => {};
+  const togglePasswordReveal = (passwordType: string) => {
+    if (passwordType === "password") {
+      setShowPassword(!showPassword);
+    } else if (passwordType === "passwordConfirmation") {
+      setShowPasswordConfirmation(!showPasswordConfirmation);
+    }
+  };
+
+  const passwordInputType = showPassword ? "text" : "password";
+  const passwordConfirmationInputType = showPasswordConfirmation
+    ? "text"
+    : "password";
 
   const signUpButtonName = submitting ? "Signing up..." : "Sign up";
 
@@ -74,7 +87,7 @@ export default function Signup() {
   const [form, fields] = useForm({
     id,
     lastSubmission,
-    shouldValidate: "onBlur",
+    shouldValidate: "onInput",
 
     onValidate({ formData }) {
       return parse(formData, { schema: signUpSchema });
@@ -92,8 +105,8 @@ export default function Signup() {
   return (
     <main className="flex min-h-screen flex-1 flex-col items-center   gap-10 bg-slate-50 px-8  py-16 dark:bg-gray-800">
       <BackButton navTo={navTo} />
-      <div className="flex w-full flex-col justify-start rounded-lg bg-gray-300 p-6 sm:max-w-md sm:px-10">
-        <h1 className="my-3 text-center text-2xl font-bold capitalize text-gray-700 dark:text-slate-100 ">
+      <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-slate-50 p-6 sm:max-w-md md:px-10">
+        <h1 className="my-3 text-center text-[1.7rem] font-bold capitalize text-gray-700 dark:text-slate-100 ">
           sign up
         </h1>
         <span className="my-4 self-center italic text-gray-700">
@@ -101,161 +114,285 @@ export default function Signup() {
         </span>
         <div className=" flex  flex-col items-center">
           <Form
-            className="flex w-full flex-col gap-6"
+            className="flex w-full flex-col gap-4"
             replace
             method="post"
             {...form.props}
           >
-            <fieldset className="mt-4">
+            <fieldset className="mt-5">
               <div className="mb-4 flex w-full flex-col items-center gap-[6px] px-3">
-                <label className="self-start" htmlFor="firstName">
-                  First name
-                </label>
+                <div className="relative w-full ">
+                  <input
+                    className={tw`${
+                      fields.firstName.errors?.length
+                        ? "border-red-700 focus:border-red-700  "
+                        : ""
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    {...conform.input(fields.firstName, { type: "text" })}
+                    placeholder="john"
+                  />
+                  <label
+                    className={tw`${
+                      fields.firstName.errors?.length
+                        ? "text-red-700 peer-focus:text-red-700  "
+                        : ""
+                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    htmlFor={fields.firstName.id}
+                  >
+                    First name
+                  </label>
+                </div>
 
-                <input
-                  className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.firstName, { type: "text" })}
-                />
                 <span
                   className={tw`${
                     fields.firstName.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
-                  }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
                   id={fields.firstName.errorId}
                 >
                   {fields.firstName.errors}
                 </span>
               </div>
 
-              <div className="mb-5 flex flex-col items-center gap-[6px] px-3 ">
-                <label className="flex-start self-start" htmlFor="lastName">
-                  Last name
-                </label>
-                <input
-                  className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.lastName, { type: "text" })}
-                />
+              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full ">
+                  <input
+                    className={tw`${
+                      fields.lastName.errors?.length
+                        ? "border-red-700 focus:border-red-700  "
+                        : ""
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    {...conform.input(fields.lastName, { type: "text" })}
+                    placeholder="appleseed"
+                  />
+                  <label
+                    className={tw`${
+                      fields.lastName.errors?.length
+                        ? "text-red-700 peer-focus:text-red-700  "
+                        : ""
+                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    htmlFor={fields.lastName.id}
+                  >
+                    Last name
+                  </label>
+                </div>
+
                 <span
                   className={tw`${
                     fields.lastName.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
                   id={fields.lastName.errorId}
                 >
                   {fields.lastName.errors}
                 </span>
               </div>
-              <div className="mb-6 flex flex-col items-center gap-[6px] px-3">
-                <label
-                  className="flex-start self-start capitalize"
-                  htmlFor="username"
-                >
-                  username
-                </label>
-                <input
-                  className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.username, { type: "text" })}
-                />
+
+              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full ">
+                  <input
+                    className={tw`${
+                      fields.username.errors?.length
+                        ? "border-red-700 focus:border-red-700  "
+                        : ""
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    {...conform.input(fields.username, { type: "text" })}
+                    placeholder="bob1234"
+                  />
+                  <label
+                    className={tw`${
+                      fields.username.errors?.length
+                        ? "text-red-700 peer-focus:text-red-700  "
+                        : ""
+                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    htmlFor={fields.username.id}
+                  >
+                    username
+                  </label>
+                </div>
+
                 <span
                   className={tw`${
                     fields.username.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
                   id={fields.username.errorId}
                 >
                   {fields.username.errors}
                 </span>
               </div>
 
-              <div className="mb-6 flex flex-col items-center gap-[6px] px-3">
-                <label className="self-start capitalize" htmlFor="email">
-                  email
-                </label>
-                <input
-                  className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.email, { type: "email" })}
-                />
+              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full ">
+                  <input
+                    className={tw`${
+                      fields.email.errors?.length
+                        ? "border-red-700 focus:border-red-700  "
+                        : ""
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    {...conform.input(fields.email, { type: "email" })}
+                    placeholder="email@example.com"
+                  />
+                  <label
+                    className={tw`${
+                      fields.email.errors?.length
+                        ? "text-red-700 peer-focus:text-red-700  "
+                        : ""
+                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    htmlFor={fields.email.id}
+                  >
+                    email
+                  </label>
+                </div>
+
                 <span
                   className={tw`${
                     fields.email.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
                   id={fields.email.errorId}
                 >
                   {fields.email.errors}
                 </span>
               </div>
-              <div className="mb-6 flex flex-col items-center gap-[6px] px-3">
-                <label className="self-start capitalize" htmlFor="password">
-                  password
-                </label>
-                <div className="relative flex w-full justify-center">
+
+              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full ">
                   <input
-                    className="w-full rounded-md border border-gray-400 bg-gray-100 px-2 py-[6px]  pr-10"
-                    {...conform.input(fields.password, { type: "password" })}
+                    className={tw`${
+                      fields.password.errors?.length
+                        ? "border-red-700 focus:border-red-700  "
+                        : ""
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    {...conform.input(fields.password, {
+                      type: passwordInputType,
+                    })}
+                    placeholder="email@example.com"
                   />
                   {showPassword ? (
-                    <button className="absolute ">
-                      <EyeNone icon="eye-none" className="size-4" />
+                    <button
+                      onClick={() => togglePasswordReveal("password")}
+                      type="button"
+                      className="absolute right-4 top-3.5"
+                    >
+                      <EyeNone
+                        icon="eye-none"
+                        className="size-[22px] text-gray-800"
+                      />
                     </button>
                   ) : (
-                    <button className="absolute right-4 top-2">
-                      <EyeOpen icon="eye-open" className="size-5" />
+                    <button
+                      onClick={() => togglePasswordReveal("password")}
+                      type="button"
+                      className="absolute right-4 top-3.5"
+                    >
+                      <EyeOpen
+                        icon="eye-open"
+                        className="size-[22px] text-gray-800"
+                      />
                     </button>
                   )}
+                  <label
+                    className={tw`${
+                      fields.password.errors?.length
+                        ? "text-red-700 peer-focus:text-red-700  "
+                        : ""
+                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    htmlFor={fields.password.id}
+                  >
+                    password
+                  </label>
                 </div>
 
                 <span
                   className={tw`${
                     fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
                   id={fields.password.errorId}
                 >
                   {fields.password.errors}
                 </span>
               </div>
 
-              <div className="mb-2 flex flex-col items-center gap-[6px] px-3">
-                <label
-                  className="self-start capitalize"
-                  htmlFor="passwordConfirmation"
-                >
-                  Password confirmation
-                </label>
-                <input
-                  className="w-full rounded-md border border-gray-400 bg-gray-100 px-2  py-[6px]"
-                  {...conform.input(fields.passwordConfirmation, {
-                    type: "password",
-                  })}
-                />
+              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full ">
+                  <input
+                    className={tw`${
+                      fields.passwordConfirmation.errors?.length
+                        ? "border-red-700 focus:border-red-700  "
+                        : ""
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    {...conform.input(fields.passwordConfirmation, {
+                      type: passwordConfirmationInputType,
+                    })}
+                    placeholder="email@example.com"
+                  />
+                  {showPasswordConfirmation ? (
+                    <button
+                      onClick={() =>
+                        togglePasswordReveal("passwordConfirmation")
+                      }
+                      type="button"
+                      className="absolute right-4 top-3.5"
+                    >
+                      <EyeNone
+                        icon="eye-none"
+                        className="size-[22px] text-gray-800"
+                      />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() =>
+                        togglePasswordReveal("passwordConfirmation")
+                      }
+                      type="button"
+                      className="absolute right-4 top-3.5"
+                    >
+                      <EyeOpen
+                        icon="eye-open"
+                        className="size-[22px] text-gray-800"
+                      />
+                    </button>
+                  )}
+                  <label
+                    className={tw`${
+                      fields.passwordConfirmation.errors?.length
+                        ? "text-red-700 peer-focus:text-red-700  "
+                        : ""
+                    }absolute -top-2.5 left-2 bg-slate-50 px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem]`}
+                    htmlFor={fields.passwordConfirmation.id}
+                  >
+                    Password confirmation
+                  </label>
+                </div>
+
                 <span
                   className={tw`${
                     fields.passwordConfirmation.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
-                  }    self-start  text-red-700 transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
                   id={fields.passwordConfirmation.errorId}
                 >
                   {fields.passwordConfirmation.errors}
                 </span>
               </div>
             </fieldset>
-            <div className="flex justify-center gap-8 px-2">
-              <div className="flex items-center">
+            <div className="flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
+              <div className=" my-3 flex items-center px-1 md:my-2 md:px-2">
                 <Checkbox.Root
-                  className="flex h-[22px] w-[22px] appearance-none items-center justify-center rounded-[4px] bg-white shadow-[0_2px_10px] shadow-blackA4 outline-none hover:bg-violet3  [&:focus-visible]:shadow-[0_0_0_2px_black] "
+                  className="flex h-[22px] w-[22px] appearance-none items-center justify-center rounded-[4px] border border-gray-400 bg-white shadow-[0_2px_10px] shadow-blackA4 outline-none hover:bg-violet3  [&:focus-visible]:shadow-[0_0_0_2px_black] "
                   id="c1"
                 >
-                  <Checkbox.Indicator className=" text-black">
+                  <Checkbox.Indicator className=" text-gray-700">
                     <Check icon="check" className="h-[18px] w-[18px]" />
                   </Checkbox.Indicator>
                 </Checkbox.Root>
                 <label
-                  className="pl-[10px] text-[15px] leading-none text-black"
+                  className="pl-[10px] text-sm leading-none text-black md:text-base "
                   htmlFor="c1"
                 >
                   Remember me?
                 </label>
               </div>
-
               <AuthButton name={signUpButtonName} submitting={submitting} />
             </div>
           </Form>
