@@ -79,7 +79,7 @@ builder
         options.Password.RequireNonAlphanumeric = false;
         options.Password.RequireUppercase = true;
         options.Password.RequireLowercase = true;
-        options.Password.RequiredUniqueChars = 1;
+        options.Password.RequiredUniqueChars = 0;
 
         // Lockout settings
         options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);

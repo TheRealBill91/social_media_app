@@ -165,7 +165,7 @@ public class AuthController : ControllerBase
                     {
                         foreach (var error in passwordResult.Errors)
                         {
-                            ModelState.AddModelError("password", error.Description);
+                            ModelState.AddModelError(error.Code, error.Description);
                         }
                     }
                     if (!userResult.Succeeded)
