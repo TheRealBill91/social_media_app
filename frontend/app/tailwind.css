@@ -7,4 +7,30 @@
     ::-ms-reveal {
         display: none;
     }
+
+
+
+}
+
+
+@layer components {
+    .signupInputAutofill {
+
+
+        &:-webkit-autofill {
+            -webkit-box-shadow: 0 0 0 30px rgb(248 250 252 / 1) inset !important;
+        }
+
+        &:-webkit-autofill:hover {
+            -webkit-box-shadow: 0 0 0 30px rgb(248 250 252 / 1) inset !important;
+        }
+
+        &:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 30px rgb(248 250 252 / 1) inset !important;
+        }
+
+        &:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px rgb(248 250 252 / 1) inset !important;
+        }
+    }
 }

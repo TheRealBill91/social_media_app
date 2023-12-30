@@ -14,6 +14,7 @@ import {
   default as EyeNone,
 } from "../../components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
+import { transformErrors } from "./transform-errors.server.ts";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -23,8 +24,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const lastName = String(formData.get("lastName"));
   const password = String(formData.get("password"));
   const passwordConfirmation = String(formData.get("passwordConfirmation"));
-
-  console.log("logging something in the action");
 
   const submission = parse(formData, { schema: signUpSchema });
 
@@ -41,11 +40,19 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (!signUpResponse.ok) {
     const serverErrors: Record<string, string[]> = await signUpResponse.json();
 
+    const transformedErrors = transformErrors(serverErrors);
+
+    console.log("Server errors: " + JSON.stringify(serverErrors, null, 2));
+
+    console.log(
+      "Zod server errors: " + JSON.stringify(submission.error, null, 2),
+    );
+
     // Create an object that matches the SubmissionResult type
     const submissionResult: Submission = {
       intent: submission.intent,
       payload: submission.payload,
-      error: serverErrors,
+      error: transformedErrors,
     };
 
     return submissionResult;
@@ -80,9 +87,11 @@ export default function Signup() {
   const signUpButtonName = submitting ? "Signing up..." : "Sign up";
 
   const lastSubmission = useActionData<typeof action>();
-  console.log(JSON.stringify(lastSubmission, null, 2));
+  lastSubmission ? console.log(JSON.stringify(lastSubmission, null, 2)) : null;
+  lastSubmission ? console.log(lastSubmission?.error) : null;
 
   const id = useId();
+  console.log("test");
 
   const [form, fields] = useForm({
     id,
@@ -93,8 +102,6 @@ export default function Signup() {
       return parse(formData, { schema: signUpSchema });
     },
   });
-
-  console.log(fields.password);
 
   const navTo = "/auth";
 
@@ -127,7 +134,7 @@ export default function Signup() {
                       fields.firstName.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-slate-50 px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.firstName, { type: "text" })}
                     placeholder="john"
                   />
@@ -136,7 +143,7 @@ export default function Signup() {
                       fields.firstName.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.firstName.id}
                   >
                     First name
@@ -162,7 +169,7 @@ export default function Signup() {
                       fields.lastName.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.lastName, { type: "text" })}
                     placeholder="appleseed"
                   />
@@ -171,7 +178,7 @@ export default function Signup() {
                       fields.lastName.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.lastName.id}
                   >
                     Last name
@@ -195,7 +202,7 @@ export default function Signup() {
                       fields.username.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.username, { type: "text" })}
                     placeholder="bob1234"
                   />
@@ -204,7 +211,7 @@ export default function Signup() {
                       fields.username.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.username.id}
                   >
                     username
@@ -228,7 +235,7 @@ export default function Signup() {
                       fields.email.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.email, { type: "email" })}
                     placeholder="email@example.com"
                   />
@@ -237,7 +244,7 @@ export default function Signup() {
                       fields.email.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.email.id}
                   >
                     email
@@ -261,7 +268,7 @@ export default function Signup() {
                       fields.password.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.password, {
                       type: passwordInputType,
                     })}
@@ -271,7 +278,7 @@ export default function Signup() {
                     <button
                       onClick={() => togglePasswordReveal("password")}
                       type="button"
-                      className="absolute right-4 top-3.5"
+                      className="absolute right-4 top-4"
                     >
                       <EyeNone
                         icon="eye-none"
@@ -282,7 +289,7 @@ export default function Signup() {
                     <button
                       onClick={() => togglePasswordReveal("password")}
                       type="button"
-                      className="absolute right-4 top-3.5"
+                      className="absolute right-4 top-4"
                     >
                       <EyeOpen
                         icon="eye-open"
@@ -295,7 +302,7 @@ export default function Signup() {
                       fields.password.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.password.id}
                   >
                     password
@@ -319,7 +326,7 @@ export default function Signup() {
                       fields.passwordConfirmation.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-3 text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.passwordConfirmation, {
                       type: passwordConfirmationInputType,
                     })}
@@ -331,7 +338,7 @@ export default function Signup() {
                         togglePasswordReveal("passwordConfirmation")
                       }
                       type="button"
-                      className="absolute right-4 top-3.5"
+                      className="absolute right-4 top-4"
                     >
                       <EyeNone
                         icon="eye-none"
@@ -344,7 +351,7 @@ export default function Signup() {
                         togglePasswordReveal("passwordConfirmation")
                       }
                       type="button"
-                      className="absolute right-4 top-3.5"
+                      className="absolute right-4 top-4"
                     >
                       <EyeOpen
                         icon="eye-open"
@@ -357,7 +364,7 @@ export default function Signup() {
                       fields.passwordConfirmation.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50 px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem]`}
+                    }absolute -top-2.5 left-2 bg-slate-50 px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
                     htmlFor={fields.passwordConfirmation.id}
                   >
                     Password confirmation
