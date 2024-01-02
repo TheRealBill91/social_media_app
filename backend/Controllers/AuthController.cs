@@ -272,7 +272,7 @@ public class AuthController : ControllerBase
     }
 
     [EnableRateLimiting("resendEmailConfirmationSlidingWindow")]
-    [HttpPost("resendemailconfirmation")]
+    [HttpPost("resend-email-confirmation")]
     [ValidateModel]
     public async Task<IActionResult> ResendEmailConfirmation(
         [FromBody] ResendEmailConfirmationDTO form
