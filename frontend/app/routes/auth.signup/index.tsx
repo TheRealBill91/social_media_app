@@ -2,7 +2,7 @@ import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { signUpSchema } from "../../../zod/signup-schema";
 import { Submission, conform, useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
-import { ActionFunctionArgs, json } from "@remix-run/cloudflare";
+import { ActionFunctionArgs, json, redirect } from "@remix-run/cloudflare";
 import { BackButton } from "../../components/ui/BackButton";
 import { tw } from "../../utils/tw-identity-helper";
 import { AuthButton } from "../../components/ui/AuthButton";
@@ -15,6 +15,7 @@ import {
 } from "../../components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
 import { transformErrors } from "./transform-errors.server.ts";
+import { postSignupEmail } from "../../cookie.server.ts";
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -42,12 +43,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const transformedErrors = transformErrors(serverErrors);
 
-    console.log("Server errors: " + JSON.stringify(serverErrors, null, 2));
-
-    console.log(
-      "Zod server errors: " + JSON.stringify(submission.error, null, 2),
-    );
-
     // Create an object that matches the SubmissionResult type
     const submissionResult: Submission = {
       intent: submission.intent,
@@ -61,10 +56,21 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (submission.intent !== "submit" || !submission.value) {
     return json(submission);
   }
+
+  const cookieHeader = request.headers.get("Cookie");
+  const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
+  cookie.email = email;
+
+  return redirect("/auth/signup/success", {
+    headers: {
+      "Set-Cookie": await postSignupEmail.serialize(cookie),
+    },
+  });
 }
 
 export default function Signup() {
   const navigation = useNavigation();
+
   const submitting = navigation.state === "submitting";
 
   const [showPassword, setShowPassword] = useState(false);
@@ -91,7 +97,6 @@ export default function Signup() {
   lastSubmission ? console.log(lastSubmission?.error) : null;
 
   const id = useId();
-  console.log("test");
 
   const [form, fields] = useForm({
     id,
@@ -110,9 +115,9 @@ export default function Signup() {
  */
 
   return (
-    <main className="flex min-h-screen flex-1 flex-col items-center   gap-10 bg-slate-50 px-8  py-16 dark:bg-gray-800">
+    <main className="flex min-h-screen flex-1 flex-col items-center   gap-10 bg-[#ffffff] px-8 py-10  md:p-12 dark:bg-gray-800">
       <BackButton navTo={navTo} />
-      <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-slate-50 p-6 sm:max-w-md md:px-10">
+      <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] p-6 sm:max-w-md md:px-10">
         <h1 className="my-3 text-center text-[1.7rem] font-bold capitalize text-gray-700 dark:text-slate-100 ">
           sign up
         </h1>
@@ -134,7 +139,7 @@ export default function Signup() {
                       fields.firstName.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-slate-50 px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-[#ffffff] px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.firstName, { type: "text" })}
                     placeholder="john"
                   />
@@ -143,7 +148,7 @@ export default function Signup() {
                       fields.firstName.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2   bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.firstName.id}
                   >
                     First name
@@ -169,7 +174,7 @@ export default function Signup() {
                       fields.lastName.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.lastName, { type: "text" })}
                     placeholder="appleseed"
                   />
@@ -178,7 +183,7 @@ export default function Signup() {
                       fields.lastName.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2   bg-slate-50 px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2   bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.lastName.id}
                   >
                     Last name
@@ -202,7 +207,7 @@ export default function Signup() {
                       fields.username.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.username, { type: "text" })}
                     placeholder="bob1234"
                   />
@@ -211,7 +216,7 @@ export default function Signup() {
                       fields.username.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.username.id}
                   >
                     username
@@ -235,7 +240,7 @@ export default function Signup() {
                       fields.email.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.email, { type: "email" })}
                     placeholder="email@example.com"
                   />
@@ -244,7 +249,7 @@ export default function Signup() {
                       fields.email.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.email.id}
                   >
                     email
@@ -268,7 +273,7 @@ export default function Signup() {
                       fields.password.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.password, {
                       type: passwordInputType,
                     })}
@@ -302,7 +307,7 @@ export default function Signup() {
                       fields.password.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
                     htmlFor={fields.password.id}
                   >
                     password
@@ -326,7 +331,7 @@ export default function Signup() {
                       fields.passwordConfirmation.errors?.length
                         ? "border-red-700 focus:border-red-700  "
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-slate-50 px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    }   peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.passwordConfirmation, {
                       type: passwordConfirmationInputType,
                     })}
@@ -364,7 +369,7 @@ export default function Signup() {
                       fields.passwordConfirmation.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-slate-50 px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
                     htmlFor={fields.passwordConfirmation.id}
                   >
                     Password confirmation
