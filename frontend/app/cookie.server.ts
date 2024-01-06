@@ -4,6 +4,6 @@ import { createCookie } from "@remix-run/cloudflare";
 
 // Used in allowing user to click 'resend email' after user signs up
 export const postSignupEmail = createCookie("post-signup-email", {
-  maxAge: 21_600, // 6 hours in seconds
+  maxAge: 300, // 5 minutes in seconds
   httpOnly: true,
 });

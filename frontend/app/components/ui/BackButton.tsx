@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { BackButtonProps } from "../../../types/back-button-props";
 
 export function BackButton({ navTo }: BackButtonProps) {
-  const navName = navTo.slice(1);
+  const extractedNavName = navTo.slice(1);
+  const navName = extractedNavName.length > 0 ? extractedNavName : "home";
   return (
     <>
       <Link

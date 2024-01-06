@@ -1,21 +1,34 @@
 import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { signUpSchema } from "../../../zod/signup-schema";
+import { signUpSchema } from "../../../zod/signup-schema.tsx";
 import { Submission, conform, useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
-import { ActionFunctionArgs, json, redirect } from "@remix-run/cloudflare";
-import { BackButton } from "../../components/ui/BackButton";
-import { tw } from "../../utils/tw-identity-helper";
-import { AuthButton } from "../../components/ui/AuthButton";
-import { useId, useState } from "react";
-import * as Checkbox from "@radix-ui/react-checkbox";
 import {
-  default as Check,
+  ActionFunctionArgs,
+  MetaFunction,
+  json,
+  redirect,
+} from "@remix-run/cloudflare";
+import { BackButton } from "../../components/ui/BackButton.tsx";
+import { tw } from "../../utils/tw-identity-helper.ts";
+import { AuthButton } from "../../components/ui/AuthButton.tsx";
+import { useId, useState } from "react";
+import {
   default as EyeOpen,
   default as EyeNone,
 } from "../../components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
 import { transformErrors } from "./transform-errors.server.ts";
 import { postSignupEmail } from "../../cookie.server.ts";
+
+export const meta: MetaFunction = () => {
+  return [
+    {
+      name: "viewport",
+      content: "width=device-width,initial-scale=1",
+    },
+    { title: "Disengage | Signup" },
+  ];
+};
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -37,7 +50,6 @@ export async function action({ request, context }: ActionFunctionArgs) {
     password,
     passwordConfirmation,
   );
-
   if (!signUpResponse.ok) {
     const serverErrors: Record<string, string[]> = await signUpResponse.json();
 
@@ -108,7 +120,7 @@ export default function Signup() {
     },
   });
 
-  const navTo = "/auth";
+  const navTo = "/";
 
   /*   const navigate = useNavigate();
   const location = useLocation();
@@ -369,7 +381,7 @@ export default function Signup() {
                       fields.passwordConfirmation.errors?.length
                         ? "text-red-700 peer-focus:text-red-700  "
                         : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
                     htmlFor={fields.passwordConfirmation.id}
                   >
                     Password confirmation
@@ -389,22 +401,6 @@ export default function Signup() {
               </div>
             </fieldset>
             <div className="flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
-              <div className=" my-3 flex items-center px-1 md:my-2 md:px-2">
-                <Checkbox.Root
-                  className="flex h-[22px] w-[22px] appearance-none items-center justify-center rounded-[4px] border border-gray-400 bg-white shadow-[0_2px_10px] shadow-blackA4 outline-none hover:bg-violet3  [&:focus-visible]:shadow-[0_0_0_2px_black] "
-                  id="c1"
-                >
-                  <Checkbox.Indicator className=" text-gray-700">
-                    <Check icon="check" className="h-[18px] w-[18px]" />
-                  </Checkbox.Indicator>
-                </Checkbox.Root>
-                <label
-                  className="pl-[10px] text-sm leading-none text-black md:text-base "
-                  htmlFor="c1"
-                >
-                  Remember me?
-                </label>
-              </div>
               <AuthButton name={signUpButtonName} submitting={submitting} />
             </div>
           </Form>
