@@ -21,13 +21,7 @@ import { transformErrors } from "./transform-errors.server.ts";
 import { postSignupEmail } from "../../cookie.server.ts";
 
 export const meta: MetaFunction = () => {
-  return [
-    {
-      name: "viewport",
-      content: "width=device-width,initial-scale=1",
-    },
-    { title: "Disengage | Signup" },
-  ];
+  return [{ title: "Disengage | Signup" }];
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
@@ -105,8 +99,6 @@ export default function Signup() {
   const signUpButtonName = submitting ? "Signing up..." : "Sign up";
 
   const lastSubmission = useActionData<typeof action>();
-  lastSubmission ? console.log(JSON.stringify(lastSubmission, null, 2)) : null;
-  lastSubmission ? console.log(lastSubmission?.error) : null;
 
   const id = useId();
 
@@ -295,6 +287,7 @@ export default function Signup() {
                     <button
                       onClick={() => togglePasswordReveal("password")}
                       type="button"
+                      title="password reveal icon"
                       className="absolute right-4 top-4"
                     >
                       <EyeNone
@@ -306,6 +299,7 @@ export default function Signup() {
                     <button
                       onClick={() => togglePasswordReveal("password")}
                       type="button"
+                      title="password reveal icon"
                       className="absolute right-4 top-4"
                     >
                       <EyeOpen
@@ -355,6 +349,7 @@ export default function Signup() {
                         togglePasswordReveal("passwordConfirmation")
                       }
                       type="button"
+                      title="password reveal icon"
                       className="absolute right-4 top-4"
                     >
                       <EyeNone
@@ -368,6 +363,7 @@ export default function Signup() {
                         togglePasswordReveal("passwordConfirmation")
                       }
                       type="button"
+                      title="password reveal icon"
                       className="absolute right-4 top-4"
                     >
                       <EyeOpen

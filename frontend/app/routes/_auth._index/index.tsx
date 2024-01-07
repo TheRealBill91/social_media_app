@@ -1,15 +1,9 @@
 import { MetaFunction } from "@remix-run/cloudflare";
 import { Link } from "@remix-run/react";
 
-export const meta: MetaFunction = () => {
-  return [
-    {
-      name: "viewport",
-      content: "width=device-width,initial-scale=1",
-    },
-    { title: "Disengage | Authentication" },
-  ];
-};
+export const meta: MetaFunction = () => [
+  { title: "Disengage | Authentication" },
+];
 
 export default function Index() {
   return (

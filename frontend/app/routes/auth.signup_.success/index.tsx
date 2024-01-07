@@ -3,13 +3,19 @@ import {
   LoaderFunctionArgs,
   SerializeFrom,
   json,
+  redirect,
 } from "@remix-run/cloudflare";
 import { FetcherWithComponents, Link, useLoaderData } from "@remix-run/react";
 import { useFetcher } from "@remix-run/react";
 import { postSignupEmail } from "../../cookie.server.ts";
-import { resendEmailConfirmation } from "./resend-email-confirmation.ts";
+import { resendEmailConfirmation } from "./resend-email-confirmation.server.ts";
 import { Toaster, toast } from "sonner";
 import { useEffect, useState } from "react";
+import { MetaFunction } from "@remix-run/cloudflare";
+
+export const meta: MetaFunction = () => {
+  return [{ title: "Disengage | Signup Success" }];
+};
 
 export type FetcherWithComponentsReset<T> = FetcherWithComponents<T> & {
   reset: () => void;
@@ -57,29 +63,37 @@ export async function action({ request, context }: ActionFunctionArgs) {
     signupEmail,
   );
 
+  console.log(
+    "email confirmation resend response status: " + resendEmailResponse.status,
+  );
+
   if (!resendEmailResponse.ok) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
+    console.log("signup email error: " + JSON.stringify(serverError.error));
 
-    return json({ success: false, error: serverError });
+    return json(
+      { success: false, error: serverError.error },
+      {
+        headers: {
+          "Set-Cookie": await postSignupEmail.serialize("", {
+            maxAge: 1,
+          }),
+        },
+      },
+    );
   }
 
-  return json(
-    { success: true },
-
-    {
-      headers: {
-        "Set-Cookie": await postSignupEmail.serialize("", {
-          maxAge: 1,
-        }),
-      },
-    },
-  );
+  return json({ success: true });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
+
+  /*  if (!cookie.email) {
+    return redirect("/");
+  } */
 
   return json({ postSignupCookie: cookie });
 }
@@ -87,12 +101,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function SignupSuccess() {
   const { postSignupCookie } = useLoaderData<typeof loader>();
 
-  const signupEmail = postSignupCookie.email;
-
-  console.log(signupEmail);
+  const signupEmail = postSignupCookie.email || "";
 
   const fetcher = useFetcherWithReset<typeof action>();
   const actionResponse = fetcher.data as ActionResponse | undefined;
+
+  console.log(actionResponse);
 
   useEffect(() => {
     if (actionResponse) {
@@ -131,7 +145,11 @@ export default function SignupSuccess() {
         </div>
         <div className="space-y-4">
           <fetcher.Form className=" " method="post">
-            <input type="hidden" name="signupEmail" value={signupEmail}></input>
+            <input
+              type="hidden"
+              name="signupEmail"
+              value={signupEmail || "bc35786+3@gmail.com"}
+            ></input>
             <button
               type="submit"
               className="text-primary-foreground    inline-flex h-10 w-full cursor-pointer items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-center text-white  hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"

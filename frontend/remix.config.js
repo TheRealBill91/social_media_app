@@ -9,6 +9,7 @@ export default {
   serverMinify: true,
   serverModuleFormat: "esm",
   serverPlatform: "neutral",
+  sourceMap: true,
   // appDirectory: "app",
   // assetsBuildDirectory: "public/build",
   // publicPath: "/build/",
