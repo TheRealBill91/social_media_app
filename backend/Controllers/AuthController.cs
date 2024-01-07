@@ -286,7 +286,13 @@ public class AuthController : ControllerBase
             var emailIsVerified = await _userManager.IsEmailConfirmedAsync(user);
             if (emailIsVerified)
             {
-                return StatusCode(409, "Email is already verified. No new confirmation link sent.");
+                // will only be reached if user is allowed to manually input email to send new confirmation email
+                return new JsonResult(
+                    new { error = "Email is already verified. No new confirmation link sent." }
+                )
+                {
+                    StatusCode = 409
+                };
             }
             string userId = user.Id.ToString();
             bool canRequestEmailConfirmation = await _authService.CanSendNewConfirmationEmail(user);
@@ -318,7 +324,12 @@ public class AuthController : ControllerBase
             }
             else
             {
-                return StatusCode(429, "Too many email confirmations sent today, try tomorrow");
+                return new JsonResult(
+                    new { error = "Too many email confirmations sent today, try in 24 hours" }
+                )
+                {
+                    StatusCode = 429
+                };
             }
         }
 
