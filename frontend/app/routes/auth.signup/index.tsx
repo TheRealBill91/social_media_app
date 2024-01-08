@@ -1,5 +1,5 @@
 import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { signUpSchema } from "../../../zod/signup-schema.tsx";
+import { signUpSchema } from "zod/signup-schema.tsx";
 import { Submission, conform, useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
 import {
@@ -8,17 +8,17 @@ import {
   json,
   redirect,
 } from "@remix-run/cloudflare";
-import { BackButton } from "../../components/ui/BackButton.tsx";
-import { tw } from "../../utils/tw-identity-helper.ts";
-import { AuthButton } from "../../components/ui/AuthButton.tsx";
+import { BackButton } from "~/components/ui/BackButton.tsx";
+import { tw } from "~/utils/tw-identity-helper.ts";
+import { AuthButton } from "~/components/ui/AuthButton.tsx";
 import { useId, useState } from "react";
 import {
   default as EyeOpen,
   default as EyeNone,
-} from "../../components/icons/icon.tsx";
+} from "~/components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
 import { transformErrors } from "./transform-errors.server.ts";
-import { postSignupEmail } from "../../cookie.server.ts";
+import { postSignupEmail } from "~/cookie.server.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup" }];
@@ -120,7 +120,7 @@ export default function Signup() {
 
   return (
     <main className="flex min-h-screen flex-1 flex-col items-center   gap-10 bg-[#ffffff] px-8 py-10  md:p-12 dark:bg-gray-800">
-      <BackButton navTo={navTo} />
+      <BackButton navTo={navTo} twStyles="self-start" />
       <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] p-6 sm:max-w-md md:px-10">
         <h1 className="my-3 text-center text-[1.7rem] font-bold capitalize text-gray-700 dark:text-slate-100 ">
           sign up
