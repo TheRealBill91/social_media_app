@@ -13,18 +13,18 @@ import {
 
 import {
   href as Spinner,
-  href as Check,
   href as EyeOpen,
   href as EyeNone,
+  href as TimerSandEmpty,
 } from "./components/icons/icon.tsx";
 import { BackButton } from "./components/ui/BackButton.tsx";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
   { rel: "preload", href: Spinner, as: "image" },
-  { rel: "preload", href: Check, as: "image" },
   { rel: "preload", href: EyeOpen, as: "image" },
   { rel: "preload", href: EyeNone, as: "image" },
+  { rel: "preload", href: TimerSandEmpty, as: "image" },
 ];
 
 export const meta: MetaFunction = () => [
@@ -105,6 +105,7 @@ export function ErrorBoundary() {
             <p className="text-lg md:text-xl">
               Looks like we ran into an issue!
             </p>
+            <BackButton navTo={navTo} />
           </main>
           <Scripts />
         </body>

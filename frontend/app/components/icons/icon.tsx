@@ -15,5 +15,6 @@ export const iconNames = [
   "eye-none",
   "eye-open",
   "spinner",
+  "timer-sand-empty",
 ] as const;
 export type IconName = typeof iconNames[number];

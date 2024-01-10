@@ -5,7 +5,6 @@ import { tw } from "~/utils/tw-identity-helper";
 export function BackButton({ navTo, twStyles }: BackButtonProps) {
   const extractedNavName = navTo.slice(1);
   const navName = extractedNavName.length > 0 ? extractedNavName : "home";
-  console.log(twStyles);
   return (
     <Link
       to={navTo}

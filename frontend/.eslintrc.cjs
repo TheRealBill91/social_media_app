@@ -62,6 +62,8 @@ module.exports = {
           },
           typescript: {
             alwaysTryTypes: true,
+            //'frontend' is included in tsconfig paths due to varying working
+            // directory detection by the eslint vscode extension.
             project: ["tsconfig.json", "frontend/tsconfig.json"],
           },
         },
