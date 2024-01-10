@@ -1,13 +1,8 @@
-using SocialMediaApp.Models;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore.Migrations;
-using System.Buffers;
-using System.Text.Json.Serialization;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
-using Newtonsoft.Json.Converters;
+using SocialMediaApp.Models;
 
 namespace SocialMediaApp.Data;
 
@@ -20,11 +15,6 @@ public enum FriendRequestStatus
 
 public class DataContext : IdentityDbContext<Member, IdentityRole<Guid>, Guid>
 {
-    static DataContext()
-    {
-        NpgsqlConnection.GlobalTypeMapper.MapEnum<FriendRequestStatus>();
-    }
-
     public DataContext(DbContextOptions<DataContext> options)
         : base(options) { }
 

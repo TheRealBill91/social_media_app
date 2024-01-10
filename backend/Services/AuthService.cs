@@ -28,9 +28,11 @@ public class AuthService
     public async Task UpdateUserLastActivityDateAsync(Guid userId)
     {
         var lastActivityDate = DateTime.UtcNow;
-        await _context.Database.ExecuteSqlAsync(
-            $"UPDATE member SET updated_at = {lastActivityDate} WHERE id = {userId} "
-        );
+        await _context
+            .Database
+            .ExecuteSqlAsync(
+                $"UPDATE member SET updated_at = {lastActivityDate} WHERE id = {userId} "
+            );
     }
 
     public async Task<string> GetEmailConfirmationHtml(string callbackUrl, string emailTemplate)
@@ -44,7 +46,7 @@ public class AuthService
         return htmlContent.Replace("{callbackUrl}", callbackUrl);
     }
 
-    public async Task<bool> CanSendNewConfirmationEmail(Member user)
+    public Task<bool> CanSendNewConfirmationEmail(Member user)
     {
         if (user != null)
         {
@@ -57,24 +59,24 @@ public class AuthService
 
             if (!twentyFourHoursPassed && emailConfirmationSentCount >= 3)
             {
-                return false;
+                return Task.FromResult(false);
             }
             else if (twentyFourHoursPassed)
             {
                 user.EmailConfirmationSentCount = 0;
-                return true;
+                return Task.FromResult(true);
             }
             else
             {
                 // 24 hours have not passed but we are under the daily limit
-                return true;
+                return Task.FromResult(true);
             }
         }
 
         throw new Exception("Cant find user!");
     }
 
-    public async Task<bool> CanSendNewPasswordResetEmail(Member user)
+    public Task<bool> CanSendNewPasswordResetEmail(Member user)
     {
         if (user != null)
         {
@@ -87,17 +89,17 @@ public class AuthService
 
             if (!twentyFourHoursPassed && passwordResetSentCount >= 3)
             {
-                return false;
+                return Task.FromResult(false);
             }
             else if (twentyFourHoursPassed)
             {
                 user.PasswordResetEmailSentCount = 0;
-                return true;
+                return Task.FromResult(true);
             }
             else
             {
                 // 24 hours have not passed but we are under the daily limit
-                return true;
+                return Task.FromResult(true);
             }
         }
 
@@ -122,7 +124,8 @@ public class AuthService
     public async Task<bool> UsernameExists(string username)
     {
         var normalizedUserName = username.ToUpperInvariant();
-        var usernameExists = await _context.Member
+        var usernameExists = await _context
+            .Member
             .FromSql($"SELECT * FROM member WHERE normalized_user_name = {normalizedUserName}")
             .FirstOrDefaultAsync();
 
@@ -144,15 +147,17 @@ public class AuthService
         IdentityResult result = await _userManager.AddLoginAsync(user, externalLoginInfo);
         if (result.Succeeded)
         {
-            if (externalLoginInfo.Principal.HasClaim(c => c.Type == "urn:google:picture"))
+            var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
+            if (pictureClaim != null)
             {
-                await _userManager.AddClaimAsync(
-                    user,
-                    externalLoginInfo.Principal.FindFirst("urn:google:picture")
-                );
+                await _userManager.AddClaimAsync(user, pictureClaim);
+                await _signInManager.SignInAsync(user, isPersistent: true);
+                return result;
             }
 
-            await _signInManager.SignInAsync(user, isPersistent: true);
+            result = IdentityResult.Failed(
+                new IdentityError { Description = "Google picture claim is missing" }
+            );
             return result;
         }
         else
@@ -172,13 +177,16 @@ public class AuthService
             result = await _userManager.AddLoginAsync(newUser, externalLoginInfo);
             if (result.Succeeded)
             {
-                if (externalLoginInfo.Principal.HasClaim(c => c.Type == "urn:google:picture"))
+                var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
+                if (pictureClaim != null)
                 {
-                    await _userManager.AddClaimAsync(
-                        newUser,
-                        externalLoginInfo.Principal.FindFirst("urn:google:picture")
-                    );
+                    await _userManager.AddClaimAsync(newUser, pictureClaim);
+                    return result;
                 }
+
+                result = IdentityResult.Failed(
+                    new IdentityError { Description = "Google picture claim is missing" }
+                );
                 return result;
             }
             return result;

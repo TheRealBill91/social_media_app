@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql;
 using SocialMediaApp.Data;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
@@ -35,12 +36,16 @@ builder
             | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseStatusCode;
     });
 
+var dataSourceBuilder = new NpgsqlDataSourceBuilder(connection);
+dataSourceBuilder.MapEnum<FriendRequestStatus>();
+var dataSource = dataSourceBuilder.Build();
+
 builder
     .Services
     .AddDbContext<DataContext>(
         options =>
             options
-                .UseNpgsql(connection)
+                .UseNpgsql(dataSource)
                 .ReplaceService<IHistoryRepository, CamelCaseHistoryContext>()
                 .UseSnakeCaseNamingConvention()
     );
@@ -63,6 +68,10 @@ builder
     .Services
     .Configure<DataProtectionTokenProviderOptions>(options =>
     {
+        if (builder.Environment.IsDevelopment())
+        {
+            options.TokenLifespan = TimeSpan.FromMinutes(2);
+        }
         options.TokenLifespan = TimeSpan.FromHours(3);
     });
 

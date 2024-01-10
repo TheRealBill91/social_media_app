@@ -200,9 +200,10 @@ public class AuthController : ControllerBase
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 
         var baseUrl = _configuration["ApiSettings:BaseUrl"];
+        var frontendURL = _configuration["ApiSettings:FrontendUrl"];
 
         var callbackURL =
-            $"{baseUrl}/auth/confirmemail?userId={newUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+            $"{frontendURL}/confirm-email?userId={newUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
         string emailHTML = await _authService.GetEmailConfirmationHtml(
             callbackURL,
@@ -220,7 +221,9 @@ public class AuthController : ControllerBase
     {
         var user = await _userManager.FindByIdAsync(userId.ToString());
         if (user == null)
+        {
             return NotFound("User not found");
+        }
 
         var decodedCode = WebEncoders.Base64UrlDecode(code);
         var result = await _userManager.ConfirmEmailAsync(
@@ -249,7 +252,14 @@ public class AuthController : ControllerBase
                 .Any(e => e.Contains("invalid token.", StringComparison.OrdinalIgnoreCase));
 
             if (tokenExpired)
-                return BadRequest("Password reset has expired");
+            {
+                var errorResponse = new EmailConfirmationResponse
+                {
+                    Error = "Email Confirmation has expired",
+                    Email = user.Email!
+                };
+                return BadRequest(errorResponse);
+            }
             else
             {
                 return BadRequest("Error confirming email confirmation");
@@ -320,7 +330,7 @@ public class AuthController : ControllerBase
                     Guid.Parse(userId)
                 );
 
-                return Ok();
+                return Ok("Successfully resent email confirmation");
             }
             else
             {
@@ -391,6 +401,11 @@ public class AuthController : ControllerBase
         // local account with same email does not exist, sign user up using google account
         else
         {
+            if (emailClaim == null)
+            {
+                return BadRequest("email claim is missing");
+            }
+
             var user = await _userManager.FindByEmailAsync(emailClaim.Value);
 
             if (user != null)
