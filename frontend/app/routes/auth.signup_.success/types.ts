@@ -1,7 +1,3 @@
-export interface resendEmailErrorResponse {
-  error?: string;
-}
-
 interface ActionSuccessReponse {
   success: true;
 }

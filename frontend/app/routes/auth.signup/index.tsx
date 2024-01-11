@@ -33,6 +33,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const password = String(formData.get("password"));
   const passwordConfirmation = String(formData.get("passwordConfirmation"));
 
+  const state = String(formData.get("state"));
+
+  if (state === "submitting") {
+    return null;
+  }
+
   const submission = parse(formData, { schema: signUpSchema });
 
   const signUpResponse = await createAccount(
@@ -135,6 +141,7 @@ export default function Signup() {
             method="post"
             {...form.props}
           >
+            <input type="hidden" name="state" value={navigation.state}></input>
             <fieldset className="mt-5">
               <div className="mb-4 flex w-full flex-col items-center gap-[6px] px-3">
                 <div className="relative w-full ">

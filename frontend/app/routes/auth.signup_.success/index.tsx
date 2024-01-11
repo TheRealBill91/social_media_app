@@ -5,12 +5,14 @@ import {
 } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
 import { postSignupEmail } from "~/cookie.server.ts";
-import { resendEmailConfirmation } from "./resend-email-confirmation.server.ts";
+import { resendEmailConfirmation } from "../resend-email-confirmation.server.ts";
 import { Toaster, toast } from "sonner";
 import { useEffect } from "react";
 import { MetaFunction } from "@remix-run/cloudflare";
-import { resendEmailErrorResponse, ActionResponse } from "./types.ts";
-import { useFetcherWithReset } from "./useFetcherWithReset.ts";
+import { ActionResponse } from "./types.ts";
+import { useFetcherWithReset } from "~/hooks/useFetcherWithReset.ts";
+import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmail.tsx";
+import { resendEmailErrorResponse } from "types/resend-email-error.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup Success" }];
@@ -20,6 +22,12 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
 
   const signupEmail = String(formData.get("signupEmail"));
+
+  const state = String(formData.get("state"));
+
+  if (state === "submitting") {
+    return null;
+  }
 
   if (!signupEmail) {
     return json({ error: "Email is missing" });
@@ -59,12 +67,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function SignupSuccess() {
   const { postSignupCookie } = useLoaderData<typeof loader>();
 
-  const signupEmail = postSignupCookie.email || "";
+  const signupEmail: string = postSignupCookie.email || "";
 
   const fetcher = useFetcherWithReset<typeof action>();
   const actionResponse = fetcher.data as ActionResponse | undefined;
 
-  console.log(actionResponse);
+  const submitting = fetcher.state === "submitting";
 
   useEffect(() => {
     if (actionResponse) {
@@ -102,20 +110,15 @@ export default function SignupSuccess() {
           </p>
         </div>
         <div className="space-y-4">
-          <fetcher.Form className=" " method="post">
+          <fetcher.Form method="post">
             <input type="hidden" name="signupEmail" value={signupEmail}></input>
-            <button
-              type="submit"
-              className="text-primary-foreground    inline-flex h-10 w-full cursor-pointer items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-center text-white  hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
-            >
-              {" "}
-              Resend Confirmation Email
-            </button>
+            <input type="hidden" name="state" value={fetcher.state}></input>
+            <ResendConfirmationEmailBtn submitting={submitting} />
           </fetcher.Form>
 
           <Link
             to="/"
-            className="text-primary-foreground inline-flex w-full cursor-pointer items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-white hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
+            className="text-primary-foreground inline-flex w-full  cursor-pointer items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-white outline-0 transition-all hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
             type="button"
           >
             Return to Home Page
