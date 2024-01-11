@@ -224,17 +224,17 @@ public static class RateLimiterConfigurator
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
         });
 
-        // resend email confirmation sliding window rate limit configuration
-        var ResendEmailConfirmationSlidingWindowOptions = new SlidingWindowPolicy();
+        // resend confirmation email sliding window rate limit configuration
+        var ResendConfirmationEmailSlidingWindowOptions = new SlidingWindowPolicy();
         configuration
-            .GetSection("RateLimiting:Authentication:ResendEmailConfirmationSlidingWindow")
-            .Bind(ResendEmailConfirmationSlidingWindowOptions);
-        var ResendEmailConfirmationPolicyName = "resendEmailConfirmationSlidingWindow";
+            .GetSection("RateLimiting:Authentication:ResendConfirmationEmailSlidingWindow")
+            .Bind(ResendConfirmationEmailSlidingWindowOptions);
+        var ResendConfirmationEmailPolicyName = "resendConfirmationEmailSlidingWindow";
 
         services.AddRateLimiter(options =>
         {
             options.AddPolicy(
-                policyName: ResendEmailConfirmationPolicyName,
+                policyName: ResendConfirmationEmailPolicyName,
                 partitioner: httpContext =>
                 {
                     string partitionKey =
@@ -250,14 +250,14 @@ public static class RateLimiterConfigurator
                                 new SlidingWindowRateLimiterOptions
                                 {
                                     PermitLimit =
-                                        ResendEmailConfirmationSlidingWindowOptions.PermitLimit,
+                                        ResendConfirmationEmailSlidingWindowOptions.PermitLimit,
                                     QueueLimit =
-                                        ResendEmailConfirmationSlidingWindowOptions.QueueLimit,
+                                        ResendConfirmationEmailSlidingWindowOptions.QueueLimit,
                                     Window = TimeSpan.FromMinutes(
-                                        ResendEmailConfirmationSlidingWindowOptions.WindowInMinutes
+                                        ResendConfirmationEmailSlidingWindowOptions.WindowInMinutes
                                     ),
                                     SegmentsPerWindow =
-                                        ResendEmailConfirmationSlidingWindowOptions.SegmentsPerWindow
+                                        ResendConfirmationEmailSlidingWindowOptions.SegmentsPerWindow
                                 }
                         );
                     }
@@ -268,9 +268,9 @@ public static class RateLimiterConfigurator
                             new SlidingWindowRateLimiterOptions
                             {
                                 PermitLimit = 3,
-                                QueueLimit = ResendEmailConfirmationSlidingWindowOptions.QueueLimit,
+                                QueueLimit = ResendConfirmationEmailSlidingWindowOptions.QueueLimit,
                                 Window = TimeSpan.FromMinutes(
-                                    ResendEmailConfirmationSlidingWindowOptions.WindowInMinutes
+                                    ResendConfirmationEmailSlidingWindowOptions.WindowInMinutes
                                 ),
                                 SegmentsPerWindow = 6
                             }

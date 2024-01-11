@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace SocialMediaApp.Models;
 
-public class ResendEmailConfirmationDTO
+public class ResendConfirmationEmailDTO
 {
     [Required(ErrorMessage = "Email is required.")]
     [EmailAddress]

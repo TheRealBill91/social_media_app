@@ -281,11 +281,11 @@ public class AuthController : ControllerBase
         return NoContent();
     }
 
-    [EnableRateLimiting("resendEmailConfirmationSlidingWindow")]
-    [HttpPost("resend-email-confirmation")]
+    [EnableRateLimiting("resendConfirmationEmailSlidingWindow")]
+    [HttpPost("resend-confirmation-email")]
     [ValidateModel]
-    public async Task<IActionResult> ResendEmailConfirmation(
-        [FromBody] ResendEmailConfirmationDTO form
+    public async Task<IActionResult> ResendConfirmationEmail(
+        [FromBody] ResendConfirmationEmailDTO form
     )
     {
         string userEmail = form.Email;
