@@ -1,6 +1,6 @@
 import { AppLoadContext } from "@remix-run/cloudflare";
 
-export async function resendEmailConfirmation(
+export async function resendConfirmationEmail(
   context: AppLoadContext,
   email: string,
 ) {

@@ -4,8 +4,8 @@ import {
   json,
 } from "@remix-run/cloudflare";
 import { Link, useLoaderData } from "@remix-run/react";
-import { postSignupEmail } from "~/cookie.server.ts";
-import { resendEmailConfirmation } from "../resend-email-confirmation.server.ts";
+import { postSignupEmail } from "~/utils/cookie.server.ts";
+import { resendConfirmationEmail } from "../resend-confirmation-email.server.ts";
 import { Toaster, toast } from "sonner";
 import { useEffect } from "react";
 import { MetaFunction } from "@remix-run/cloudflare";
@@ -33,7 +33,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json({ error: "Email is missing" });
   }
 
-  const resendEmailResponse = await resendEmailConfirmation(
+  const resendEmailResponse = await resendConfirmationEmail(
     context,
     signupEmail,
   );
@@ -53,8 +53,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
       },
     );
   }
-
-  return json({ success: true });
+  const serverSuccessMessage = await resendEmailResponse.json();
+  return json({ success: true, serverSuccessMessage });
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -75,17 +75,22 @@ export default function SignupSuccess() {
   const submitting = fetcher.state === "submitting";
 
   useEffect(() => {
+    console.log("in use effect");
     if (actionResponse) {
       if (actionResponse?.success) {
-        toast.success("Resent email confirmation", { duration: 20000 });
+        toast.success(actionResponse.serverSuccessMessage, {
+          duration: 15000,
+          position: "top-center",
+        });
       } else if (!actionResponse?.success) {
         toast.error(actionResponse.error, {
+          duration: 15000,
           position: "top-center",
         });
       }
       fetcher.reset();
     }
-  }, [fetcher, actionResponse]);
+  }, [actionResponse, fetcher.reset]);
 
   return (
     <main className="flex h-screen w-full  items-center justify-center bg-[#ffffff]">

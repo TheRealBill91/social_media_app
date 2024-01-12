@@ -1,15 +1,25 @@
 import { default as TimerSandEmpty } from "~/components/icons/icon.tsx";
 import { useFetcherWithReset } from "~/hooks/useFetcherWithReset";
 import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmail";
-import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/cloudflare";
-/* import { resendEmailConfirmation } from "../resend-email-confirmation.server";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+  json,
+} from "@remix-run/cloudflare";
+import { resendConfirmationEmail } from "../resend-confirmation-email.server";
 import { resendEmailErrorResponse } from "types/resend-email-error";
- */
+import { postSignupEmail } from "~/utils/cookie.server";
+import { useLoaderData } from "@remix-run/react";
+import { ActionResponse } from "../auth.signup_.success/types";
+import { useEffect } from "react";
+import { toast } from "sonner";
+
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Email Confirmation Expired" }];
 };
 
-export async function action({ request }: ActionFunctionArgs) {
+export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
 
   const email = String(formData.get("email"));
@@ -24,17 +34,59 @@ export async function action({ request }: ActionFunctionArgs) {
     return json({ error: "Email is missing" });
   }
 
-  // const resendEmailResponse = await resendEmailConfirmation(context, email);
+  const resendEmailResponse = await resendConfirmationEmail(context, email);
 
-  /* if (!resendEmailResponse) {
-    const serverError: resendEmailErrorResponse = await resendEmailResponse.json();
-  } */
+  if (!resendEmailResponse.ok) {
+    const serverError: resendEmailErrorResponse =
+      await resendEmailResponse.json();
+
+    return json(
+      { success: false, error: serverError.error },
+      {
+        headers: {
+          "Set-Cookie": await postSignupEmail.serialize("", {
+            maxAge: 1,
+          }),
+        },
+      },
+    );
+  }
+
+  const serverSuccessMessage = await resendEmailResponse.json();
+  return json({ success: true, serverSuccessMessage });
+}
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  const cookieHeader = request.headers.get("Cookie");
+  const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
+
+  return json({ postSignupCookie: cookie });
 }
 
 export default function ConfirmExpired() {
+  const { postSignupCookie } = useLoaderData<typeof loader>();
+
+  const signupEmail: string = postSignupCookie.email || "";
+
+  console.log(signupEmail);
+
   const fetcher = useFetcherWithReset<typeof action>();
+  const actionResponse = fetcher.data as ActionResponse | undefined;
 
   const submitting = fetcher.state === "submitting";
+
+  useEffect(() => {
+    if (actionResponse) {
+      if (actionResponse?.success) {
+        toast.success(actionResponse.serverSuccessMessage, {
+          duration: 15000,
+          position: "top-center",
+        });
+      } else if (actionResponse?.error) {
+        toast.error(actionResponse.error);
+      }
+    }
+  }, [fetcher, actionResponse]);
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 ">

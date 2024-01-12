@@ -1,5 +1,6 @@
 interface ActionSuccessReponse {
   success: true;
+  serverSuccessMessage: string;
 }
 
 interface ActionErrorResponse {

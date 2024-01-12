@@ -18,7 +18,7 @@ import {
 } from "~/components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
 import { transformErrors } from "./transform-errors.server.ts";
-import { postSignupEmail } from "~/cookie.server.ts";
+import { postSignupEmail } from "~/utils/cookie.server.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup" }];
