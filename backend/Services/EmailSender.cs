@@ -1,7 +1,7 @@
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.Extensions.Options;
 using SendGrid;
 using SendGrid.Helpers.Mail;
-using Microsoft.AspNetCore.Identity.UI.Services;
 
 namespace SocialMediaApp.Services;
 
@@ -28,7 +28,7 @@ public class EmailSender : IEmailSender
         var client = new SendGridClient(apiKey);
         var msg = new SendGridMessage()
         {
-            From = new EmailAddress("bc357gaming@gmail.com", "Account confirmation"),
+            From = new EmailAddress("noreply@em9325.disengage.online"),
             Subject = subject,
             PlainTextContent = message,
             HtmlContent = message

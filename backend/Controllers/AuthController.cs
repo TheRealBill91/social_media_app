@@ -186,7 +186,7 @@ public class AuthController : ControllerBase
             var errors = passwordResult.Errors.Concat(userResult.Errors);
             foreach (var error in errors)
             {
-                ModelState.AddModelError("", error.Description);
+                ModelState.AddModelError(error.Code, error.Description);
             }
             return BadRequest(ModelState);
         }
@@ -215,17 +215,17 @@ public class AuthController : ControllerBase
         return Ok(new { UserId = newUser.Id });
     }
 
-    [EnableRateLimiting("confirmEmailSlidingWindow")]
-    [HttpGet("confirmemail")]
-    public async Task<IActionResult> ConfirmEmail(Guid userId, string code)
+    //[EnableRateLimiting("confirmEmailSlidingWindow")]
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDTO emailFields)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var user = await _userManager.FindByIdAsync(emailFields.UserId.ToString());
         if (user == null)
         {
-            return NotFound("User not found");
+            return new JsonResult(new { error = "User not found" }) { StatusCode = 404 };
         }
 
-        var decodedCode = WebEncoders.Base64UrlDecode(code);
+        var decodedCode = WebEncoders.Base64UrlDecode(emailFields.Code);
         var result = await _userManager.ConfirmEmailAsync(
             user,
             Encoding.UTF8.GetString(decodedCode)
@@ -234,11 +234,17 @@ public class AuthController : ControllerBase
         if (result.Succeeded)
         {
             // create member profile
-            var memberProfileCreation = await _memberProfileService.CreateMemberProfile(userId);
+            var memberProfileCreation = await _memberProfileService.CreateMemberProfile(
+                emailFields.UserId
+            );
             if (!memberProfileCreation.Success)
             {
                 // should not get here
-                return BadRequest("failed to create the member profile");
+                return new JsonResult(new { error = "failed to create the member profile" })
+                {
+                    StatusCode = 400
+                };
+                //return BadRequest("failed to create the member profile");
             }
 
             await _authService.UpdateUserLastActivityDateAsync(user.Id);
@@ -321,7 +327,7 @@ public class AuthController : ControllerBase
                     "EmailConfirmationTemplate.html"
                 );
 
-                await _emailSender.SendEmailAsync(user.Email!, "Confirm your email", emailHTML);
+                await _emailSender.SendEmailAsync(user.Email, "Confirm your email", emailHTML);
 
                 await _memberService.UpdateEmailConfirmationSendDate(Guid.Parse(userId));
 

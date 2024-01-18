@@ -68,10 +68,6 @@ builder
     .Services
     .Configure<DataProtectionTokenProviderOptions>(options =>
     {
-        if (builder.Environment.IsDevelopment())
-        {
-            options.TokenLifespan = TimeSpan.FromMinutes(2);
-        }
         options.TokenLifespan = TimeSpan.FromHours(3);
     });
 
@@ -159,8 +155,6 @@ builder
 
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
-
-// builder.ConfigureHostFiltering();
 
 var app = builder.Build();
 
