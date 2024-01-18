@@ -3,16 +3,20 @@ import {
   LoaderFunctionArgs,
   json,
 } from "@remix-run/cloudflare";
-import { Link, useLoaderData } from "@remix-run/react";
-import { postSignupEmail } from "~/utils/cookie.server.ts";
+import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+// import { postSignupEmail } from "~/utils/cookie.server.ts";
 import { resendConfirmationEmail } from "../resend-confirmation-email.server.ts";
-import { Toaster, toast } from "sonner";
-import { useEffect } from "react";
+
 import { MetaFunction } from "@remix-run/cloudflare";
-import { ActionResponse } from "./types.ts";
-import { useFetcherWithReset } from "~/hooks/useFetcherWithReset.ts";
-import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmail.tsx";
+// import { useFetcherWithReset } from "~/hooks/useFetcherWithReset.ts";
+import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
 import { resendEmailErrorResponse } from "types/resend-email-error.ts";
+import {
+  getToast,
+  jsonWithError,
+  jsonWithSuccess,
+} from "~/utils/flash-session/flash-session.server.ts";
+import { postSignupEmail } from "~/utils/cookie.server.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup Success" }];
@@ -21,7 +25,7 @@ export const meta: MetaFunction = () => {
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
 
-  const signupEmail = String(formData.get("signupEmail"));
+  const email = String(formData.get("email"));
 
   const state = String(formData.get("state"));
 
@@ -29,96 +33,66 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return null;
   }
 
-  if (!signupEmail) {
-    return json({ error: "Email is missing" });
+  if (!email) {
+    return jsonWithError(null, "Email is missing", context);
   }
 
-  const resendEmailResponse = await resendConfirmationEmail(
-    context,
-    signupEmail,
-  );
+  const resendEmailResponse = await resendConfirmationEmail(context, email);
 
   if (!resendEmailResponse.ok) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return json(
-      { success: false, error: serverError.error },
-      {
-        headers: {
-          "Set-Cookie": await postSignupEmail.serialize("", {
-            maxAge: 1,
-          }),
-        },
+    return jsonWithError(null, serverError.error, context, {
+      headers: {
+        "Set-Cookie": await postSignupEmail.serialize("", {
+          maxAge: 1,
+        }),
       },
-    );
+    });
   }
-  const serverSuccessMessage = await resendEmailResponse.json();
-  return json({ success: true, serverSuccessMessage });
+  const serverSuccessMessage: string = await resendEmailResponse.json();
+
+  return jsonWithSuccess(null, serverSuccessMessage, context);
 }
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
 
-  return json({ postSignupCookie: cookie });
+  const { toast, headers } = await getToast(request, context);
+
+  return json({ toast, postSignUpCookie: cookie }, { headers });
 }
 
 export default function SignupSuccess() {
-  const { postSignupCookie } = useLoaderData<typeof loader>();
+  const { postSignUpCookie } = useLoaderData<typeof loader>();
 
-  const signupEmail: string = postSignupCookie.email || "";
+  const email: string = postSignUpCookie.email || "";
 
-  const fetcher = useFetcherWithReset<typeof action>();
-  const actionResponse = fetcher.data as ActionResponse | undefined;
+  const emailMissing = email ? false : true;
+
+  const fetcher = useFetcher();
 
   const submitting = fetcher.state === "submitting";
 
-  useEffect(() => {
-    console.log("in use effect");
-    if (actionResponse) {
-      if (actionResponse?.success) {
-        toast.success(actionResponse.serverSuccessMessage, {
-          duration: 15000,
-          position: "top-center",
-        });
-      } else if (!actionResponse?.success) {
-        toast.error(actionResponse.error, {
-          duration: 15000,
-          position: "top-center",
-        });
-      }
-      fetcher.reset();
-    }
-  }, [actionResponse, fetcher.reset]);
-
   return (
-    <main className="flex h-screen w-full  items-center justify-center bg-[#ffffff]">
-      <Toaster
-        closeButton
-        position="top-center"
-        toastOptions={{
-          unstyled: true,
-
-          classNames: {
-            toast:
-              "bg-white border border-gray-50 shadow-md w-[350px] rounded-md p-4 flex justify-center items-center ",
-            title: "text-gray-700 ml-3",
-          },
-        }}
-      />
-      <div className="mx-auto flex w-[350px] flex-col gap-2 space-y-6 rounded-md border border-gray-800/40 p-10 md:w-[400px]">
+    <main className="flex h-screen w-full  items-center justify-center bg-gray-100">
+      <div className="mx-auto flex w-[350px] flex-col gap-2 space-y-6 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-10 shadow-md md:w-[400px]">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Account Created!</h1>
-          <p className="text-gray-800 dark:text-gray-400">
+          <p className="text-gray-600 ">
             Please check your email to confirm your account before signing in.
           </p>
         </div>
         <div className="space-y-4">
           <fetcher.Form method="post">
-            <input type="hidden" name="signupEmail" value={signupEmail}></input>
+            <input type="hidden" name="email" value={email}></input>
             <input type="hidden" name="state" value={fetcher.state}></input>
-            <ResendConfirmationEmailBtn submitting={submitting} />
+            <ResendConfirmationEmailBtn
+              submitting={submitting}
+              emailMissing={emailMissing}
+            />
           </fetcher.Form>
 
           <Link

@@ -1,11 +1,3 @@
-interface ActionSuccessReponse {
-  success: true;
-  serverSuccessMessage: string;
+export interface resendEmailSuccessResponse {
+  successMessage: string;
 }
-
-interface ActionErrorResponse {
-  success: false;
-  error: string;
-}
-
-export type ActionResponse = ActionSuccessReponse | ActionErrorResponse;

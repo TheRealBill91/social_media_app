@@ -1,4 +1,4 @@
-export function transformErrors(
+export function transformSignupErrors(
   serverErrors: Record<string, string[]>,
 ): Record<string, string[]> {
   const PasswordErrorMessage =

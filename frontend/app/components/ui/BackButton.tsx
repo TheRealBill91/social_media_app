@@ -6,16 +6,14 @@ export function BackButton({ navTo, twStyles }: BackButtonProps) {
   const extractedNavName = navTo.slice(1);
   const navName = extractedNavName.length > 0 ? extractedNavName : "home";
   return (
-    <Link
-      to={navTo}
-      className={tw`${twStyles} rounded-lg focus:ring focus:ring-gray-800/80 focus:ring-offset-2`}
-    >
-      <button
-        type="button"
-        className=" rounded-lg border border-solid border-gray-800 px-3 py-1 text-gray-700  dark:border-slate-100 dark:text-slate-100 dark:hover:border-slate-50 dark:hover:text-slate-50"
+    <>
+      <Link
+        to={navTo}
+        className={tw`${twStyles} rounded-lg bg-gray-700 px-4 py-2 text-gray-100 outline-none hover:bg-gray-700/90 focus:ring focus:ring-gray-800/80 focus:ring-offset-2 `}
       >
+        {" "}
         Back to {navName}
-      </button>
-    </Link>
+      </Link>
+    </>
   );
 }

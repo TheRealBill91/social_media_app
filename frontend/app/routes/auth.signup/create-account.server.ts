@@ -9,7 +9,9 @@ export async function createAccount(
   password: string,
   passwordConfirmation: string,
 ) {
-  const signUpResponse = await fetch(`${context.env.API_URL}/api/auth/signup`, {
+  console.log(context.env.API_URL);
+
+  const signUpResponse = await fetch(`https://localhost/api/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -21,6 +23,8 @@ export async function createAccount(
       passwordConfirmation,
     }),
   });
+
+  console.log("response" + signUpResponse);
 
   return signUpResponse;
 }

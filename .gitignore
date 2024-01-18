@@ -430,5 +430,7 @@ node_modules
 /public/build
 .dev.vars
 /frontend/.dev.vars
+/frontend/.wrangler
+.wrangler
 
 

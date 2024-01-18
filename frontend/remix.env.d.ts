@@ -7,6 +7,8 @@ import type { AppLoadContext as OriginalAppLoadContext } from "@remix-run/server
 declare module "@remix-run/server-runtime" {
   export interface AppLoadContext extends OriginalAppLoadContext {
     env: {
+      ENVIRONMENT: string;
+      COOKIE_SECRET: string;
       API_URL: string;
     };
   }

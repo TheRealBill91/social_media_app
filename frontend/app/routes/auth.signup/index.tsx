@@ -1,5 +1,5 @@
 import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { signUpSchema } from "zod/signup-schema.tsx";
+import { signUpSchema } from "~/routes/auth.signup/signup-schema.tsx";
 import { Submission, conform, useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
 import {
@@ -17,7 +17,7 @@ import {
   default as EyeNone,
 } from "~/components/icons/icon.tsx";
 import { createAccount } from "./create-account.server.ts";
-import { transformErrors } from "./transform-errors.server.ts";
+import { transformSignupErrors } from "./transform-signup-errors.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
 
 export const meta: MetaFunction = () => {
@@ -50,10 +50,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
     password,
     passwordConfirmation,
   );
+
   if (!signUpResponse.ok) {
     const serverErrors: Record<string, string[]> = await signUpResponse.json();
 
-    const transformedErrors = transformErrors(serverErrors);
+    const transformedErrors = transformSignupErrors(serverErrors);
 
     // Create an object that matches the SubmissionResult type
     const submissionResult: Submission = {
@@ -125,13 +126,13 @@ export default function Signup() {
  */
 
   return (
-    <main className="flex min-h-screen flex-1 flex-col items-center   gap-10 bg-[#ffffff] px-8 py-10  md:p-12 dark:bg-gray-800">
+    <main className="flex min-h-screen flex-1 flex-col items-center   gap-12 bg-[#ffffff] px-8 py-10  md:p-12 ">
       <BackButton navTo={navTo} twStyles="self-start" />
       <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] p-6 sm:max-w-md md:px-10">
-        <h1 className="my-3 text-center text-[1.7rem] font-bold capitalize text-gray-700 dark:text-slate-100 ">
+        <h1 className="mt-3 text-center text-[2rem] font-bold capitalize text-gray-700  ">
           sign up
         </h1>
-        <span className="my-4 self-center italic text-gray-700">
+        <span className="my-2 self-center text-[1.1rem] italic text-gray-600">
           All fields are required
         </span>
         <div className=" flex  flex-col items-center">
@@ -171,7 +172,7 @@ export default function Signup() {
                     fields.firstName.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
                   id={fields.firstName.errorId}
                 >
                   {fields.firstName.errors}
@@ -204,7 +205,7 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.lastName.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
                   id={fields.lastName.errorId}
                 >
                   {fields.lastName.errors}
@@ -237,7 +238,7 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.username.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
                   id={fields.username.errorId}
                 >
                   {fields.username.errors}
@@ -270,7 +271,7 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.email.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
                   id={fields.email.errorId}
                 >
                   {fields.email.errors}
@@ -330,7 +331,7 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
                   id={fields.password.errorId}
                 >
                   {fields.password.errors}
@@ -396,7 +397,7 @@ export default function Signup() {
                     fields.passwordConfirmation.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out dark:text-slate-100 dark:underline dark:decoration-red-700 dark:underline-offset-[5px]`}
+                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
                   id={fields.passwordConfirmation.errorId}
                 >
                   {fields.passwordConfirmation.errors}

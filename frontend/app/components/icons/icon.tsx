@@ -11,6 +11,7 @@ export default function Icon({ icon, ...props}: SVGProps<SVGSVGElement> & { icon
 }
 
 export const iconNames = [
+  "check-circle-outline",
   "check",
   "eye-none",
   "eye-open",

@@ -1,6 +1,5 @@
 import { default as TimerSandEmpty } from "~/components/icons/icon.tsx";
-import { useFetcherWithReset } from "~/hooks/useFetcherWithReset";
-import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmail";
+import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
@@ -10,10 +9,11 @@ import {
 import { resendConfirmationEmail } from "../resend-confirmation-email.server";
 import { resendEmailErrorResponse } from "types/resend-email-error";
 import { postSignupEmail } from "~/utils/cookie.server";
-import { useLoaderData } from "@remix-run/react";
-import { ActionResponse } from "../auth.signup_.success/types";
-import { useEffect } from "react";
-import { toast } from "sonner";
+import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  jsonWithError,
+  jsonWithSuccess,
+} from "~/utils/flash-session/flash-session.server";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Email Confirmation Expired" }];
@@ -31,7 +31,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   if (!email) {
-    return json({ error: "Email is missing" });
+    return jsonWithError(null, "Email is missing", context);
   }
 
   const resendEmailResponse = await resendConfirmationEmail(context, email);
@@ -40,20 +40,17 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return json(
-      { success: false, error: serverError.error },
-      {
-        headers: {
-          "Set-Cookie": await postSignupEmail.serialize("", {
-            maxAge: 1,
-          }),
-        },
+    return jsonWithError(null, serverError.error, context, {
+      headers: {
+        "Set-Cookie": await postSignupEmail.serialize("", {
+          maxAge: 1,
+        }),
       },
-    );
+    });
   }
 
-  const serverSuccessMessage = await resendEmailResponse.json();
-  return json({ success: true, serverSuccessMessage });
+  const serverSuccessMessage: string = await resendEmailResponse.json();
+  return jsonWithSuccess(null, serverSuccessMessage, context);
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
@@ -66,36 +63,24 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function ConfirmExpired() {
   const { postSignupCookie } = useLoaderData<typeof loader>();
 
-  const signupEmail: string = postSignupCookie.email || "";
+  const email: string = postSignupCookie.email || "";
 
-  console.log(signupEmail);
+  const emailMissing = email ? false : true;
 
-  const fetcher = useFetcherWithReset<typeof action>();
-  const actionResponse = fetcher.data as ActionResponse | undefined;
+  const fetcher = useFetcher();
 
   const submitting = fetcher.state === "submitting";
 
-  useEffect(() => {
-    if (actionResponse) {
-      if (actionResponse?.success) {
-        toast.success(actionResponse.serverSuccessMessage, {
-          duration: 15000,
-          position: "top-center",
-        });
-      } else if (actionResponse?.error) {
-        toast.error(actionResponse.error);
-      }
-    }
-  }, [fetcher, actionResponse]);
-
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-4 ">
-      <article className="mx-auto flex w-full max-w-md flex-col gap-3 rounded-md border border-gray-200 bg-white p-3 py-6 ">
+    <main className="flex min-h-screen flex-col items-center justify-center bg-gray-100 p-4 px-6 ">
+      <article className="mx-auto flex w-full max-w-md flex-col gap-3 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-3  py-8 shadow-md ">
         <div>
-          <h3 className="text-center text-2xl font-bold">Email Confirmation</h3>
+          <h3 className="text-center text-2xl font-bold capitalize">
+            email confirmation
+          </h3>
         </div>
-        <div className="mx-3 space-y-4">
-          <div className="flex flex-col items-center space-y-2">
+        <div className="mx-3 space-y-4 px-2 md:px-4">
+          <div className="my-2 flex flex-col items-center space-y-4">
             <TimerSandEmpty
               icon="timer-sand-empty"
               className="my-3 size-10 text-gray-700"
@@ -105,15 +90,21 @@ export default function ConfirmExpired() {
               <em className="font-[600]">expired</em>.
             </p>
           </div>
-          <fetcher.Form method="post">
-            <input type="hidden" name="email" value={""} />
+          <fetcher.Form className="mt-2" method="post">
+            <input type="hidden" name="email" value={email} />
             <input type="hidden" name="state" value={fetcher.state} />
-            <ResendConfirmationEmailBtn submitting={submitting} />
+            <ResendConfirmationEmailBtn
+              submitting={submitting}
+              emailMissing={emailMissing}
+            />
           </fetcher.Form>
 
-          <button className="w-full rounded-md bg-gray-700 px-4 py-2 text-white">
+          <Link
+            to="/"
+            className="inline-block w-full rounded-md bg-gray-800 px-4 py-2 text-center text-white outline-0 transition-all hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
+          >
             Go Home
-          </button>
+          </Link>
         </div>
       </article>
     </main>

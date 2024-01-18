@@ -8,7 +8,7 @@ export async function confirmEmail(
   const confirmEmailResponse = await fetch(
     `${context.env.API_URL}/api/auth/confirm-email`,
     {
-      method: "GET",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ userId, code }),
     },

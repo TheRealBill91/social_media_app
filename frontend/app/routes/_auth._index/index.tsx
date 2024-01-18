@@ -6,16 +6,19 @@ export const meta: MetaFunction = () => [{ title: "Disengage" }];
 export default function Index() {
   return (
     <>
-      <main className=" flex min-h-screen flex-col items-center gap-4 ">
-        <h2 className="mt-10 text-lg ">Non auth landing page!</h2>
-        <div className=" flex   gap-6">
+      <main className="flex min-h-screen flex-col items-center justify-center gap-5 ">
+        <h2 className="mt-6 text-xl ">Non auth landing page!</h2>
+        <div className=" flex gap-6">
           <Link
-            className=" rounded-md bg-slate-200 p-3 capitalize"
+            className="rounded-md bg-gray-700 px-4 py-2 text-lg font-medium capitalize text-white outline-none hover:bg-gray-700/90  focus:ring focus:ring-slate-600 focus:ring-offset-2"
             to="/auth/signup"
           >
             sign up
           </Link>
-          <Link className="rounded-md bg-slate-200 p-3 capitalize" to="signin">
+          <Link
+            className="rounded-md bg-gray-700 px-4 py-2 text-lg font-medium capitalize text-white outline-none hover:bg-gray-700/90 focus:ring focus:ring-gray-600 focus:ring-offset-2"
+            to="signin"
+          >
             sign in
           </Link>
         </div>
