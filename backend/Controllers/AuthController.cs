@@ -91,15 +91,26 @@ public class AuthController : ControllerBase
         }
         else if (result.IsLockedOut)
         {
-            return BadRequest("Too many failed signin attempts, please try in 30 minutes");
+            return new JsonResult(
+                new { error = "Too many failed signin attempts, please try in 30 minutes" }
+            )
+            {
+                StatusCode = 400
+            };
         }
         else if (result.IsNotAllowed)
         {
-            return BadRequest("Please confirm your email to sign in");
+            return new JsonResult(new { error = "Please confirm your email to sign in" })
+            {
+                StatusCode = 400
+            };
         }
         else
         {
-            return BadRequest("Invalid email and/or password");
+            return new JsonResult(new { error = "Invalid email and/or password" })
+            {
+                StatusCode = 400
+            };
         }
     }
 
@@ -240,15 +251,14 @@ public class AuthController : ControllerBase
             if (!memberProfileCreation.Success)
             {
                 // should not get here
-                return new JsonResult(new { error = "failed to create the member profile" })
+                return new JsonResult(new { error = "Failed to create the member profile." })
                 {
                     StatusCode = 400
                 };
-                //return BadRequest("failed to create the member profile");
             }
 
             await _authService.UpdateUserLastActivityDateAsync(user.Id);
-            return Ok("Email confirmed successfully");
+            return Ok();
         }
         else
         {
@@ -336,7 +346,12 @@ public class AuthController : ControllerBase
                     Guid.Parse(userId)
                 );
 
-                return Ok("Successfully resent email confirmation");
+                return new JsonResult(
+                    new { successMessage = "Successfully resent email confirmation" }
+                )
+                {
+                    StatusCode = 200
+                };
             }
             else
             {
