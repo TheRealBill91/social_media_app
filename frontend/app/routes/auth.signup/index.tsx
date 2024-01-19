@@ -1,5 +1,5 @@
 import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { signUpSchema } from "~/routes/auth.signup/signup-schema.tsx";
+import { signUpSchema } from "~/routes/auth.signup/signup-schema.ts";
 import { Submission, conform, useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
 import {
@@ -35,9 +35,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const state = String(formData.get("state"));
 
-  if (state === "submitting") {
-    return null;
-  }
+  if (state === "submitting") return null;
 
   const submission = parse(formData, { schema: signUpSchema });
 
@@ -56,7 +54,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
     const transformedErrors = transformSignupErrors(serverErrors);
 
-    // Create an object that matches the SubmissionResult type
+    //  Create an object that matches the SubmissionResult type
     const submissionResult: Submission = {
       intent: submission.intent,
       payload: submission.payload,
@@ -114,28 +112,24 @@ export default function Signup() {
     lastSubmission,
     shouldValidate: "onInput",
 
-    onValidate({ formData }) {
+    /*  onValidate({ formData }) {
       return parse(formData, { schema: signUpSchema });
-    },
+    }, */
   });
 
   const navTo = "/";
 
-  /*   const navigate = useNavigate();
-  const location = useLocation();
- */
-
   return (
-    <main className="flex min-h-screen flex-1 flex-col items-center   gap-12 bg-[#ffffff] px-8 py-10  md:p-12 ">
+    <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-10 md:p-12">
       <BackButton navTo={navTo} twStyles="self-start" />
       <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] p-6 sm:max-w-md md:px-10">
-        <h1 className="mt-3 text-center text-[2rem] font-bold capitalize text-gray-700  ">
+        <h1 className="mt-3 text-center text-[2rem] font-bold capitalize text-gray-700">
           sign up
         </h1>
         <span className="my-2 self-center text-[1.1rem] italic text-gray-600">
           All fields are required
         </span>
-        <div className=" flex  flex-col items-center">
+        <div className="flex flex-col items-center">
           <Form
             className="flex w-full flex-col gap-4"
             replace
@@ -179,7 +173,7 @@ export default function Signup() {
                 </span>
               </div>
 
-              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
                 <div className="relative w-full ">
                   <input
                     className={tw`${
@@ -289,13 +283,13 @@ export default function Signup() {
                     {...conform.input(fields.password, {
                       type: passwordInputType,
                     })}
-                    placeholder="email@example.com"
+                    placeholder="password"
                   />
                   {showPassword ? (
                     <button
                       onClick={() => togglePasswordReveal("password")}
                       type="button"
-                      title="password reveal icon"
+                      title="hide password icon"
                       className="absolute right-4 top-4"
                     >
                       <EyeNone
@@ -307,7 +301,7 @@ export default function Signup() {
                     <button
                       onClick={() => togglePasswordReveal("password")}
                       type="button"
-                      title="password reveal icon"
+                      title="reveal password icon"
                       className="absolute right-4 top-4"
                     >
                       <EyeOpen

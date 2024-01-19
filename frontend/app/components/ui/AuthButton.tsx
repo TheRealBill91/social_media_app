@@ -1,4 +1,4 @@
-import { tw } from "../../utils/tw-identity-helper";
+import { tw } from "~/utils/tw-identity-helper";
 import { AuthButtonProps } from "../../../types/auth-button-props";
 
 import { default as Spinner } from "../icons/icon.tsx";
@@ -14,7 +14,7 @@ export function AuthButton({ name, submitting }: AuthButtonProps) {
       {submitting ? (
         <Spinner
           icon="spinner"
-          className="mr-3 h-5 w-5 animate-spin text-white"
+          className="mr-3 h-5 w-5 animate-spin fill-transparent text-white"
         />
       ) : null}
     </button>

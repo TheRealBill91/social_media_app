@@ -4,11 +4,9 @@ import {
   json,
 } from "@remix-run/cloudflare";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
-// import { postSignupEmail } from "~/utils/cookie.server.ts";
-import { resendConfirmationEmail } from "../resend-confirmation-email.server.ts";
+import { resendConfirmationEmail } from "~/routes/resend-confirmation-email.server.ts";
 
 import { MetaFunction } from "@remix-run/cloudflare";
-// import { useFetcherWithReset } from "~/hooks/useFetcherWithReset.ts";
 import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
 import { resendEmailErrorResponse } from "types/resend-email-error.ts";
 import {
@@ -17,6 +15,7 @@ import {
   jsonWithSuccess,
 } from "~/utils/flash-session/flash-session.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
+import { resendEmailSuccessResponse } from "./types.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup Success" }];
@@ -43,7 +42,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return jsonWithError(null, serverError.error, context, {
+    return jsonWithError(null, serverError.errorMessage, context, {
       headers: {
         "Set-Cookie": await postSignupEmail.serialize("", {
           maxAge: 1,
@@ -51,9 +50,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
       },
     });
   }
-  const serverSuccessMessage: string = await resendEmailResponse.json();
+  const serverSuccessResponse: resendEmailSuccessResponse =
+    await resendEmailResponse.json();
 
-  return jsonWithSuccess(null, serverSuccessMessage, context);
+  return jsonWithSuccess(null, serverSuccessResponse.successMessage, context);
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {

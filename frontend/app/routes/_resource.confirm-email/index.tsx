@@ -5,15 +5,12 @@ import { redirectWithErrorToast } from "~/utils/flash-session/flash-session.serv
 import { EmailConfirmationResponse } from "./types.ts";
 
 export async function loader({ request, context }: ActionFunctionArgs) {
-  console.log("request URL: " + request.url);
   const emailCallbackURL = new URL(request.url).searchParams;
 
   const userId = String(emailCallbackURL.get("userId"));
-  console.log("userId: " + userId);
 
   // this is the token for the email callback URL
   const code = String(emailCallbackURL.get("code"));
-  console.log("code: " + code);
 
   const emailConfirmationResponse = await confirmEmail(context, userId, code);
 
@@ -42,4 +39,6 @@ export async function loader({ request, context }: ActionFunctionArgs) {
       });
     }
   }
+
+  throw redirect("/auth/confirm-success");
 }

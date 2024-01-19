@@ -5,7 +5,7 @@ export async function resendConfirmationEmail(
   email: string,
 ) {
   const resendEmailResponse = await fetch(
-    `${context.env.API_URL}/api/auth/resend-email-confirmation`,
+    `${context.env.API_URL}/api/auth/resend-confirmation-email`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
