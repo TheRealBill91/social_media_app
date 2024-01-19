@@ -11,14 +11,12 @@ import {
 import { BackButton } from "~/components/ui/BackButton.tsx";
 import { tw } from "~/utils/tw-identity-helper.ts";
 import { AuthButton } from "~/components/ui/AuthButton.tsx";
-import { useId, useState } from "react";
-import {
-  default as EyeOpen,
-  default as EyeNone,
-} from "~/components/icons/icon.tsx";
+import { useId } from "react";
 import { createAccount } from "./create-account.server.ts";
 import { transformSignupErrors } from "./transform-signup-errors.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
+import { usePasswordReveal } from "~/utils/usePasswordReveal.ts";
+import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn.tsx";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup" }];
@@ -84,20 +82,22 @@ export default function Signup() {
 
   const submitting = navigation.state === "submitting";
 
-  const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirmation, setShowPasswordConfirmation] =
-    useState(false);
+  const passwordReveal = usePasswordReveal();
 
-  const togglePasswordReveal = (passwordType: string) => {
-    if (passwordType === "password") {
-      setShowPassword(!showPassword);
-    } else if (passwordType === "passwordConfirmation") {
-      setShowPasswordConfirmation(!showPasswordConfirmation);
-    }
-  };
+  // const [showPassword, setShowPassword] = useState(false);
+  // const [showPasswordConfirmation, setShowPasswordConfirmation] =
+  //   useState(false);
 
-  const passwordInputType = showPassword ? "text" : "password";
-  const passwordConfirmationInputType = showPasswordConfirmation
+  // const togglePasswordReveal = (passwordType: string) => {
+  //   if (passwordType === "password") {
+  //     setShowPassword(!showPassword);
+  //   } else if (passwordType === "passwordConfirmation") {
+  //     setShowPasswordConfirmation(!showPasswordConfirmation);
+  //   }
+  // };
+
+  const passwordInputType = passwordReveal.showPassword ? "text" : "password";
+  const passwordConfirmationInputType = passwordReveal.showPasswordConfirmation
     ? "text"
     : "password";
 
@@ -112,9 +112,9 @@ export default function Signup() {
     lastSubmission,
     shouldValidate: "onInput",
 
-    /*  onValidate({ formData }) {
+    onValidate({ formData }) {
       return parse(formData, { schema: signUpSchema });
-    }, */
+    },
   });
 
   const navTo = "/";
@@ -285,31 +285,11 @@ export default function Signup() {
                     })}
                     placeholder="password"
                   />
-                  {showPassword ? (
-                    <button
-                      onClick={() => togglePasswordReveal("password")}
-                      type="button"
-                      title="hide password icon"
-                      className="absolute right-4 top-4"
-                    >
-                      <EyeNone
-                        icon="eye-none"
-                        className="size-[22px] text-gray-800"
-                      />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => togglePasswordReveal("password")}
-                      type="button"
-                      title="reveal password icon"
-                      className="absolute right-4 top-4"
-                    >
-                      <EyeOpen
-                        icon="eye-open"
-                        className="size-[22px] text-gray-800"
-                      />
-                    </button>
-                  )}
+                  <PasswordRevealBtn
+                    togglePassword={passwordReveal.togglePassword}
+                    showPassword={passwordReveal.showPassword}
+                  />
+
                   <label
                     className={tw`${
                       fields.password.errors?.length
@@ -345,35 +325,14 @@ export default function Signup() {
                     })}
                     placeholder="email@example.com"
                   />
-                  {showPasswordConfirmation ? (
-                    <button
-                      onClick={() =>
-                        togglePasswordReveal("passwordConfirmation")
-                      }
-                      type="button"
-                      title="password reveal icon"
-                      className="absolute right-4 top-4"
-                    >
-                      <EyeNone
-                        icon="eye-none"
-                        className="size-[22px] text-gray-800"
-                      />
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() =>
-                        togglePasswordReveal("passwordConfirmation")
-                      }
-                      type="button"
-                      title="password reveal icon"
-                      className="absolute right-4 top-4"
-                    >
-                      <EyeOpen
-                        icon="eye-open"
-                        className="size-[22px] text-gray-800"
-                      />
-                    </button>
-                  )}
+                  <PasswordRevealBtn
+                    togglePasswordConfirmation={
+                      passwordReveal.togglePasswordConfirmation
+                    }
+                    showPasswordConfirmation={
+                      passwordReveal.showPasswordConfirmation
+                    }
+                  />
                   <label
                     className={tw`${
                       fields.passwordConfirmation.errors?.length
