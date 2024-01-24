@@ -59,7 +59,7 @@ public class AuthController : ControllerBase
     {
         if (User.Identity!.IsAuthenticated)
         {
-            return BadRequest("User is already authenticated");
+            return BadRequest(new { ErrorMessage = "User is already authenticated" });
         }
 
         // Find the user by email
@@ -72,7 +72,7 @@ public class AuthController : ControllerBase
 
         if (user == null || user.UserName == null)
         {
-            return BadRequest("Invalid email and/or password");
+            return BadRequest(new { ErrorMessage = "Invalid email and/or password" });
         }
 
         bool rememberMe = form.RememberMe == true;
@@ -87,30 +87,21 @@ public class AuthController : ControllerBase
         if (result.Succeeded)
         {
             await _authService.UpdateUserLastActivityDateAsync(user.Id);
-            return Ok();
+            return Ok(new { UserId = user.Id });
         }
         else if (result.IsLockedOut)
         {
-            return new JsonResult(
-                new { error = "Too many failed signin attempts, please try in 30 minutes" }
-            )
-            {
-                StatusCode = 400
-            };
+            return BadRequest(
+                new { ErrorMessage = "Too many failed signin attempts, please try in 30 minutes" }
+            );
         }
         else if (result.IsNotAllowed)
         {
-            return new JsonResult(new { error = "Please confirm your email to sign in" })
-            {
-                StatusCode = 400
-            };
+            return BadRequest(new { ErrorMessage = "Please confirm your email to sign in" });
         }
         else
         {
-            return new JsonResult(new { error = "Invalid email and/or password" })
-            {
-                StatusCode = 400
-            };
+            return BadRequest(new { ErrorMessage = "Invalid email and/or password" });
         }
     }
 
@@ -233,7 +224,7 @@ public class AuthController : ControllerBase
         var user = await _userManager.FindByIdAsync(emailFields.UserId.ToString());
         if (user == null)
         {
-            return new JsonResult(new { error = "User not found" }) { StatusCode = 404 };
+            return NotFound(new { ErrorMessage = "User not found" });
         }
 
         var decodedCode = WebEncoders.Base64UrlDecode(emailFields.Code);
@@ -251,10 +242,7 @@ public class AuthController : ControllerBase
             if (!memberProfileCreation.Success)
             {
                 // should not get here
-                return new JsonResult(new { error = "Failed to create the member profile." })
-                {
-                    StatusCode = 400
-                };
+                return BadRequest(new { ErrorMessage = "Failed to create the member profile." });
             }
 
             await _authService.UpdateUserLastActivityDateAsync(user.Id);
@@ -271,14 +259,14 @@ public class AuthController : ControllerBase
             {
                 var errorResponse = new EmailConfirmationResponse
                 {
-                    Error = "Email Confirmation has expired",
+                    ErrorMessage = "Email Confirmation has expired",
                     Email = user.Email!
                 };
                 return BadRequest(errorResponse);
             }
             else
             {
-                return BadRequest("Error confirming email confirmation");
+                return BadRequest(new { ErrorMessage = "Error confirming email confirmation" });
             }
         }
     }

@@ -12,5 +12,5 @@ public class SignInDTO
     [DataType(DataType.Password)]
     public required string Password { get; set; }
 
-    public Boolean? RememberMe { get; set; }
+    public bool? RememberMe { get; set; }
 }

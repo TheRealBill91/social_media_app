@@ -33,7 +33,10 @@ builder
             Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestMethod
             | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestPath
             | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestProtocol
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseStatusCode;
+            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestHeaders
+            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseStatusCode
+            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseHeaders
+            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseBody;
     });
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(connection);
@@ -152,8 +155,24 @@ builder
         options.SlidingExpiration = true;
 
         options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.Name = "auth";
+        options.SlidingExpiration = true;
 
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        if (builder.Environment.IsProduction())
+        {
+            options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        }
+        else if (builder.Environment.IsDevelopment())
+        {
+            options.Cookie.SecurePolicy = CookieSecurePolicy.None;
+        }
+    });
+
+builder
+    .Services
+    .Configure<PasswordHasherOptions>(option =>
+    {
+        option.IterationCount = 210000;
     });
 
 var app = builder.Build();
@@ -184,6 +203,7 @@ else if (app.Environment.IsProduction())
 
 app.UseRateLimiter();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
