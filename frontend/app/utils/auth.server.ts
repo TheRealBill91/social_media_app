@@ -1,22 +1,32 @@
-import { redirect } from "@remix-run/cloudflare";
-import { postSignupEmail } from "./cookie.server";
+import { AppLoadContext, redirect } from "@remix-run/cloudflare";
+import { createCloudflareCookie } from "./cookie.server";
 
-export async function getUserId(request: Request) {
+export async function getUserId(request: Request, context: AppLoadContext) {
+  const userIdCookie = createCloudflareCookie(
+    "user-id",
+    true,
+    "lax",
+    context.env.ENVIRONMENT === "production",
+    [context.env.COOKIE_SECRET],
+  );
+
   const cookieHeader = request.headers.get("Cookie");
-  const userIdCookie: string = await postSignupEmail.parse(cookieHeader);
+  const userId: string = await userIdCookie.parse(cookieHeader);
 
   if (!userIdCookie) {
     console.log("eventually will throw logout here");
   }
 
   console.log("userId: " + userIdCookie);
-  const userId = userIdCookie;
 
   return userId;
 }
 
-export async function requireAnonymous(request: Request) {
-  const userId = await getUserId(request);
+export async function requireAnonymous(
+  request: Request,
+  context: AppLoadContext,
+) {
+  const userId = await getUserId(request, context);
 
   if (userId) {
     throw redirect("/");

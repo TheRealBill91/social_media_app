@@ -86,7 +86,7 @@ export default function App() {
 
             classNames: {
               toast:
-                "bg-white border border-gray-50 shadow-md w-[350px] rounded-md p-4 flex justify-center items-center ",
+                "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
               title: "text-gray-700 ml-3",
             },
           }}

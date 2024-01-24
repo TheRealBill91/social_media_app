@@ -4,6 +4,7 @@ import { createCookie } from "@remix-run/cloudflare";
 export const postSignupEmail = createCookie("post-signup-email", {
   maxAge: 600, // 10 minutes in seconds
   httpOnly: true,
+  path: "/auth",
 });
 
 // export const emailConfirmationFailuree = createCloudflareCookie(
@@ -17,6 +18,7 @@ export const emailConfirmationFailure = createCookie(
   {
     maxAge: 86_400, // 7 days in seconds
     httpOnly: true,
+    path: "/auth",
   },
 );
 

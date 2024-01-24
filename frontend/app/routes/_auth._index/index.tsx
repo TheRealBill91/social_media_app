@@ -26,7 +26,7 @@ export default function Index() {
             className="rounded-md bg-gray-700 px-4 py-2 text-lg font-medium capitalize text-white outline-none hover:bg-gray-700/90 focus:ring focus:ring-gray-600 focus:ring-offset-2"
             to="/auth/login"
           >
-            sign in
+            login
           </Link>
         </div>
       </main>

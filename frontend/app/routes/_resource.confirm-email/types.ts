@@ -1,10 +1,10 @@
 interface MissingUserID {
-  error: string;
+  ErrorMessage: string;
 }
 
 interface EmailConfirmationExpired {
-  error: string;
-  email: string;
+  ErrorMessage: string;
+  Email: string;
 }
 
 export type EmailConfirmationResponse =

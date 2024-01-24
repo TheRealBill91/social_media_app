@@ -22,15 +22,15 @@ export async function loader({ request, context }: ActionFunctionArgs) {
       await emailConfirmationResponse.json();
 
     // non expiration error
-    if (!("email" in emailConfirmationErrors)) {
+    if (!("Email" in emailConfirmationErrors)) {
       throw await redirectWithErrorToast(
         "/",
-        emailConfirmationErrors.error,
+        emailConfirmationErrors.ErrorMessage,
         context,
       );
       // expiration error
-    } else if ("email" in emailConfirmationErrors) {
-      cookie.email = emailConfirmationErrors.email;
+    } else if ("Email" in emailConfirmationErrors) {
+      cookie.email = emailConfirmationErrors.Email;
       throw redirect("/auth/confirm-expired", {
         status: 302,
         headers: {

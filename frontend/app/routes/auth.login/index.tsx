@@ -25,8 +25,8 @@ export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Log in" }];
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  await requireAnonymous(request);
+export async function loader({ request, context }: LoaderFunctionArgs) {
+  await requireAnonymous(request, context);
   return json({});
 }
 
@@ -71,9 +71,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const userIdCookie = createCloudflareCookie(
     "user-id",
-    false,
+    true,
     "lax",
     context.env.ENVIRONMENT === "production",
+    [context.env.COOKIE_SECRET],
   );
 
   const userIdCookieHeader = await userIdCookie.serialize(userId);
@@ -96,7 +97,7 @@ export default function Login() {
 
   const passwordInputType = passwordReveal.showPassword ? "text" : "password";
 
-  const signUpButtonName = submitting ? "Signing up..." : "Sign up";
+  const loginButtonName = submitting ? "Authenticating..." : "Login";
 
   const actionData = useActionData<typeof action>();
 
@@ -236,7 +237,7 @@ export default function Login() {
                 className="size-5"
               />
               <div className="flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
-                <AuthButton name={signUpButtonName} submitting={submitting} />
+                <AuthButton name={loginButtonName} submitting={submitting} />
               </div>
             </Form>
           </div>

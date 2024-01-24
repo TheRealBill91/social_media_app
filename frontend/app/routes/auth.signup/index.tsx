@@ -84,18 +84,6 @@ export default function Signup() {
 
   const passwordReveal = usePasswordReveal();
 
-  // const [showPassword, setShowPassword] = useState(false);
-  // const [showPasswordConfirmation, setShowPasswordConfirmation] =
-  //   useState(false);
-
-  // const togglePasswordReveal = (passwordType: string) => {
-  //   if (passwordType === "password") {
-  //     setShowPassword(!showPassword);
-  //   } else if (passwordType === "passwordConfirmation") {
-  //     setShowPasswordConfirmation(!showPasswordConfirmation);
-  //   }
-  // };
-
   const passwordInputType = passwordReveal.showPassword ? "text" : "password";
   const passwordConfirmationInputType = passwordReveal.showPasswordConfirmation
     ? "text"
