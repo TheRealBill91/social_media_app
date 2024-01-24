@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -302,7 +303,10 @@ public class AuthController : ControllerBase
             {
                 // will only be reached if user is allowed to manually input email to send new confirmation email
                 return new JsonResult(
-                    new { error = "Email is already verified. No new confirmation link sent." }
+                    new
+                    {
+                        ErrorMessage = "Email is already verified. No new confirmation link sent."
+                    }
                 )
                 {
                     StatusCode = 409
@@ -325,6 +329,11 @@ public class AuthController : ControllerBase
                     "EmailConfirmationTemplate.html"
                 );
 
+                if (user.Email == null)
+                {
+                    return BadRequest(new { ErrorMessage = "Email is missing" });
+                }
+
                 await _emailSender.SendEmailAsync(user.Email, "Confirm your email", emailHTML);
 
                 await _memberService.UpdateEmailConfirmationSendDate(Guid.Parse(userId));
@@ -334,17 +343,16 @@ public class AuthController : ControllerBase
                     Guid.Parse(userId)
                 );
 
-                return new JsonResult(
-                    new { successMessage = "Successfully resent email confirmation" }
-                )
-                {
-                    StatusCode = 200
-                };
+                return Ok(new { successMessage = "Successfully resent email confirmation" });
             }
             else
             {
+                Console.WriteLine("getting here?");
                 return new JsonResult(
-                    new { error = "Too many email confirmations sent today, try in 24 hours" }
+                    new
+                    {
+                        ErrorMessage = "Too many email confirmations sent today, try in 24 hours"
+                    }
                 )
                 {
                     StatusCode = 429
@@ -352,7 +360,7 @@ public class AuthController : ControllerBase
             }
         }
 
-        return NotFound("Issue sending email confirmation");
+        return NotFound(new { ErrorMessage = "Issue sending email confirmation" });
     }
 
     [EnableRateLimiting("signInSlidingWindow")]

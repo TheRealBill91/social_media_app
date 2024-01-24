@@ -64,6 +64,8 @@ builder
     {
         // Serializes enum's to string's
         options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
@@ -94,11 +96,7 @@ builder
         options.Lockout.MaxFailedAccessAttempts = 5;
         options.Lockout.AllowedForNewUsers = true;
 
-        // User settings
-        if (builder.Environment.IsProduction())
-        {
-            options.SignIn.RequireConfirmedEmail = true;
-        }
+        options.SignIn.RequireConfirmedEmail = true;
 
         options.User.RequireUniqueEmail = true;
 
