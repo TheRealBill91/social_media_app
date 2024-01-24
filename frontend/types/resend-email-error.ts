@@ -7,5 +7,5 @@ export interface resendEmailErrorResponse {
   /**
    * The error message when resending the email confirmation fails
    */
-  errorMessage: string;
+  ErrorMessage: string;
 }

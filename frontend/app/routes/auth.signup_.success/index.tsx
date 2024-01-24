@@ -42,7 +42,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return jsonWithError(null, serverError.errorMessage, context, {
+    return jsonWithError(null, serverError.ErrorMessage, context, {
       headers: {
         "Set-Cookie": await postSignupEmail.serialize("", {
           maxAge: 1,

@@ -47,6 +47,8 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  console.log(request.headers.get("Cookie"));
+
   const { toast, headers } = await getToast(request, context);
 
   return json({ toast }, { headers });

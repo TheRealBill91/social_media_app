@@ -3,9 +3,21 @@
  * when the user login fails
  */
 
-export interface loginErrorResponse {
+export interface LoginErrorResponse {
   /**
    * The error message when the user login fails
    */
-  errorMessage: string;
+  ErrorMessage: string;
+}
+
+/**
+ *  An object that contains the success string when
+ *  the user successfully logs in
+ */
+
+export interface LoginSuccessResponse {
+  /**
+   *  The user id for the user who just logged in
+   */
+  UserId: string;
 }

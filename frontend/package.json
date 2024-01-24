@@ -7,7 +7,7 @@
     "build": "remix build",
     "dev": "remix dev --manual -c \"npm run start\"",
     "lint": "eslint --ignore-path .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "start": "wrangler pages dev --compatibility-date=2023-06-21 ./public",
+    "start": "wrangler pages dev  --compatibility-date=2023-06-21 ./public -kv=SOCIAL_MEDIA_APP",
     "typecheck": "tsc",
     "gen-svg-sprite": "rmx svg-sprite assets/svg/icons app/components/icons",
     "prepare": "cd .. && husky install frontend/.husky"
@@ -22,11 +22,13 @@
     "@remix-run/cloudflare-pages": "^2.4.0",
     "@remix-run/css-bundle": "^2.4.0",
     "@remix-run/react": "^2.4.0",
+    "clsx": "^2.1.0",
     "isbot": "^3.6.8",
     "lucide-react": "^0.298.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "sonner": "^1.3.1"
+    "sonner": "^1.3.1",
+    "tailwind-merge": "^2.2.0"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20230518.0",

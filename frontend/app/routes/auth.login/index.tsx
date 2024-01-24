@@ -1,20 +1,34 @@
 import { useForm, conform } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
-import { ActionFunctionArgs, MetaFunction } from "@remix-run/cloudflare";
+import {
+  ActionFunctionArgs,
+  LoaderFunctionArgs,
+  MetaFunction,
+  json,
+} from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useId } from "react";
 import { BackButton } from "~/components/ui/BackButton";
 import { loginSchema } from "./login-schema.ts";
 import { tw } from "~/utils/tw-identity-helper";
 import { AuthButton } from "~/components/ui/AuthButton";
-import { AuthCheckbox } from "~/components/ui/AuthCheckBox.tsx";
+import { RememberMeCheckbox } from "~/components/ui/RememberMeCheckbox.tsx";
 import { login } from "./login.server.ts";
 import { usePasswordReveal } from "~/utils/usePasswordReveal.ts";
 import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn.tsx";
+import { LoginErrorResponse, LoginSuccessResponse } from "./types.ts";
+import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server.ts";
+import { createCloudflareCookie } from "~/utils/cookie.server.ts";
+import { requireAnonymous } from "~/utils/auth.server.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Log in" }];
 };
+
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireAnonymous(request);
+  return json({});
+}
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const formData = await request.formData();
@@ -23,11 +37,17 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const rememberMe = formData.get("rememberMe") as string | null;
 
   // Used in fetch request for logging in
-  const persistLogin: boolean = rememberMe === "yes";
+  const persistLogin: boolean = rememberMe === "on" ? true : false;
 
   const state = String(formData.get("state"));
 
   if (state === "submitting") return null;
+
+  const submission = parse(formData, { schema: loginSchema });
+
+  if (submission.intent !== "submit" || !submission.value) {
+    return json(submission);
+  }
 
   const loginResponse = await login(
     context,
@@ -37,10 +57,34 @@ export async function action({ request, context }: ActionFunctionArgs) {
   );
 
   if (!loginResponse.ok) {
-    //const loginError: loginErrorResponse = await loginResponse.json();
+    const loginError: LoginErrorResponse = await loginResponse.json();
+
+    return json(loginError);
   }
 
-  // const submission = parse(formData, { schema: loginSchema });
+  const authCookie = loginResponse.headers.getSetCookie().at(-1) as string;
+
+  console.log("----------------------");
+
+  const loginSuccess: LoginSuccessResponse = await loginResponse.json();
+  const userId = loginSuccess.UserId;
+
+  const userIdCookie = createCloudflareCookie(
+    "user-id",
+    false,
+    "lax",
+    context.env.ENVIRONMENT === "production",
+  );
+
+  const userIdCookieHeader = await userIdCookie.serialize(userId);
+
+  const loginCookieHeaders = new Headers();
+  loginCookieHeaders.append("Set-Cookie", authCookie);
+  loginCookieHeaders.append("Set-Cookie", userIdCookieHeader);
+
+  return redirectWithSuccessToast("/", "Successfully logged in", context, {
+    headers: loginCookieHeaders,
+  });
 }
 
 export default function Login() {
@@ -54,14 +98,20 @@ export default function Login() {
 
   const signUpButtonName = submitting ? "Signing up..." : "Sign up";
 
-  const lastSubmission = useActionData<typeof action>();
+  const actionData = useActionData<typeof action>();
+
+  const lastSubmission =
+    actionData && "intent" in actionData ? actionData : null;
+
+  const loginErrorMessage =
+    actionData && "ErrorMessage" in actionData ? actionData : null;
 
   const id = useId();
 
   const [form, fields] = useForm({
     id,
     lastSubmission,
-    shouldValidate: "onInput",
+    shouldValidate: "onBlur",
 
     onValidate({ formData }) {
       return parse(formData, { schema: loginSchema });
@@ -80,6 +130,15 @@ export default function Login() {
           <span className="my-2 self-center text-[1.1rem] italic text-gray-600">
             All fields are required
           </span>
+          {loginErrorMessage?.ErrorMessage ? (
+            <span
+              className={tw`${
+                loginErrorMessage.ErrorMessage ? "opacity-100" : "opacity-0"
+              } mt-3  self-center px-4 pl-1 text-[1rem] text-red-700 transition-opacity duration-300 ease-in-out`}
+            >
+              {loginErrorMessage.ErrorMessage}
+            </span>
+          ) : null}
           <div className="flex flex-col items-center">
             <Form
               className="flex w-full flex-col gap-4"
@@ -101,6 +160,7 @@ export default function Login() {
                         type: "text",
                       })}
                       placeholder="john"
+                      autoComplete="on"
                     />
                     <label
                       htmlFor={fields.userIdentifier.id}
@@ -168,7 +228,13 @@ export default function Login() {
                   </span>
                 </div>
               </fieldset>
-              <AuthCheckbox label={"Remember me?"} fields={fields} />
+              <RememberMeCheckbox
+                checkBoxProps={conform.input(fields.rememberMe, {
+                  type: "checkbox",
+                })}
+                fields={fields}
+                className="size-5"
+              />
               <div className="flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
                 <AuthButton name={signUpButtonName} submitting={submitting} />
               </div>

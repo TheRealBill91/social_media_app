@@ -18,9 +18,9 @@ export async function login(
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      userIdentifier,
+      emailOrUsername: userIdentifier,
       password,
-      persistLogin,
+      rememberMe: persistLogin,
     }),
   });
 
