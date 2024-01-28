@@ -6,7 +6,7 @@ import {
   MetaFunction,
   json,
 } from "@remix-run/cloudflare";
-import { resendConfirmationEmail } from "../resend-confirmation-email.server";
+import { resendConfirmationEmail } from "../../utils/resend-confirmation-email.server";
 import { resendEmailErrorResponse } from "types/resend-email-error";
 import { postSignupEmail } from "~/utils/cookie.server";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";

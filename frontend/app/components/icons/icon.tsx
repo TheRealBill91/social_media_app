@@ -15,6 +15,7 @@ export const iconNames = [
   "check",
   "eye-none",
   "eye-open",
+  "google",
   "spinner",
   "timer-sand-empty",
 ] as const;

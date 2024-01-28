@@ -1,10 +1,10 @@
-import { ActionFunctionArgs, redirect } from "@remix-run/cloudflare";
+import { LoaderFunctionArgs, redirect } from "@remix-run/cloudflare";
 import { confirmEmail } from "./confirm-email.server.ts";
 import { emailConfirmationFailure } from "~/utils/cookie.server";
 import { redirectWithErrorToast } from "~/utils/flash-session/flash-session.server.ts";
 import { EmailConfirmationResponse } from "./types.ts";
 
-export async function loader({ request, context }: ActionFunctionArgs) {
+export async function loader({ request, context }: LoaderFunctionArgs) {
   const emailCallbackURL = new URL(request.url).searchParams;
 
   const userId = String(emailCallbackURL.get("userId"));

@@ -22,6 +22,9 @@ export async function getUserId(request: Request, context: AppLoadContext) {
   return userId;
 }
 
+/**
+ * A route that requires user to be unauthenticated
+ */
 export async function requireAnonymous(
   request: Request,
   context: AppLoadContext,
@@ -30,5 +33,16 @@ export async function requireAnonymous(
 
   if (userId) {
     throw redirect("/");
+  }
+}
+
+export async function redirectLoggedInUser(
+  request: Request,
+  context: AppLoadContext,
+) {
+  const userId = await getUserId(request, context);
+
+  if (userId) {
+    throw redirect("/home");
   }
 }

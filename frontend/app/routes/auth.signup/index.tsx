@@ -98,7 +98,7 @@ export default function Signup() {
   const [form, fields] = useForm({
     id,
     lastSubmission,
-    shouldValidate: "onInput",
+    shouldValidate: "onBlur",
 
     onValidate({ formData }) {
       return parse(formData, { schema: signUpSchema });
@@ -345,8 +345,12 @@ export default function Signup() {
                 </span>
               </div>
             </fieldset>
-            <div className="flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
-              <AuthButton name={signUpButtonName} submitting={submitting} />
+            <div className="mt-3 flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
+              <AuthButton
+                name={signUpButtonName}
+                submitting={submitting}
+                className="w-full"
+              />
             </div>
           </Form>
         </div>

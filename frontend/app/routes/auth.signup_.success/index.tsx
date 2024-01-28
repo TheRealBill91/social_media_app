@@ -4,7 +4,7 @@ import {
   json,
 } from "@remix-run/cloudflare";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
-import { resendConfirmationEmail } from "~/routes/resend-confirmation-email.server.ts";
+import { resendConfirmationEmail } from "~/utils/resend-confirmation-email.server.ts";
 
 import { MetaFunction } from "@remix-run/cloudflare";
 import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
