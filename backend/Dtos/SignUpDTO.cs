@@ -5,11 +5,13 @@ namespace SocialMediaApp.Models;
 public class SignUpDTO
 {
     [Required(ErrorMessage = "Username is required.")]
-    [MinLength(5, ErrorMessage = "Minimum length of 5 characters required.")]
-    [MaxLength(15, ErrorMessage = "Maximum length of 15 characters exceeded.")]
+    [MinLength(3, ErrorMessage = "Minimum length of 3 characters required.")]
+    [MaxLength(20, ErrorMessage = "Maximum length of 20 characters exceeded.")]
     public string UserName { get; set; } = null!;
 
     [Required(ErrorMessage = "Email is required.")]
+    [MinLength(3, ErrorMessage = "Minimum length of 3 characters required.")]
+    [MaxLength(50, ErrorMessage = "Maximum length of 50 characters exceeded.")]
     [EmailAddress]
     public string Email { get; set; } = null!;
 
@@ -22,7 +24,7 @@ public class SignUpDTO
     public string LastName { get; set; } = null!;
 
     [Required(ErrorMessage = "Password is required")]
-    [StringLength(20, ErrorMessage = "{0} length must be between {2} and {1}.", MinimumLength = 8)]
+    [StringLength(50, ErrorMessage = "{0} length must be between {2} and {1}.", MinimumLength = 8)]
     [DataType(DataType.Password)]
     public string Password { get; set; } = null!;
 

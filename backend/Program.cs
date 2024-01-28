@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,19 +26,34 @@ else
 
 builder.Services.AddCustomRateLimiting(builder.Configuration);
 
-builder
-    .Services
-    .AddHttpLogging(logging =>
-    {
-        logging.LoggingFields =
-            Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestMethod
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestPath
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestProtocol
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestHeaders
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseStatusCode
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseHeaders
-            | Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.ResponseBody;
-    });
+if (builder.Environment.IsDevelopment())
+{
+    builder
+        .Services
+        .AddHttpLogging(logging =>
+        {
+            logging.LoggingFields =
+                HttpLoggingFields.RequestMethod
+                | HttpLoggingFields.RequestPath
+                | HttpLoggingFields.RequestProtocol
+                | HttpLoggingFields.RequestHeaders
+                | HttpLoggingFields.ResponseStatusCode
+                | HttpLoggingFields.ResponseHeaders
+                | HttpLoggingFields.ResponseBody;
+            logging.RequestHeaders.Add("sec-ch-ua");
+            logging.ResponseHeaders.Add("MyResponseHeader");
+        });
+}
+else if (builder.Environment.IsProduction())
+{
+    builder
+        .Services
+        .AddHttpLogging(
+            logging =>
+                logging.LoggingFields =
+                    HttpLoggingFields.RequestPath | HttpLoggingFields.ResponseStatusCode
+        );
+}
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(connection);
 dataSourceBuilder.MapEnum<FriendRequestStatus>();

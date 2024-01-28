@@ -10,17 +10,17 @@ public class AuthService
     private readonly DataContext _context;
     private readonly UserManager<Member> _userManager;
 
-    private readonly SignInManager<Member> _signInManager;
+    private readonly ILogger<AuthService> _logger;
 
     public AuthService(
         DataContext context,
         UserManager<Member> userManager,
-        SignInManager<Member> signInManager
+        ILogger<AuthService> logger
     )
     {
         _context = context;
         _userManager = userManager;
-        _signInManager = signInManager;
+        _logger = logger;
     }
 
     public async Task UpdateUserLastActivityDateAsync(Guid userId)
@@ -143,25 +143,25 @@ public class AuthService
     )
     {
         IdentityResult result = await _userManager.AddLoginAsync(user, externalLoginInfo);
-        if (result.Succeeded)
-        {
-            var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
-            if (pictureClaim != null)
-            {
-                await _userManager.AddClaimAsync(user, pictureClaim);
-                await _signInManager.SignInAsync(user, isPersistent: true);
-                return result;
-            }
 
-            result = IdentityResult.Failed(
-                new IdentityError { Description = "Google picture claim is missing" }
-            );
+        if (!result.Succeeded)
+        {
+            _logger.LogError("Failed to link external login for user {UserId}", user.Id);
             return result;
+        }
+
+        var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
+        if (pictureClaim != null)
+        {
+            await _userManager.AddClaimAsync(user, pictureClaim);
         }
         else
         {
-            return result;
+            _logger.LogWarning("Google picture claim data is missing for {UserId}", user.Id);
         }
+
+        _logger.LogInformation("Successfully linked external login for {UserId}", user.Id);
+        return IdentityResult.Success;
     }
 
     public async Task<IdentityResult> CreateAndLinkExternalLogin(
@@ -170,28 +170,34 @@ public class AuthService
     )
     {
         IdentityResult result = await _userManager.CreateAsync(newUser);
+
+        if (!result.Succeeded)
+        {
+            _logger.LogError(
+                "Failed to created account and link external login for user {UserId}",
+                newUser.Id
+            );
+            return result;
+        }
+
+        result = await _userManager.AddLoginAsync(newUser, externalLoginInfo);
         if (result.Succeeded)
         {
-            result = await _userManager.AddLoginAsync(newUser, externalLoginInfo);
-            if (result.Succeeded)
+            var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
+            if (pictureClaim != null)
             {
-                var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
-                if (pictureClaim != null)
-                {
-                    await _userManager.AddClaimAsync(newUser, pictureClaim);
-                    return result;
-                }
-
-                result = IdentityResult.Failed(
-                    new IdentityError { Description = "Google picture claim is missing" }
-                );
+                await _userManager.AddClaimAsync(newUser, pictureClaim);
                 return result;
             }
-            return result;
+            else
+            {
+                _logger.LogWarning("Google picture claim data is missing for {UserId}", newUser.Id);
+            }
         }
-        else
-        {
-            return result;
-        }
+        _logger.LogInformation(
+            "Successfully created account and linked external login for {UserId}",
+            newUser.Id
+        );
+        return result;
     }
 }

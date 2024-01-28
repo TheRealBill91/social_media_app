@@ -406,26 +406,41 @@ public class AuthController : ControllerBase
         );
 
         if (signInResult.Succeeded)
+        // User successfully signed in with Google; no further action needed.
         {
-            // return Redirect("http://localhost:5151/swagger/index.html");
+            var cookieOptions = new CookieOptions
+            {
+                Secure = true,
+                HttpOnly = true,
+                SameSite = SameSiteMode.Lax,
+                MaxAge = TimeSpan.FromMinutes(3),
+                Path = "/auth/google/callback"
+            };
 
-            return Ok();
+            Response
+                .Cookies
+                .Append("MessageCookie", "Sign in successful! Welcome back.", cookieOptions);
+
+            return Redirect("/auth/google/callback");
         }
         else if (signInResult.IsLockedOut)
         {
-            return BadRequest("Too many failed login attempts, please try in 30 minutes");
+            return BadRequest(
+                new { ErrorMessage = "Too many failed login attempts, please try in 30 minutes" }
+            );
         }
-        // local account with same email does not exist, sign user up using google account
         else
         {
+            // Checking if account already exists using email claim
             if (emailClaim == null)
             {
-                return BadRequest("email claim is missing");
+                return BadRequest(new { ErrorMessage = "Email claim is missing" });
             }
 
             var user = await _userManager.FindByEmailAsync(emailClaim.Value);
 
             if (user != null)
+            // Linking user's local account to their google account and signing them in
             {
                 IdentityResult externalLinkResult = await _authService.LinkExternalLogin(
                     user,
@@ -434,7 +449,25 @@ public class AuthController : ControllerBase
                 if (externalLinkResult.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: true);
-                    return Ok();
+
+                    var cookieOptions = new CookieOptions
+                    {
+                        Secure = true,
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax,
+                        MaxAge = TimeSpan.FromMinutes(3),
+                        Path = "/auth/google/callback"
+                    };
+
+                    Response
+                        .Cookies
+                        .Append(
+                            "MessageCookie",
+                            "Account linked successfully! You are now logged in.",
+                            cookieOptions
+                        );
+
+                    return Redirect("/auth/google/callback");
                 }
                 else
                 {
@@ -442,6 +475,8 @@ public class AuthController : ControllerBase
                 }
             }
             else
+            // local account with the same email does not exist, creating new account,
+            // linking it to the google login, and signing the user in
             {
                 var newUser = new Member
                 {
@@ -453,11 +488,11 @@ public class AuthController : ControllerBase
                     UpdatedAt = DateTime.UtcNow,
                     EmailConfirmationSentCount = 0
                 };
-                var externalCreatationLoginResult = await _authService.CreateAndLinkExternalLogin(
+                var externalLoginCreationResult = await _authService.CreateAndLinkExternalLogin(
                     newUser,
                     externalSigninInfo
                 );
-                if (externalCreatationLoginResult.Succeeded)
+                if (externalLoginCreationResult.Succeeded)
                 {
                     // create member profile
                     var memberProfileCreation = await _memberProfileService.CreateMemberProfile(
@@ -466,14 +501,44 @@ public class AuthController : ControllerBase
                     if (!memberProfileCreation.Success)
                     {
                         // should not get here
-                        return BadRequest("failed to create the member profile");
+                        return BadRequest(
+                            new { ErrorMessage = "failed to create the member profile" }
+                        );
                     }
                     await _signInManager.SignInAsync(newUser, isPersistent: true);
-                    return Ok();
+
+                    var cookieOptions = new CookieOptions
+                    {
+                        Secure = true,
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax,
+                        MaxAge = TimeSpan.FromMinutes(3),
+                        Path = "/auth/google/callback"
+                    };
+
+                    Response
+                        .Cookies
+                        .Append(
+                            "MessageCookie",
+                            "Account created successfully! You are now logged in"
+                        );
+
+                    return Redirect("/auth/google/callback");
                 }
                 else
                 {
-                    return BadRequest(externalCreatationLoginResult.Errors);
+                    var cookieOptions = new CookieOptions
+                    {
+                        Secure = true,
+                        HttpOnly = true,
+                        SameSite = SameSiteMode.Lax,
+                        MaxAge = TimeSpan.FromMinutes(3),
+                        Path = "/auth/google/callback"
+                    };
+
+                    Response.Cookies.Append("ErrorCookie", "");
+
+                    return BadRequest(externalLoginCreationResult.Errors);
                 }
             }
         }
