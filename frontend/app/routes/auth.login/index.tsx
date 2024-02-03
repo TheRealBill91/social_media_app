@@ -72,6 +72,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     "lax",
     context.env.ENVIRONMENT === "production",
     [context.env.COOKIE_SECRET],
+    259_200,
   );
 
   const userIdCookieHeader = await userIdCookie.serialize(userId);
@@ -119,7 +120,7 @@ export default function Login() {
   console.log(fields.password.errors);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-12 bg-[#ffffff] px-8 py-12  md:p-12">
+    <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-12  md:p-12">
       <BackButton navTo="/" twStyles="self-start" />
 
       <div

@@ -17,8 +17,6 @@ export async function getUserId(request: Request, context: AppLoadContext) {
     console.log("eventually will throw logout here");
   }
 
-  console.log("userId: " + userIdCookie);
-
   return userId;
 }
 

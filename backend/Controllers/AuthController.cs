@@ -64,9 +64,9 @@ public class AuthController : ControllerBase
         }
 
         // Find the user by email
-        Member? user;
 
-        user = await _userManager.FindByEmailAsync(form.EmailOrUsername);
+
+        var user = await _userManager.FindByEmailAsync(form.EmailOrUsername);
 
         // checks if user is null before finding by username
         user ??= await _userManager.FindByNameAsync(form.EmailOrUsername);
@@ -363,7 +363,7 @@ public class AuthController : ControllerBase
         return NotFound(new { ErrorMessage = "Issue sending email confirmation" });
     }
 
-    [EnableRateLimiting("signInSlidingWindow")]
+    // [EnableRateLimiting("signInSlidingWindow")]
     [HttpGet("google-sign-in")]
     [AllowAnonymous]
     public IActionResult GoogleSignin(string? returnUrl = null)
@@ -377,16 +377,35 @@ public class AuthController : ControllerBase
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
 
-    [EnableRateLimiting("signInSlidingWindow")]
+    //[EnableRateLimiting("signInSlidingWindow")]
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GoogleResponse()
     {
+        var frontendURL = _configuration["ApiSettings:FrontendUrl"];
+
+        // cookie options for the cookie we return in the redirect to the
+        // Remix BFF
+        var cookieOptions = new CookieOptions
+        {
+            Secure = true,
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            MaxAge = TimeSpan.FromMinutes(3),
+            Path = "/auth/google/callback",
+        };
+
+        // return URL of the Remix BFF callback loader
+        var redirectURL = $"{frontendURL}/auth/google/callback";
+
         var externalSigninInfo = await _signInManager.GetExternalLoginInfoAsync();
 
         if (externalSigninInfo == null)
         {
-            return BadRequest();
+            Response
+                .Cookies
+                .Append("ExternalSigninError", "We ran into an unexpected issue", cookieOptions);
+            return Redirect(redirectURL);
         }
 
         var signInResult = await _signInManager.ExternalLoginSignInAsync(
@@ -408,33 +427,41 @@ public class AuthController : ControllerBase
         if (signInResult.Succeeded)
         // User successfully signed in with Google; no further action needed.
         {
-            var cookieOptions = new CookieOptions
-            {
-                Secure = true,
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax,
-                MaxAge = TimeSpan.FromMinutes(3),
-                Path = "/auth/google/callback"
-            };
+            var user = await _userManager.FindByEmailAsync(emailClaim.Value);
+            var userId = user.Id.ToString();
+
+            // return userId so Remix can easily query logged in users data
+
+            // override default maxAge to match the auth cookie maxAge
+            cookieOptions.MaxAge = TimeSpan.FromDays(3);
+
+            Response.Cookies.Append("UserId", userId, cookieOptions);
 
             Response
                 .Cookies
                 .Append("MessageCookie", "Sign in successful! Welcome back.", cookieOptions);
 
-            return Redirect("/auth/google/callback");
+            return Redirect(redirectURL);
         }
         else if (signInResult.IsLockedOut)
         {
-            return BadRequest(
-                new { ErrorMessage = "Too many failed login attempts, please try in 30 minutes" }
-            );
+            Response
+                .Cookies
+                .Append(
+                    "LockedOutMessage",
+                    "Too many login attempts, try again in 30 minutes",
+                    cookieOptions
+                );
+
+            return Redirect(redirectURL);
         }
         else
         {
             // Checking if account already exists using email claim
             if (emailClaim == null)
             {
-                return BadRequest(new { ErrorMessage = "Email claim is missing" });
+                Response.Cookies.Append("EmailClaimError", "We ran into an unexpected issue");
+                return Redirect(redirectURL);
             }
 
             var user = await _userManager.FindByEmailAsync(emailClaim.Value);
@@ -448,16 +475,16 @@ public class AuthController : ControllerBase
                 );
                 if (externalLinkResult.Succeeded)
                 {
-                    await _signInManager.SignInAsync(user, isPersistent: true);
+                    var userId = user.Id.ToString();
 
-                    var cookieOptions = new CookieOptions
-                    {
-                        Secure = true,
-                        HttpOnly = true,
-                        SameSite = SameSiteMode.Lax,
-                        MaxAge = TimeSpan.FromMinutes(3),
-                        Path = "/auth/google/callback"
-                    };
+                    // return userId so Remix can easily query logged in users data
+
+                    // override default maxAge to match the auth cookie maxAge
+                    cookieOptions.MaxAge = TimeSpan.FromDays(3);
+
+                    Response.Cookies.Append("UserId", userId, cookieOptions);
+
+                    await _signInManager.SignInAsync(user, isPersistent: true);
 
                     Response
                         .Cookies
@@ -467,11 +494,17 @@ public class AuthController : ControllerBase
                             cookieOptions
                         );
 
-                    return Redirect("/auth/google/callback");
+                    return Redirect(redirectURL);
                 }
                 else
                 {
-                    return BadRequest(externalLinkResult.Errors);
+                    Response
+                        .Cookies
+                        .Append(
+                            "CreateOrLinkError",
+                            "We ran into an issue creating or linking your accounts"
+                        );
+                    return Redirect(redirectURL);
                 }
             }
             else
@@ -501,20 +534,25 @@ public class AuthController : ControllerBase
                     if (!memberProfileCreation.Success)
                     {
                         // should not get here
-                        return BadRequest(
-                            new { ErrorMessage = "failed to create the member profile" }
-                        );
+                        Response
+                            .Cookies
+                            .Append(
+                                "CreateOrLinkError",
+                                "We ran into an issue creating or linking your accounts"
+                            );
+                        return Redirect(redirectURL);
                     }
-                    await _signInManager.SignInAsync(newUser, isPersistent: true);
 
-                    var cookieOptions = new CookieOptions
-                    {
-                        Secure = true,
-                        HttpOnly = true,
-                        SameSite = SameSiteMode.Lax,
-                        MaxAge = TimeSpan.FromMinutes(3),
-                        Path = "/auth/google/callback"
-                    };
+                    var userId = user.Id.ToString();
+
+                    // return userId so Remix can easily query logged in users data
+
+                    // override default maxAge to match the auth cookie maxAge
+                    cookieOptions.MaxAge = TimeSpan.FromDays(3);
+
+                    Response.Cookies.Append("UserId", userId, cookieOptions);
+
+                    await _signInManager.SignInAsync(newUser, isPersistent: true);
 
                     Response
                         .Cookies
@@ -523,22 +561,17 @@ public class AuthController : ControllerBase
                             "Account created successfully! You are now logged in"
                         );
 
-                    return Redirect("/auth/google/callback");
+                    return Redirect(redirectURL);
                 }
                 else
                 {
-                    var cookieOptions = new CookieOptions
-                    {
-                        Secure = true,
-                        HttpOnly = true,
-                        SameSite = SameSiteMode.Lax,
-                        MaxAge = TimeSpan.FromMinutes(3),
-                        Path = "/auth/google/callback"
-                    };
-
-                    Response.Cookies.Append("ErrorCookie", "");
-
-                    return BadRequest(externalLoginCreationResult.Errors);
+                    Response
+                        .Cookies
+                        .Append(
+                            "CreateOrLinkError",
+                            "We ran into an issue creating or linking your accounts"
+                        );
+                    return Redirect(redirectURL);
                 }
             }
         }

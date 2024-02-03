@@ -117,18 +117,21 @@ export function ErrorBoundary() {
           <Links />
         </head>
         <body>
-          <main className="flex min-h-screen flex-col justify-center gap-4 bg-gray-100 text-slate-900 ">
+          <main className="flex min-h-screen flex-col justify-center gap-5 bg-gray-100 p-6 text-slate-900 ">
             <section className="mx-auto flex flex-col items-center justify-center gap-4 rounded-md bg-[#FFFFFF] p-8 shadow-md">
               <h1 className="text-center text-3xl font-bold md:text-4xl">
                 Uh oh!
               </h1>
-              <p className="text-lg italic text-gray-500 md:text-xl">
-                Looks like we ran into an issue!
-              </p>
-              <div className="flex items-baseline gap-2">
-                <p className="text-lg  lg:text-xl">{error.status} </p>
-                <span className="text-lg">|</span>
-                <p className="text-lg">{error.statusText}</p>
+              {!error.statusText && (
+                <p className="text-lg italic text-gray-500 md:text-xl">
+                  Looks like we ran into an issue!
+                </p>
+              )}
+
+              <div className="flex items-center gap-2 ">
+                <p className="mr-2 text-lg lg:text-xl">{error.status} </p>
+                <div className=" h-8 border-r border-l-gray-800  text-lg"></div>
+                <p className="ml-2 text-balance text-lg">{error.statusText}</p>
               </div>
               <hr className="my-2 h-[2px] w-full bg-gray-500 " />
               <BackButton navTo={navTo} />
