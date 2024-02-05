@@ -28,6 +28,7 @@ import { BackButton } from "./components/ui/BackButton.tsx";
 import { toast as showToast, Toaster } from "sonner";
 import { getToast } from "./utils/flash-session/flash-session.server.ts";
 import { useEffect } from "react";
+import { getProfileInfo } from "./utils/auth.server.ts";
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: styles },
@@ -47,15 +48,16 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  console.log(request.headers.get("Cookie"));
-
   const { toast, headers } = await getToast(request, context);
 
-  return json({ toast }, { headers });
+  const userInfo = await getProfileInfo(request, context);
+
+  return json({ toast, userInfo }, { headers: headers });
 }
 
 export default function App() {
-  const { toast } = useLoaderData<typeof loader>();
+  const data = useLoaderData<typeof loader>();
+  const toast = data.toast;
 
   useEffect(() => {
     if (toast?.type === "error") {

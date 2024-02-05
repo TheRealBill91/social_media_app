@@ -1,4 +1,5 @@
 import { createCookie } from "@remix-run/cloudflare";
+import { parse, serialize } from "cookie";
 
 // Used in allowing user to click 'resend email' after user signs up
 export const postSignupEmail = createCookie("post-signup-email", {
@@ -42,4 +43,17 @@ export function createCloudflareCookie(
     secure: secure,
     secrets: secrets,
   });
+}
+
+export function getAuthCookie(request: Request) {
+  const cookieHeaders = request.headers.get("Cookie");
+  const cookie = parse(cookieHeaders || "");
+
+  const authCookieValue = cookie["auth"];
+
+  if (!authCookieValue) return undefined;
+
+  const authCookie = serialize("auth", authCookieValue);
+
+  return authCookie;
 }

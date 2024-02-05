@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.AspNetCore.HttpLogging;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -130,11 +131,11 @@ builder
 
 builder.Services.AddModelServices();
 
-string? googleClientId = builder.Environment.IsDevelopment()
+var googleClientId = builder.Environment.IsDevelopment()
     ? builder.Configuration["Authentication:Google:ClientId"]
     : Environment.GetEnvironmentVariable("Authentication:Google:ClientId");
 
-string? googleClientSecret = builder.Environment.IsDevelopment()
+var googleClientSecret = builder.Environment.IsDevelopment()
     ? builder.Configuration["Authentication:Google:ClientSecret"]
     : Environment.GetEnvironmentVariable("Authentication:Google:ClientSecret");
 
@@ -147,6 +148,19 @@ builder
         googleOptions.ClientSecret = googleClientSecret!;
         googleOptions.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
         googleOptions.CallbackPath = new PathString("/signin-google");
+
+        // This is a workaround in order to allow users
+        // to select their google account on each google login
+        // https://github.com/dotnet/aspnetcore/issues/47054#issuecomment-1786192809
+        googleOptions.Events = new OAuthEvents()
+        {
+            OnRedirectToAuthorizationEndpoint = c =>
+            {
+                c.RedirectUri += "&prompt=select_account";
+                c.Response.Redirect(c.RedirectUri);
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder

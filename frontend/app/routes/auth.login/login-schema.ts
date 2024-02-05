@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { passwordValidationLogic } from "~/utils/passwordValidationLogic";
 
-const username = z
+const usernameSchema = z
   .string({ required_error: "Username is required" })
   .min(3, { message: "Username is too short " })
   .max(20, { message: "Username is too long" })
@@ -10,7 +10,7 @@ const username = z
   })
   .trim();
 
-const password = z
+const passwordSchema = z
   .string({ required_error: "Password is required" })
   .min(8, { message: "Password is too short" })
   .max(50, { message: "Password is too long" })
@@ -18,8 +18,8 @@ const password = z
 
 export const loginSchema = z
   .object({
-    username: username,
-    password: password,
+    username: usernameSchema,
+    password: passwordSchema,
     rememberMe: z.boolean().optional(),
   })
 

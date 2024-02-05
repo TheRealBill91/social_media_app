@@ -51,14 +51,14 @@ public class MemberProfileController : Controller
 
             if (string.IsNullOrEmpty(userId))
             {
-                return NotFound("No user id available");
+                return NotFound(new { ErrorMessage = "No user id available" });
             }
 
             var user = await _userManager.FindByIdAsync(userId);
 
             if (user == null)
             {
-                return NotFound("Can't find the user");
+                return NotFound(new { ErrorMessage = "Can't find the user" });
             }
 
             memberId = Guid.Parse(userId);

@@ -1,5 +1,7 @@
 using System.Security.Claims;
 using System.Text;
+using System.Text.Json.Nodes;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -408,6 +410,8 @@ public class AuthController : ControllerBase
             return Redirect(redirectURL);
         }
 
+        await _signInManager.SignOutAsync();
+
         var signInResult = await _signInManager.ExternalLoginSignInAsync(
             externalSigninInfo.LoginProvider,
             externalSigninInfo.ProviderKey,
@@ -435,11 +439,15 @@ public class AuthController : ControllerBase
             // override default maxAge to match the auth cookie maxAge
             cookieOptions.MaxAge = TimeSpan.FromDays(3);
 
-            Response.Cookies.Append("UserId", userId, cookieOptions);
-
             Response
                 .Cookies
                 .Append("MessageCookie", "Sign in successful! Welcome back.", cookieOptions);
+
+            // override the path so the user id cookie persists across different
+            // paths on the frontend
+            cookieOptions.Path = "/";
+
+            Response.Cookies.Append("UserId", userId, cookieOptions);
 
             return Redirect(redirectURL);
         }
@@ -622,10 +630,15 @@ public class AuthController : ControllerBase
             }
             else
             {
-                return StatusCode(429, "Too many password reset emails sent today, try tomorrow");
+                return new JsonResult(
+                    new { ErrorMessage = "Too many password reset emails sent today, try tomorrow" }
+                )
+                {
+                    StatusCode = 429
+                };
             }
         }
-        return NotFound("Issue sending email confirmation");
+        return NotFound(new { ErrorMessage = "Issue sending email confirmation" });
     }
 
     [EnableRateLimiting("passwordResetRequestSlidingWindow")]

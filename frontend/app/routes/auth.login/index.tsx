@@ -27,8 +27,8 @@ export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Log in" }];
 };
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
-  await requireAnonymous(request, context);
+export async function loader({ request }: LoaderFunctionArgs) {
+  await requireAnonymous(request);
   return json({});
 }
 
@@ -67,7 +67,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const userId = loginSuccess.UserId;
 
   const userIdCookie = createCloudflareCookie(
-    "user-id",
+    "UserId",
     true,
     "lax",
     context.env.ENVIRONMENT === "production",
@@ -89,7 +89,9 @@ export async function action({ request, context }: ActionFunctionArgs) {
 export default function Login() {
   const navigation = useNavigation();
 
-  const submitting = navigation.state === "submitting";
+  const submitting =
+    navigation.state === "submitting" &&
+    navigation.formAction === "/auth/login";
 
   const passwordReveal = usePasswordReveal();
 
@@ -116,8 +118,6 @@ export default function Login() {
       return parse(formData, { schema: loginSchema });
     },
   });
-
-  console.log(fields.password.errors);
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-12  md:p-12">
