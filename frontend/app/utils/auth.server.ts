@@ -81,7 +81,7 @@ export async function requireAuthUser(request: Request) {
   const authCookie = getAuthCookie(request);
 
   if (!authCookie) {
-    throw redirect("/");
+    throw redirect("/auth/login");
   }
 }
 

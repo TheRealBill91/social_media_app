@@ -22,6 +22,7 @@ import { createCloudflareCookie } from "~/utils/cookie.server.ts";
 import { requireAnonymous } from "~/utils/auth.server.ts";
 import { AuthDivider } from "~/components/ui/AuthDivider.tsx";
 import { ProviderConnectionForm } from "~/utils/connections.tsx";
+import { Link } from "@remix-run/react";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Log in" }];
@@ -120,7 +121,7 @@ export default function Login() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-12  md:p-12">
+    <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-12 md:p-12">
       <BackButton navTo="/" twStyles="self-start" />
 
       <div
@@ -222,6 +223,20 @@ export default function Login() {
                 </span>
               </div>
             </fieldset>
+            <div className="my-2 flex justify-between pt-1 *:text-gray-600">
+              <Link
+                to="/auth/forgot-password"
+                className="transition-color text-sm capitalize hover:text-gray-800 hover:underline hover:decoration-gray-800 hover:underline-offset-2"
+              >
+                forgot password?
+              </Link>
+              <Link
+                to="/auth/forgot-username"
+                className="transition-color text-sm capitalize hover:text-gray-800 hover:underline hover:decoration-gray-800 hover:underline-offset-4"
+              >
+                forgot username?
+              </Link>
+            </div>
             <RememberMeCheckbox
               checkBoxProps={conform.input(fields.rememberMe, {
                 type: "checkbox",

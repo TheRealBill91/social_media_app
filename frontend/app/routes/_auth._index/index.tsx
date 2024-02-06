@@ -7,7 +7,7 @@ import { type loader as rootLoader } from "~/root.tsx";
 export const meta: MetaFunction = () => [{ title: "Disengage" }];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await redirectLoggedInUser(request);
+  // await redirectLoggedInUser(request);
   return json({});
 }
 
