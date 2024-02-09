@@ -8,7 +8,6 @@ import {
 } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { useId } from "react";
-import { BackButton } from "~/components/ui/BackButton";
 import { loginSchema } from "./login-schema.ts";
 import { tw } from "~/utils/tw-identity-helper";
 import { AuthButton } from "~/components/ui/AuthButton";
@@ -122,7 +121,7 @@ export default function Login() {
 
   return (
     <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-12 md:p-12">
-      <BackButton navTo="/" twStyles="self-start" />
+      {/* <BackButton navTo="/" twStyles="self-start" /> */}
 
       <div
         className="flex 
@@ -147,7 +146,7 @@ export default function Login() {
           <Form replace method="post" className="w-full" {...form.props}>
             <input type="hidden" name="state" value={navigation.state} />
             <fieldset className="mt-5">
-              <div className="mb-4 flex w-full flex-col items-center gap-[6px]">
+              <div className="mb-4 flex flex-col items-center gap-[6px]">
                 <div className="relative w-full">
                   <input
                     className={tw`${
@@ -253,7 +252,7 @@ export default function Login() {
           <AuthDivider />
           <ProviderConnectionForm
             btnClassName="h-[54px]"
-            iconClassName="text-white size-4"
+            iconClassName="size-10"
           />
         </div>
       </div>

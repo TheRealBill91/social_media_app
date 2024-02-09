@@ -1,10 +1,7 @@
 using System.Security.Claims;
 using System.Text;
-using System.Text.Json.Nodes;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -586,7 +583,7 @@ public class AuthController : ControllerBase
     }
 
     [EnableRateLimiting("passwordResetRequestSlidingWindow")]
-    [HttpPost("passwordresetrequest")]
+    [HttpPost("password-reset-request")]
     [ValidateModel]
     public async Task<IActionResult> RequestPasswordResetEmail(
         [FromBody] RequestPasswordResetDTO form
@@ -626,7 +623,7 @@ public class AuthController : ControllerBase
                     Guid.Parse(userId)
                 );
 
-                return Ok();
+                return Ok(new { ResponseMessage = "" });
             }
             else
             {
@@ -638,13 +635,26 @@ public class AuthController : ControllerBase
                 };
             }
         }
-        return NotFound(new { ErrorMessage = "Issue sending email confirmation" });
+        return NotFound(new { ErrorMessage = "No account found" });
     }
 
     [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpGet("validate-password-reset-token")]
     public async Task<IActionResult> ValidatePasswordResetToken(Guid userId, string code)
     {
+        var frontendURL = _configuration["ApiSettings:FrontendUrl"];
+
+        // cookie options for the cookie we return in the redirect to the
+        // Remix BFF
+        var cookieOptions = new CookieOptions
+        {
+            Secure = true,
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax,
+            MaxAge = TimeSpan.FromMinutes(3),
+            Path = "/auth/reset-password",
+        };
+
         var user = await _userManager.FindByIdAsync(userId.ToString());
 
         if (user == null)
@@ -662,6 +672,8 @@ public class AuthController : ControllerBase
 
         if (passwordResetTokenValid)
         {
+            Response.Cookies.Append("UserId", user.Id.ToString(), cookieOptions);
+            // need to redirect here to remix frontend (BFF action)
             return Ok("Password reset token is valid");
         }
         else if (!passwordResetTokenValid)
@@ -675,7 +687,7 @@ public class AuthController : ControllerBase
     }
 
     [EnableRateLimiting("passwordResetRequestSlidingWindow")]
-    [HttpPost("resetpassword")]
+    [HttpPost("reset-password")]
     [ValidateModel]
     public async Task<IActionResult> ResetPassword(
         [FromBody] ResetPasswordDTO form,

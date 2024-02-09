@@ -23,6 +23,7 @@ import {
   href as EyeNone,
   href as TimerSandEmpty,
   href as CheckCircleOutline,
+  href as GoogleLight,
 } from "./components/icons/icon.tsx";
 import { BackButton } from "./components/ui/BackButton.tsx";
 import { toast as showToast, Toaster } from "sonner";
@@ -37,6 +38,7 @@ export const links: LinksFunction = () => [
   { rel: "preload", href: EyeNone, as: "image" },
   { rel: "preload", href: TimerSandEmpty, as: "image" },
   { rel: "preload", href: CheckCircleOutline, as: "image" },
+  { rel: "preload", href: GoogleLight, as: "image" },
 ];
 
 export const meta: MetaFunction = () => [
