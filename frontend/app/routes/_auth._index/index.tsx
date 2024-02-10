@@ -7,7 +7,7 @@ import { type loader as rootLoader } from "~/root.tsx";
 export const meta: MetaFunction = () => [{ title: "Disengage" }];
 
 export async function loader({ request }: LoaderFunctionArgs) {
-  await redirectLoggedInUser(request);
+  /* await redirectLoggedInUser(request); */
   return json({});
 }
 
@@ -19,7 +19,7 @@ export default function Index() {
     <>
       <main className="flex min-h-screen flex-col items-center justify-center gap-5">
         {userInfo ? (
-          <h2 className="mb-2 rounded-lg border border-gray-500 px-4 py-2 text-2xl text-gray-600">
+          <h2 className="mb-2 px-4 py-2 text-2xl text-gray-600">
             Hi, {userInfo.UserName}
           </h2>
         ) : null}

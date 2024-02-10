@@ -6,6 +6,7 @@ import { z } from "zod";
 import { tw } from "~/utils/tw-identity-helper";
 import { useId } from "react";
 import { requestPasswordReset } from "./request-password-reset.server";
+import { default as AlertCircle } from "~/components/icons/icon.tsx";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Password recovery" }];
@@ -41,16 +42,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
   if (!requestPasswordResetResult.ok) {
     const passwordResetRequestError: { ErrorMessage: string } =
       await requestPasswordResetResult.json();
-    if (requestPasswordResetResult.status === 429) {
-      // need to return this error (as json) and render it on the page,
-      // as it tells the user they have hit the daily limit of the number of password
-      // reset requests they're able to send in
-    }
 
-    // if error is not rate limit, it must be that not account
-    // can be found
     return json(passwordResetRequestError);
   }
+
+  const passwordResetRequestResult: { ResponseMessage: string } =
+    await requestPasswordResetResult.json();
+  return json(passwordResetRequestResult);
 }
 
 export default function ForgotPassword() {
@@ -65,8 +63,11 @@ export default function ForgotPassword() {
   const lastSubmission =
     actionData && "intent" in actionData ? actionData : null;
 
-  //   const requestPasswordResetError =
-  //     actionData && "ErrorMessage" in actionData ? actionData : null;
+  const requestPasswordResetError =
+    actionData && "ErrorMessage" in actionData ? actionData : null;
+
+  const requestPasswordResetSuccess =
+    actionData && "ResponseMessage" in actionData ? actionData : null;
 
   const [form, fields] = useForm({
     id,
@@ -80,6 +81,24 @@ export default function ForgotPassword() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
+      {requestPasswordResetError ? (
+        <div className="mx-auto w-full max-w-[24rem] rounded-lg bg-white p-6 shadow-md">
+          <p>
+            <strong>
+              {requestPasswordResetError.ErrorMessage || "No account found"}
+            </strong>
+          </p>
+        </div>
+      ) : null}
+      {/* For testing, make sure to delete! */}
+      {!requestPasswordResetError ? (
+        <div className="mx-auto flex w-full max-w-[24rem] items-center justify-center gap-3 rounded-lg bg-white px-4 py-4 shadow-md">
+          <AlertCircle icon="alert-circle" className="size-10 fill-red-400" />
+          <p className="dynamic-text block text-pretty font-bold">
+            No account found
+          </p>
+        </div>
+      ) : null}
       <div className="mx-auto flex w-full max-w-[24rem] flex-col justify-start gap-6 rounded-lg border border-white bg-white p-6 px-8 py-6 shadow-md md:px-12">
         <h2 className="mt-4 text-center text-2xl">Forgot Password?</h2>
         <div className="flex flex-col items-center">

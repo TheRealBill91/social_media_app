@@ -26,4 +26,12 @@
       -webkit-box-shadow: 0 0 0 30px rgb(255, 255, 255) inset !important;
     }
   }
+
+  .dynamic-text {
+    font-size: clamp(
+      0.9rem,
+      0.5rem + 0.6vw,
+      1.2rem
+    ); /* Values adjusted for example */
+  }
 }

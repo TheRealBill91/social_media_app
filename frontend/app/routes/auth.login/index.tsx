@@ -120,7 +120,7 @@ export default function Login() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-12 md:p-12">
+    <main className="flex min-h-screen flex-col items-center justify-center gap-12 bg-[#ffffff] px-8 py-12 md:p-12">
       {/* <BackButton navTo="/" twStyles="self-start" /> */}
 
       <div
