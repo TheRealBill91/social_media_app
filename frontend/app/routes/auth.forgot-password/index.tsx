@@ -1,12 +1,13 @@
 import { conform, useForm } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
 import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/cloudflare";
-import { useActionData, useFetcher, useNavigation } from "@remix-run/react";
+import { useFetcher, useNavigation } from "@remix-run/react";
 import { z } from "zod";
 import { tw } from "~/utils/tw-identity-helper";
 import { useId } from "react";
 import { requestPasswordReset } from "./request-password-reset.server";
 import { default as AlertCircle } from "~/components/icons/icon.tsx";
+import { Alert, AlertTitle } from "~/components/ui/Alert";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Password recovery" }];
@@ -39,8 +40,22 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   const requestPasswordResetResult = await requestPasswordReset(context, email);
 
-  if (!requestPasswordResetResult.ok) {
-    const passwordResetRequestError: { ErrorMessage: string } =
+  const statusCode = requestPasswordResetResult.status;
+  console.log("status code: " + statusCode);
+
+  if (
+    !requestPasswordResetResult.ok &&
+    requestPasswordResetResult.status === 429
+  ) {
+    const passwordResetRequestError: { DailyLimitMessage: string } =
+      await requestPasswordResetResult.json();
+
+    return json(passwordResetRequestError);
+  } else if (
+    !requestPasswordResetResult.ok &&
+    requestPasswordResetResult.status === 404
+  ) {
+    const passwordResetRequestError: { NoAccountFoundMessage: string } =
       await requestPasswordResetResult.json();
 
     return json(passwordResetRequestError);
@@ -58,16 +73,36 @@ export default function ForgotPassword() {
 
   const id = useId();
 
-  const actionData = useActionData<typeof action>();
+  const submissionData = forgotPassword.data;
 
   const lastSubmission =
-    actionData && "intent" in actionData ? actionData : null;
+    submissionData && "intent" in submissionData ? submissionData : null;
 
-  const requestPasswordResetError =
-    actionData && "ErrorMessage" in actionData ? actionData : null;
+  const dailyLimitMessage =
+    submissionData && "DailyLimitMessage" in submissionData
+      ? submissionData
+      : null;
+
+  const noAccountFoundMessage =
+    submissionData && "NoAccountFoundMessage" in submissionData
+      ? submissionData
+      : null;
 
   const requestPasswordResetSuccess =
-    actionData && "ResponseMessage" in actionData ? actionData : null;
+    submissionData && "ResponseMessage" in submissionData
+      ? submissionData
+      : null;
+
+  const requestPasswordResetError =
+    dailyLimitMessage?.DailyLimitMessage ||
+    noAccountFoundMessage?.NoAccountFoundMessage;
+
+  // used to dynamically change the error alert callout font size
+  const alertTitleFontSize = dailyLimitMessage
+    ? tw`text-sm`
+    : noAccountFoundMessage
+      ? tw`text-lg`
+      : null;
 
   const [form, fields] = useForm({
     id,
@@ -82,27 +117,26 @@ export default function ForgotPassword() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
       {requestPasswordResetError ? (
-        <div className="mx-auto w-full max-w-[24rem] rounded-lg bg-white p-6 shadow-md">
-          <p>
-            <strong>
-              {requestPasswordResetError.ErrorMessage || "No account found"}
-            </strong>
-          </p>
-        </div>
-      ) : null}
-      {/* For testing, make sure to delete! */}
-      {!requestPasswordResetError ? (
-        <div className="mx-auto flex w-full max-w-[24rem] items-center justify-center gap-3 rounded-lg bg-white px-4 py-4 shadow-md">
-          <AlertCircle icon="alert-circle" className="size-10 fill-red-400" />
-          <p className="dynamic-text block text-pretty font-bold">
-            No account found
+        <Alert className="md-shadow max-w-[24rem] bg-white">
+          <AlertCircle
+            icon="alert-circle"
+            className="size-[22px] fill-red-400"
+          />
+          <AlertTitle className={tw`pb-0 ${alertTitleFontSize}`}>
+            {requestPasswordResetError}
+          </AlertTitle>
+        </Alert>
+      ) : requestPasswordResetSuccess ? (
+        <div className="w-full max-w-[24rem] p-3 pb-0">
+          <p className="text-sm ">
+            {requestPasswordResetSuccess.ResponseMessage}
           </p>
         </div>
       ) : null}
       <div className="mx-auto flex w-full max-w-[24rem] flex-col justify-start gap-6 rounded-lg border border-white bg-white p-6 px-8 py-6 shadow-md md:px-12">
         <h2 className="mt-4 text-center text-2xl">Forgot Password?</h2>
         <div className="flex flex-col items-center">
-          <forgotPassword.Form {...form.props} className="w-full">
+          <forgotPassword.Form method="post" {...form.props} className="w-full">
             <input type="hidden" name="state" value={navigation.state} />
             <fieldset className="mt-5">
               <div className="mb-4 flex flex-col items-center gap-[6px]">

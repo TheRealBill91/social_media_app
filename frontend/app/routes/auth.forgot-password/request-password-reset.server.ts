@@ -5,8 +5,9 @@ export async function requestPasswordReset(
   email: string,
 ) {
   const requestPasswordResetResponse = await fetch(
-    `${context.env.API_URL}api/auth/password-reset-request`,
+    `${context.env.API_URL}/api/auth/password-reset-request`,
     {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email,

@@ -623,19 +623,27 @@ public class AuthController : ControllerBase
                     Guid.Parse(userId)
                 );
 
-                return Ok(new { ResponseMessage = "" });
+                return Ok(
+                    new
+                    {
+                        ResponseMessage = "Check your email for instructions on resetting your password"
+                    }
+                );
             }
             else
             {
                 return new JsonResult(
-                    new { ErrorMessage = "Too many password reset emails sent today, try tomorrow" }
+                    new
+                    {
+                        DailyLimitMessage = "Maximum password reset attempts reached. Please try again tomorrow."
+                    }
                 )
                 {
                     StatusCode = 429
                 };
             }
         }
-        return NotFound(new { ErrorMessage = "No account found" });
+        return NotFound(new { NoAccountFoundMessage = "No account found" });
     }
 
     [EnableRateLimiting("passwordResetRequestSlidingWindow")]
@@ -659,7 +667,8 @@ public class AuthController : ControllerBase
 
         if (user == null)
         {
-            return NotFound("User not found");
+            // Should not reach here
+            return NotFound(new { ErrorMessage = "User not found" });
         }
 
         var decodedCode = WebEncoders.Base64UrlDecode(code);
@@ -673,8 +682,8 @@ public class AuthController : ControllerBase
         if (passwordResetTokenValid)
         {
             Response.Cookies.Append("UserId", user.Id.ToString(), cookieOptions);
-            // need to redirect here to remix frontend (BFF action)
-            return Ok("Password reset token is valid");
+            Response.Cookies.Append("Code", code, cookieOptions);
+            return Redirect($"{frontendURL}/auth/reset-password");
         }
         else if (!passwordResetTokenValid)
         {
