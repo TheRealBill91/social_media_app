@@ -1,5 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
+namespace SocialMediaApp.ValidationAttributes;
+
 public class OptionalUrlAttribute : ValidationAttribute
 {
     protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
@@ -16,11 +18,7 @@ public class OptionalUrlAttribute : ValidationAttribute
         if (!urlAttribute.IsValid(value))
         {
             return new ValidationResult(this.ErrorMessage ?? "Invalid URL format.");
-        
-        
-        
-        
-        }   
+        }
 
         return ValidationResult.Success;
     }

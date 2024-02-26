@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
-using SocialMediaApp.Models;
 
 namespace SocialMediaApp.Services;
 

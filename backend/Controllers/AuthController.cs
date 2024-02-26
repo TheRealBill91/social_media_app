@@ -11,6 +11,8 @@ using SocialMediaApp.Filters;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
 
+namespace SocialMediaApp.Controllers;
+
 [ApiController]
 [Route("api/auth")]
 public class AuthController : ControllerBase
@@ -194,10 +196,36 @@ public class AuthController : ControllerBase
         }
 
         var createUserResult = await _userManager.CreateAsync(newUser, form.Password);
+
+        var newLocalUser = await _userManager.FindByEmailAsync(form.Email);
+
         if (!createUserResult.Succeeded)
         {
             return BadRequest(createUserResult.Errors);
         }
+
+        if (newLocalUser == null)
+        {
+            // should not get here
+            return StatusCode(500);
+        }
+
+        var passwordHash = newLocalUser.PasswordHash;
+
+        var userId = newLocalUser.Id;
+
+        var addPasswordToHistoryResult = await _authService.AddPasswordToHistory(
+            passwordHash!,
+            userId
+        );
+
+        if (!addPasswordToHistoryResult.Succeess)
+        {
+            // should not get here
+            return StatusCode(500);
+        }
+
+        // * Commented out just for testing AddPasswordToHistory functionality
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 
@@ -604,6 +632,9 @@ public class AuthController : ControllerBase
                 user.PasswordResetEmailSentCount = 0;
                 string code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
+                // just for testing, delete or comment out in prod
+                // return Ok(new { code, userId });
+
                 string? baseUrl = _configuration["ApiSettings:BaseUrl"];
 
                 string callbackURL =
@@ -651,6 +682,7 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> ValidatePasswordResetToken(Guid userId, string code)
     {
         var frontendURL = _configuration["ApiSettings:FrontendUrl"];
+        var redirectURL = $"{frontendURL}/auth/reset-password";
 
         // cookie options for the cookie we return in the redirect to the
         // Remix BFF
@@ -681,13 +713,17 @@ public class AuthController : ControllerBase
 
         if (passwordResetTokenValid)
         {
-            Response.Cookies.Append("UserId", user.Id.ToString(), cookieOptions);
+            Response.Cookies.Append("PasswordResetUserId", user.Id.ToString(), cookieOptions);
             Response.Cookies.Append("Code", code, cookieOptions);
-            return Redirect($"{frontendURL}/auth/reset-password");
+            return Redirect(redirectURL);
         }
         else if (!passwordResetTokenValid)
         {
-            return BadRequest("Invalid password reset token.");
+            Response
+                .Cookies
+                .Append("ExpiredMessage", "Password reset token is no longer valid", cookieOptions);
+
+            return Redirect(redirectURL);
         }
         else
         {
@@ -695,18 +731,23 @@ public class AuthController : ControllerBase
         }
     }
 
-    [EnableRateLimiting("passwordResetRequestSlidingWindow")]
+    // [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpPost("reset-password")]
     [ValidateModel]
-    public async Task<IActionResult> ResetPassword(
-        [FromBody] ResetPasswordDTO form,
-        Guid userId,
-        string code
-    )
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO form)
     {
-        var user = await _userManager.FindByIdAsync(userId.ToString());
+        var userId = form.PasswordResetUserId.ToString();
+        var code = form.Code;
+
+        var user = await _userManager.FindByIdAsync(userId);
         if (user != null)
         {
+            var passwordExists = await _authService.PasswordAlreadyExists(user, form.NewPassword);
+
+            if (passwordExists.Result == true)
+            {
+                return Conflict(new { passwordExists.Message });
+            }
             var decodedCode = WebEncoders.Base64UrlDecode(code);
             var passwordResetResult = await _userManager.ResetPasswordAsync(
                 user,
@@ -717,7 +758,7 @@ public class AuthController : ControllerBase
             if (passwordResetResult.Succeeded)
             {
                 await _authService.UpdateUserLastActivityDateAsync(user.Id);
-                return Ok("Password reset successful");
+                return Ok(new { SuccessMessage = "Password reset successful" });
             }
             else
             {

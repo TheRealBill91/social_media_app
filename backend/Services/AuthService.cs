@@ -200,4 +200,57 @@ public class AuthService
         );
         return result;
     }
+
+    public async Task<AddPasswordToHistoryResponse> AddPasswordToHistory(
+        string passwordHash,
+        Guid userId
+    )
+    {
+        var result = await _context
+            .Database
+            .ExecuteSqlAsync(
+                $"INSERT INTO password_history (id, password_hash) VALUES ( {userId}, {passwordHash})"
+            );
+
+        if (result > 0)
+        {
+            return new AddPasswordToHistoryResponse { Succeess = true };
+        }
+        else
+        {
+            return new AddPasswordToHistoryResponse
+            {
+                Succeess = false,
+                Message = "Password has previously been used, please try again"
+            };
+        }
+    }
+
+    public async Task<PasswordExistsResponse> PasswordAlreadyExists(Member user, string newPassword)
+    {
+        var passwordHashes = await _context
+            .PasswordHistory
+            .Select(p => p.PasswordHash)
+            .Distinct()
+            .ToListAsync();
+
+        var hasUsedPassword = passwordHashes.Any(hash =>
+        {
+            var res = _userManager.PasswordHasher.VerifyHashedPassword(user, hash, newPassword);
+            return res == PasswordVerificationResult.Success;
+        });
+
+        if (hasUsedPassword)
+        {
+            return new PasswordExistsResponse
+            {
+                Result = true,
+                Message = "Password previously used, please try a different one"
+            };
+        }
+        else
+        {
+            return new PasswordExistsResponse { Result = false };
+        }
+    }
 }

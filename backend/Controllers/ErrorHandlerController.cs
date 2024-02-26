@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 
+namespace SocialMediaApp.Controllers;
+
 [ApiController]
 [ApiExplorerSettings(IgnoreApi = true)]
 public class ErrorController : ControllerBase

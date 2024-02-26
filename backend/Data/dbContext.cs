@@ -30,6 +30,8 @@ public class DataContext : IdentityDbContext<Member, IdentityRole<Guid>, Guid>
 
     public DbSet<PostUpvote> PostUpvote { get; set; }
 
+    public DbSet<PasswordHistory> PasswordHistory { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

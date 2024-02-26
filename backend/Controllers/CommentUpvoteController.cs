@@ -7,6 +7,8 @@ using SocialMediaApp.Filters;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
 
+namespace SocialMediaApp.Controllers;
+
 [ApiController]
 [ValidateModel]
 [Route("/api/posts/{postId:guid}/comments/{commentId:guid}")]
