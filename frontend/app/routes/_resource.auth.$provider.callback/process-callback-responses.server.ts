@@ -1,14 +1,10 @@
-import { AppLoadContext } from "@remix-run/cloudflare";
 import { serialize } from "cookie";
 import {
   redirectWithErrorToast,
   redirectWithSuccessToast,
 } from "~/utils/flash-session/flash-session.server";
 
-export function lockedOutError(
-  lockedOutErrorMsg: string,
-  context: AppLoadContext,
-) {
+export function lockedOutError(lockedOutErrorMsg: string, env: Env) {
   const newHeaders = new Headers();
   newHeaders.append(
     "Set-Cookie",
@@ -22,7 +18,7 @@ export function lockedOutError(
     }),
   );
 
-  return redirectWithErrorToast("/auth/login", lockedOutErrorMsg, context);
+  return redirectWithErrorToast("/auth/login", lockedOutErrorMsg, env);
 }
 
 export function emailClaimError(emailClaimErrorMsg: string) {
@@ -87,10 +83,7 @@ export function externalSigninError(externalSigninErrorMsg: string) {
 
 // If the account is successfuly created or linked, then
 // logged in, this function will be used
-export function successCookie(
-  successCookieMsg: string,
-  context: AppLoadContext,
-) {
+export function successCookie(successCookieMsg: string, env: Env) {
   const newHeaders = new Headers();
 
   newHeaders.append(
@@ -105,7 +98,7 @@ export function successCookie(
     }),
   );
 
-  return redirectWithSuccessToast("/home", successCookieMsg, context, {
+  return redirectWithSuccessToast("/home", successCookieMsg, env, {
     headers: newHeaders,
   });
 }

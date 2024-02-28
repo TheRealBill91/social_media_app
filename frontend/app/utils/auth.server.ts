@@ -1,4 +1,4 @@
-import { AppLoadContext, redirect } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import { parse, serialize } from "cookie";
 import { logout } from "~/routes/auth.logout/logout.server";
 import { redirectWithSuccessToast } from "./flash-session/flash-session.server";
@@ -17,18 +17,13 @@ export async function getUserId(request: Request) {
   return userIdValue;
 }
 
-export async function getProfileInfo(
-  request: Request,
-  context: AppLoadContext,
-) {
-  const authCookie = await getAuthCookie(request);
-
-  console.log(authCookie);
+export async function getProfileInfo(request: Request, env: Env) {
+  const authCookie = getAuthCookie(request);
 
   if (!authCookie) return undefined;
 
   const getProfileInfoResponse = await fetch(
-    `${context.env.API_URL}/api/user-profile`,
+    `${env.API_URL}/api/user-profile`,
     {
       method: "GET",
       headers: {
@@ -93,11 +88,8 @@ export async function redirectLoggedInUser(request: Request) {
   }
 }
 
-export async function logoutAndRedirect(
-  authCookie: string,
-  context: AppLoadContext,
-) {
-  const logoutResponse = await logout(authCookie, context);
+export async function logoutAndRedirect(authCookie: string, env: Env) {
+  const logoutResponse = await logout(authCookie, env);
 
   const logoutCookieResponseHeaders = new Headers();
 
@@ -123,7 +115,7 @@ export async function logoutAndRedirect(
   logoutCookieResponseHeaders.append("Set-Cookie", expiredUserIdCookie);
 
   if (logoutResponse.ok) {
-    return redirectWithSuccessToast("/", "Logout successful", context, {
+    return redirectWithSuccessToast("/", "Logout successful", env, {
       headers: logoutCookieResponseHeaders,
     });
   }

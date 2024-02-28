@@ -1,17 +1,20 @@
 {
   "include": [
-    "remix.env.d.ts",
+    "env.d.ts",
     "**/*.ts",
     "**/*.tsx",
     "prettier.config.cjs",
     "app/routes/_resource_.confirm-email",
-    "app/routes/_resource.auth.$provider"
+    "app/routes/_resource.auth.$provider",
+    "vite.config.ts",
+    "vite.config.ts"
   ],
   "compilerOptions": {
     "lib": ["DOM", "DOM.Iterable", "ES2022"],
     "isolatedModules": true,
     "esModuleInterop": true,
     "jsx": "react-jsx",
+    "module": "ESNext",
     "moduleResolution": "Bundler",
     "resolveJsonModule": true,
     "target": "ES2022",

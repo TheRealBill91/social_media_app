@@ -33,6 +33,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  const { env } = context.cloudflare;
   const formData = await request.formData();
   const username = String(formData.get("username"));
   const password = String(formData.get("password"));
@@ -51,7 +52,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json(submission);
   }
 
-  const loginResponse = await login(context, username, password, persistLogin);
+  const loginResponse = await login(env, username, password, persistLogin);
 
   if (!loginResponse.ok) {
     const loginError: LoginErrorResponse = await loginResponse.json();
@@ -70,8 +71,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
     "UserId",
     true,
     "lax",
-    context.env.ENVIRONMENT === "production",
-    [context.env.COOKIE_SECRET],
+    env.ENVIRONMENT === "production",
+    [env.COOKIE_SECRET],
     259_200,
   );
 
@@ -81,7 +82,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   loginCookieHeaders.append("Set-Cookie", authCookie);
   loginCookieHeaders.append("Set-Cookie", userIdCookieHeader);
 
-  return redirectWithSuccessToast("/", "Successfully logged in", context, {
+  return redirectWithSuccessToast("/", "Successfully logged in", env, {
     headers: loginCookieHeaders,
   });
 }

@@ -1,7 +1,5 @@
-import { AppLoadContext } from "@remix-run/cloudflare";
-
 export async function createAccount(
-  context: AppLoadContext,
+  env: Env,
   username: string,
   email: string,
   firstName: string,
@@ -9,7 +7,7 @@ export async function createAccount(
   password: string,
   passwordConfirmation: string,
 ) {
-  const signUpResponse = await fetch(`${context.env.API_URL}/api/auth/signup`, {
+  const signUpResponse = await fetch(`${env.API_URL}/api/auth/signup`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

@@ -4,10 +4,9 @@ import {
   type LoaderFunctionArgs,
   type MetaFunction,
 } from "@remix-run/cloudflare";
-import styles from "./tailwind.css";
+import styles from "./tailwind.css?url";
 import {
   Links,
-  LiveReload,
   Meta,
   Outlet,
   Scripts,
@@ -52,9 +51,13 @@ export const meta: MetaFunction = () => [
 ];
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { toast, headers } = await getToast(request, context);
+  const { env } = context.cloudflare;
 
-  const userInfo = await getProfileInfo(request, context);
+  const { toast, headers } = await getToast(request, env);
+
+  const userInfo = await getProfileInfo(request, env);
+
+  console.log("userInfo:" + userInfo);
 
   return json({ toast, userInfo }, { headers: headers });
 }
@@ -100,7 +103,6 @@ export default function App() {
         <Outlet />
         <ScrollRestoration />
         <Scripts />
-        <LiveReload />
       </body>
     </html>
   );
@@ -123,7 +125,7 @@ export function ErrorBoundary() {
           <Links />
         </head>
         <body>
-          <main className="flex min-h-screen flex-col justify-center gap-5 bg-gray-100 p-6 text-slate-900 ">
+          <main className=" flex min-h-screen flex-col justify-center gap-5 bg-gray-100 p-6 text-slate-900 ">
             <section className="mx-auto flex flex-col items-center justify-center gap-4 rounded-md bg-[#FFFFFF] p-8 shadow-md">
               <h1 className="text-center text-3xl font-bold md:text-4xl">
                 Uh oh!

@@ -20,6 +20,8 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  const { env } = context.cloudflare;
+
   const formData = await request.formData();
 
   const email = String(formData.get("email"));
@@ -31,16 +33,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   if (!email) {
-    return jsonWithError(null, "Email is missing", context);
+    return jsonWithError(null, "Email is missing", env);
   }
 
-  const resendEmailResponse = await resendConfirmationEmail(context, email);
+  const resendEmailResponse = await resendConfirmationEmail(env, email);
 
   if (!resendEmailResponse.ok) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return jsonWithError(null, serverError.ErrorMessage, context, {
+    return jsonWithError(null, serverError.ErrorMessage, env, {
       headers: {
         "Set-Cookie": await postSignupEmail.serialize("", {
           maxAge: 1,
@@ -50,7 +52,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const serverSuccessMessage: string = await resendEmailResponse.json();
-  return jsonWithSuccess(null, serverSuccessMessage, context);
+  return jsonWithSuccess(null, serverSuccessMessage, env);
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {

@@ -22,6 +22,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  const { env } = context.cloudflare;
   const formData = await request.formData();
 
   const email = String(formData.get("email"));
@@ -33,16 +34,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   if (!email) {
-    return jsonWithError(null, "Email is missing", context);
+    return jsonWithError(null, "Email is missing", env);
   }
 
-  const resendEmailResponse = await resendConfirmationEmail(context, email);
+  const resendEmailResponse = await resendConfirmationEmail(env, email);
 
   if (!resendEmailResponse.ok) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return jsonWithError(null, serverError.ErrorMessage, context, {
+    return jsonWithError(null, serverError.ErrorMessage, env, {
       headers: {
         "Set-Cookie": await postSignupEmail.serialize("", {
           maxAge: 1,
@@ -53,14 +54,16 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const serverSuccessResponse: resendEmailSuccessResponse =
     await resendEmailResponse.json();
 
-  return jsonWithSuccess(null, serverSuccessResponse.successMessage, context);
+  return jsonWithSuccess(null, serverSuccessResponse.successMessage, env);
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { env } = context.cloudflare;
+
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
 
-  const { toast, headers } = await getToast(request, context);
+  const { toast, headers } = await getToast(request, env);
 
   return json({ toast, postSignUpCookie: cookie }, { headers });
 }

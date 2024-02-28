@@ -1,12 +1,6 @@
-import { AppLoadContext } from "@remix-run/cloudflare";
-
-export async function confirmEmail(
-  context: AppLoadContext,
-  userId: string,
-  code: string,
-) {
+export async function confirmEmail(env: Env, userId: string, code: string) {
   const confirmEmailResponse = await fetch(
-    `${context.env.API_URL}/api/auth/confirm-email`,
+    `${env.API_URL}/api/auth/confirm-email`,
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },

@@ -1,34 +1,6 @@
 import { z } from "zod";
 import { passwordValidationLogic } from "~/utils/passwordValidationLogic";
 
-const firstNameSchema = z
-  .string({ required_error: "First name is required" })
-  .max(50, { message: "Maximum length of 50 characters exceeded." })
-  .trim();
-
-const lastNameSchema = z
-  .string({ required_error: "Last name is required" })
-  .max(50, { message: "Maximum length of 50 characters exceeded." })
-  .trim();
-
-const usernameSchema = z
-  .string({ required_error: "Username is required" })
-  .min(3, { message: "Username is too short " })
-  .max(20, { message: "Username is too long" })
-  .regex(/^[a-zA-Z0-9_]+$/, {
-    message: "Username can only include letters, numbers, and underscores",
-  })
-  .trim();
-
-const emailSchema = z
-  .string({ required_error: "Email is required" })
-  .email({
-    message:
-      "Please enter a valid email address in the format: example@domain.com.",
-  })
-  .min(3, { message: "Username is too short " })
-  .max(50, { message: "Username is too long" });
-
 const passwordSchema = z
   .string({ required_error: "Password is required" })
   .min(8, { message: "Password is too short" })
@@ -41,16 +13,11 @@ const passwordConfirmationSchema = z
   .max(50, { message: "Password confirmation is too long" })
   .trim();
 
-export const signUpSchema = z
+export const PasswordAndConfirmPasswordSchema = z
   .object({
-    firstName: firstNameSchema,
-    lastName: lastNameSchema,
-    username: usernameSchema,
-    email: emailSchema,
     password: passwordSchema,
     passwordConfirmation: passwordConfirmationSchema,
   })
-
   .superRefine((data, ctx) => {
     const passwordValidation = passwordValidationLogic(data.password);
     const passwordConfirmationValidation = passwordValidationLogic(

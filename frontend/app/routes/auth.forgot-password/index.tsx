@@ -25,6 +25,7 @@ const email = z
 export const forgotPasswordSchema = z.object({ email: email });
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  const { env } = context.cloudflare;
   const formData = await request.formData();
 
   const email = String(formData.get("email"));
@@ -38,7 +39,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     return json(submission);
   }
 
-  const requestPasswordResetResult = await requestPasswordReset(context, email);
+  const requestPasswordResetResult = await requestPasswordReset(env, email);
 
   const statusCode = requestPasswordResetResult.status;
   console.log("status code: " + statusCode);

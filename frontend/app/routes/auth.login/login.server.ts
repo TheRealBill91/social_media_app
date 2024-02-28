@@ -1,5 +1,3 @@
-import { AppLoadContext } from "@remix-run/cloudflare";
-
 /**
  *
  * @param context Used to access Cloudflare environment variables through Remix context
@@ -9,12 +7,12 @@ import { AppLoadContext } from "@remix-run/cloudflare";
  */
 
 export async function login(
-  context: AppLoadContext,
+  env: Env,
   userIdentifier: string, // the username or password
   password: string,
   persistLogin: boolean,
 ) {
-  const loginResponse = await fetch(`${context.env.API_URL}/api/auth/signin`, {
+  const loginResponse = await fetch(`${env.API_URL}/api/auth/signin`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({

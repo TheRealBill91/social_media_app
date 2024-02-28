@@ -5,6 +5,7 @@ import { redirectWithErrorToast } from "~/utils/flash-session/flash-session.serv
 import { EmailConfirmationResponse } from "./types.ts";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { env } = context.cloudflare;
   const emailCallbackURL = new URL(request.url).searchParams;
 
   const userId = String(emailCallbackURL.get("userId"));
@@ -12,7 +13,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // this is the token for the email callback URL
   const code = String(emailCallbackURL.get("code"));
 
-  const emailConfirmationResponse = await confirmEmail(context, userId, code);
+  const emailConfirmationResponse = await confirmEmail(env, userId, code);
 
   const cookieHeader = request.headers.get("Cookie");
   const cookie = (await emailConfirmationFailure.parse(cookieHeader)) || {};
@@ -26,7 +27,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       throw await redirectWithErrorToast(
         "/",
         emailConfirmationErrors.ErrorMessage,
-        context,
+        env,
       );
       // expiration error
     } else if ("Email" in emailConfirmationErrors) {

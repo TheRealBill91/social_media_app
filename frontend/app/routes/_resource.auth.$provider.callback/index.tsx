@@ -9,6 +9,7 @@ import {
 } from "./process-callback-responses.server";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
+  const { env } = context.cloudflare;
   const cookieHeaders = request.headers.get("Cookie");
 
   const cookieObj = parse(cookieHeaders || "");
@@ -30,7 +31,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       case "LockedOutMessage": {
         const lockedOutMessage = cookieObj["LockedOutMessage"];
 
-        return lockedOutError(lockedOutMessage, context);
+        return lockedOutError(lockedOutMessage, env);
       }
       case "EmailClaimError": {
         const emailClaimErrorMsg = cookieObj["EmailClaimError"];
@@ -49,7 +50,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
       }
       case "MessageCookie": {
         const successCookieMsg = cookieObj["MessageCookie"];
-        return successCookie(successCookieMsg, context);
+        return successCookie(successCookieMsg, env);
       }
       default: {
         // If the cookie headers obj contains more than just the toast-session cookie,

@@ -23,6 +23,7 @@ export const meta: MetaFunction = () => {
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  const { env } = context.cloudflare;
   const formData = await request.formData();
   const username = String(formData.get("username"));
   const email = String(formData.get("email"));
@@ -38,7 +39,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const submission = parse(formData, { schema: signUpSchema });
 
   const signUpResponse = await createAccount(
-    context,
+    env,
     username,
     email,
     firstName,

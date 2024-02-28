@@ -1,33 +1,32 @@
 import { createCookieSessionStorage, json } from "@remix-run/cloudflare";
-import { AppLoadContext, redirect } from "@remix-run/cloudflare";
+import { redirect } from "@remix-run/cloudflare";
 import {
   FlashSessionValues,
   ToastMessage,
   flashSessionValuesSchema,
 } from "./schema";
 
-export function createFlashSessionStorage(context: AppLoadContext) {
+export function createFlashSessionStorage(env: Env) {
   return createCookieSessionStorage({
     cookie: {
       name: "toast-session",
       sameSite: "lax",
       path: "/",
       httpOnly: true,
-      secrets: [context.env.COOKIE_SECRET],
-      secure: context.env.ENVIRONMENT === "production",
+      secrets: [env.COOKIE_SECRET],
+      secure: env.ENVIRONMENT === "production",
     },
   });
 }
 
-const flashSessionStorage = (context: AppLoadContext) =>
-  createFlashSessionStorage(context);
+const flashSessionStorage = (env: Env) => createFlashSessionStorage(env);
 
 /**
  * This helper method is used to retrieve the cookie from the request,
  * parse it, and then gets the session used to store flash information
  */
-function getSessionFromRequest(request: Request, context: AppLoadContext) {
-  const sessionStorage = flashSessionStorage(context);
+function getSessionFromRequest(request: Request, env: Env) {
+  const sessionStorage = flashSessionStorage(env);
 
   // Gets the cookie header from the request
   const cookie = request.headers.get("Cookie");
@@ -38,13 +37,13 @@ function getSessionFromRequest(request: Request, context: AppLoadContext) {
 
 export async function flashMessage(
   flash: FlashSessionValues,
-  context: AppLoadContext,
+  env: Env,
   headers?: ResponseInit["headers"],
 ) {
   // Creates cookie session storage with custom function that passes in Cloudflare
-  // context (so we can access the env secrets)
+  // env object (so we can access the env secrets)
 
-  const flashSessionStorage = createFlashSessionStorage(context);
+  const flashSessionStorage = createFlashSessionStorage(env);
 
   // Gets session defined above
 
@@ -76,7 +75,7 @@ export async function flashMessage(
  * Helper method used to redirect the user to a new page with flash session values
  * @param url Url to redirect to
  * @param flash Flash session values
- * @param context Used to access Cloudflare environment variables through Remix context
+ * @param env Used to access Cloudflare environment variables
  * @param init Response options
  * @returns Redirect response
  */
@@ -84,7 +83,7 @@ export async function flashMessage(
 export async function redirectWithFlash(
   url: string,
   flash: FlashSessionValues,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
   return redirect(url, {
@@ -94,19 +93,19 @@ export async function redirectWithFlash(
     // and gives that back to the redirect which stores this in your web
     // browser into a cookie which will be sent with the next requests
     // automatically!
-    headers: await flashMessage(flash, context, init?.headers),
+    headers: await flashMessage(flash, env, init?.headers),
   });
 }
 
 async function jsonWithFlash<T>(
   data: T,
   flash: FlashSessionValues,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
   return json(data, {
     ...init,
-    headers: await flashMessage(flash, context, init?.headers),
+    headers: await flashMessage(flash, env, init?.headers),
   });
 }
 
@@ -122,10 +121,10 @@ async function jsonWithFlash<T>(
 export function jsonWithToast<T>(
   data: T,
   toast: ToastMessage,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
-  return jsonWithFlash(data, { toast }, context, init);
+  return jsonWithFlash(data, { toast }, env, init);
 }
 
 /**
@@ -140,10 +139,10 @@ export function jsonWithToast<T>(
 export function jsonWithSuccess<T>(
   data: T,
   text: string,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
-  return jsonWithToast(data, { text, type: "success" }, context, init);
+  return jsonWithToast(data, { text, type: "success" }, env, init);
 }
 
 /**
@@ -158,10 +157,10 @@ export function jsonWithSuccess<T>(
 export function jsonWithError<T>(
   data: T,
   text: string,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
-  return jsonWithToast(data, { text, type: "error" }, context, init);
+  return jsonWithToast(data, { text, type: "error" }, env, init);
 }
 
 /**
@@ -175,17 +174,17 @@ export function jsonWithError<T>(
 export function jsonWithInfo<T>(
   data: T,
   text: string,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
-  return jsonWithToast(data, { text, type: "info" }, context, init);
+  return jsonWithToast(data, { text, type: "info" }, env, init);
 }
 
 /**
  * Helper method used to redirect the user to a new page with a toast notification
  * If thrown it needs to be awaited
  * @param url Redirect URL
- * @param context Used to access Cloudflare environment variables through Remix context
+ * @param env Used to access Cloudflare environment variables
  * @param init Additional response options
  * @returns Returns a redirect response with toast stored in the session
  */
@@ -193,37 +192,32 @@ export function jsonWithInfo<T>(
 export function redirectWithToast(
   url: string,
   toast: ToastMessage,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
   // We provide a simple utility around redirectWithFlash to make it
   // less generic and toast specific, add more methods if you need them!
-  return redirectWithFlash(url, { toast }, context, init);
+  return redirectWithFlash(url, { toast }, env, init);
 }
 
 /** Helper utility to redirect with an error toast shown to the user */
 export function redirectWithErrorToast(
   redirectUrl: string,
   text: string,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
-  return redirectWithToast(redirectUrl, { text, type: "error" }, context, init);
+  return redirectWithToast(redirectUrl, { text, type: "error" }, env, init);
 }
 
 /** Helper utility to redirect with success toast shown to the user */
 export function redirectWithSuccessToast(
   redirectUrl: string,
   text: string,
-  context: AppLoadContext,
+  env: Env,
   init?: ResponseInit,
 ) {
-  return redirectWithToast(
-    redirectUrl,
-    { text, type: "success" },
-    context,
-    init,
-  );
+  return redirectWithToast(redirectUrl, { text, type: "success" }, env, init);
 }
 
 /**
@@ -234,10 +228,10 @@ export function redirectWithSuccessToast(
 
 export async function getToast(
   request: Request,
-  context: AppLoadContext,
+  env: Env,
 ): Promise<{ toast: ToastMessage | undefined; headers: Headers }> {
-  const flashSession = flashSessionStorage(context);
-  const session = await getSessionFromRequest(request, context);
+  const flashSession = flashSessionStorage(env);
+  const session = await getSessionFromRequest(request, env);
   const result = flashSessionValuesSchema.safeParse(
     session.get("toast-session"),
   );
