@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using SocialMediaApp.ValidationAttributes;
 
 [Keyless]
 public class MemberProfileUpdateDTO

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Extensions.Options;
 using SocialMediaApp.Filters;
 using SocialMediaApp.Models;
 using SocialMediaApp.Services;
@@ -27,7 +28,7 @@ public class AuthController : ControllerBase
 
     private readonly IEmailSender _emailSender;
 
-    private readonly IConfiguration _configuration;
+    private readonly ApiSettingsOptions _apiSettingsOptions;
 
     private readonly MemberService _memberService;
 
@@ -39,7 +40,7 @@ public class AuthController : ControllerBase
         RoleManager<IdentityRole<Guid>> roleManager,
         AuthService authService,
         IEmailSender emailSender,
-        IConfiguration configuration,
+        IOptionsSnapshot<ApiSettingsOptions> apiSettingsOptions,
         MemberService memberService,
         MemberProfileService memberProfileService
     )
@@ -49,7 +50,7 @@ public class AuthController : ControllerBase
         _roleManager = roleManager;
         _authService = authService;
         _emailSender = emailSender;
-        _configuration = configuration;
+        _apiSettingsOptions = apiSettingsOptions.Value;
         _memberService = memberService;
         _memberProfileService = memberProfileService;
     }
@@ -229,8 +230,8 @@ public class AuthController : ControllerBase
 
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
 
-        var baseUrl = _configuration["ApiSettings:BaseUrl"];
-        var frontendURL = _configuration["ApiSettings:FrontendUrl"];
+        var baseUrl = _apiSettingsOptions.BaseUrl;
+        var frontendURL = _apiSettingsOptions.FrontendUrl;
 
         var callbackURL =
             $"{frontendURL}/confirm-email?userId={newUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
@@ -346,7 +347,7 @@ public class AuthController : ControllerBase
             {
                 string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
 
-                string baseUrl = _configuration["ApiSettings:BaseUrl"]!;
+                string baseUrl = _apiSettingsOptions.BaseUrl;
 
                 string callbackURL =
                     $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
@@ -409,7 +410,7 @@ public class AuthController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GoogleResponse()
     {
-        var frontendURL = _configuration["ApiSettings:FrontendUrl"];
+        var frontendURL = _apiSettingsOptions.FrontendUrl;
 
         // cookie options for the cookie we return in the redirect to the
         // Remix BFF
@@ -635,7 +636,7 @@ public class AuthController : ControllerBase
                 // just for testing, delete or comment out in prod
                 // return Ok(new { code, userId });
 
-                string? baseUrl = _configuration["ApiSettings:BaseUrl"];
+                string baseUrl = _apiSettingsOptions.BaseUrl;
 
                 string callbackURL =
                     $"{baseUrl}/auth/validate-password-reset-token?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
@@ -681,7 +682,7 @@ public class AuthController : ControllerBase
     [HttpGet("validate-password-reset-token")]
     public async Task<IActionResult> ValidatePasswordResetToken(Guid userId, string code)
     {
-        var frontendURL = _configuration["ApiSettings:FrontendUrl"];
+        var frontendURL = _apiSettingsOptions.FrontendUrl;
         var redirectURL = $"{frontendURL}/auth/reset-password";
 
         // cookie options for the cookie we return in the redirect to the
@@ -805,7 +806,7 @@ public class AuthController : ControllerBase
  
          var code = await _userManager.GenerateEmailConfirmationTokenAsync(adminUser);
  
-         var baseUrl = _configuration["ApiSettings:BaseUrl"];
+         var baseUrl = _apiSettingsOptions.BaseUrl;
  
          var callbackURL =
              $"{baseUrl}/auth/confirmemail?userId={adminUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";

@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql;
+using SocialMediaApp.ConfigurationExtensions;
 using SocialMediaApp.Data;
 using SocialMediaApp.Models;
+using SocialMediaApp.RateLimiter;
 using SocialMediaApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -130,6 +132,7 @@ builder
     .AddDefaultTokenProviders();
 
 builder.Services.AddModelServices();
+builder.Services.AddConfigurationOptions(builder.Configuration);
 
 var googleClientId = builder.Environment.IsDevelopment()
     ? builder.Configuration["Authentication:Google:ClientId"]

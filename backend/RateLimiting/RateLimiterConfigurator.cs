@@ -2,6 +2,8 @@ using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.Extensions.Primitives;
 
+namespace SocialMediaApp.RateLimiter;
+
 public static class RateLimiterConfigurator
 {
     public static IServiceCollection AddCustomRateLimiting(
