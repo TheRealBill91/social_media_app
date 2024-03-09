@@ -1,6 +1,5 @@
-using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.AspNetCore.Identity;
 
 namespace SocialMediaApp.Models;
 
@@ -28,4 +27,8 @@ public class Member : IdentityUser<Guid>
     public int PasswordResetEmailSentCount { get; set; }
 
     public DateTime LastPasswordResetEmailSentDate { get; set; }
+
+    public int UsernameRequestEmailSentCount { get; set; }
+
+    public DateTime LastUsernameRequestEmailSentDate { get; set; }
 };

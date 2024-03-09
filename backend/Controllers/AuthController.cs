@@ -236,7 +236,7 @@ public class AuthController : ControllerBase
         var callbackURL =
             $"{frontendURL}/confirm-email?userId={newUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-        string emailHTML = await _authService.GetEmailConfirmationHtml(
+        string emailHTML = await _authService.GenerateEmailContentFromTemplate(
             callbackURL,
             "EmailConfirmationTemplate.html"
         );
@@ -352,7 +352,7 @@ public class AuthController : ControllerBase
                 string callbackURL =
                     $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                string emailHTML = await _authService.GetEmailConfirmationHtml(
+                string emailHTML = await _authService.GenerateEmailContentFromTemplate(
                     callbackURL,
                     "EmailConfirmationTemplate.html"
                 );
@@ -618,30 +618,29 @@ public class AuthController : ControllerBase
         [FromBody] RequestPasswordResetDTO form
     )
     {
-        string userEmail = form.Email;
+        var userEmail = form.Email;
         var user = await _userManager.FindByEmailAsync(userEmail);
 
         if (user != null)
         {
             var userId = user.Id.ToString();
-            bool canRequestPasswordResetEmail = await _authService.CanSendNewPasswordResetEmail(
+            var canRequestPasswordResetEmail = await _authService.CanSendNewPasswordResetEmail(
                 user
             );
 
             if (canRequestPasswordResetEmail)
             {
-                user.PasswordResetEmailSentCount = 0;
-                string code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
                 // just for testing, delete or comment out in prod
                 // return Ok(new { code, userId });
 
-                string baseUrl = _apiSettingsOptions.BaseUrl;
+                var baseUrl = _apiSettingsOptions.BaseUrl;
 
-                string callbackURL =
+                var callbackURL =
                     $"{baseUrl}/auth/validate-password-reset-token?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                string emailHTML = await _authService.GetEmailConfirmationHtml(
+                var emailHTML = await _authService.GenerateEmailContentFromTemplate(
                     callbackURL,
                     "EmailPasswordResetTemplate.html"
                 );
@@ -770,6 +769,56 @@ public class AuthController : ControllerBase
         {
             return BadRequest("User was not found");
         }
+    }
+
+    [HttpPost("username-recovery-request")]
+    [ValidateModel]
+    public async Task<IActionResult> RequestForgotUsernameEmail(
+        [FromBody] RequestForgotUsernameDTO form
+    )
+    {
+        var userEmail = form.Email;
+
+        var user = await _userManager.FindByEmailAsync(userEmail);
+
+        if (user != null)
+        {
+            var canRequestUsernameRequestEmail = await _authService.CanSendUsernameEmail(user);
+
+            if (canRequestUsernameRequestEmail)
+            {
+                var emailHTML = await _authService.GenerateForgotUsernameEmailHtml(
+                    user.UserName!,
+                    "UsernameRequestTemplate.html"
+                );
+
+                await _emailSender.SendEmailAsync(user.Email!, "Here is your Username", emailHTML);
+
+                await _memberService.UpdateUsernameRequestSendDate(user.Id);
+
+                await _memberService.UpdateUsernameRequestSendCount(
+                    user.UsernameRequestEmailSentCount,
+                    user.Id
+                );
+                // update password reset send count
+
+
+                return Ok(new { ResponseMessage = "Check your email to recover your username" });
+            }
+            else
+            {
+                return new JsonResult(
+                    new
+                    {
+                        DailyLimitMessage = "Maximum username recovery attempts reached. Please try again tomorrow."
+                    }
+                )
+                {
+                    StatusCode = 429
+                };
+            }
+        }
+        return NotFound(new { NoAccountFoundMessage = "No account found" });
     }
 
     /*  [HttpPost("admin-signup")]

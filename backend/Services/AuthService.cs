@@ -33,7 +33,10 @@ public class AuthService
             );
     }
 
-    public async Task<string> GetEmailConfirmationHtml(string callbackUrl, string emailTemplate)
+    public async Task<string> GenerateEmailContentFromTemplate(
+        string callbackUrl,
+        string emailTemplate
+    )
     {
         var filePath = Path.Combine(
             Directory.GetCurrentDirectory(),
@@ -42,6 +45,18 @@ public class AuthService
         );
         var htmlContent = await File.ReadAllTextAsync(filePath);
         return htmlContent.Replace("{callbackUrl}", callbackUrl);
+    }
+
+    public async Task<string> GenerateForgotUsernameEmailHtml(string username, string emailTemplate)
+    {
+        var filePath = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "EmailTemplates",
+            emailTemplate
+        );
+
+        var htmlContent = await File.ReadAllTextAsync(filePath);
+        return htmlContent.Replace("{username}", username);
     }
 
     public Task<bool> CanSendNewConfirmationEmail(Member user)
@@ -104,6 +119,36 @@ public class AuthService
         throw new Exception("Cant find user!");
     }
 
+    public Task<bool> CanSendUsernameEmail(Member user)
+    {
+        if (user != null)
+        {
+            var LastUserNameRequestEmailSentDate = user.LastUsernameRequestEmailSentDate;
+            var CurrentDateTime = DateTime.UtcNow;
+            int usernameRequestEmailSentCount = user.UsernameRequestEmailSentCount;
+
+            var twentyFourHoursPassed =
+                (CurrentDateTime - LastUserNameRequestEmailSentDate) > TimeSpan.FromHours(24);
+
+            if (!twentyFourHoursPassed && usernameRequestEmailSentCount >= 3)
+            {
+                return Task.FromResult(false);
+            }
+            else if (twentyFourHoursPassed)
+            {
+                user.UsernameRequestEmailSentCount = 0;
+                return Task.FromResult(true);
+            }
+            else
+            {
+                // 24 hours have not passed but we are under the daily limit
+                return Task.FromResult(true);
+            }
+        }
+
+        throw new Exception("Cant find user!");
+    }
+
     public async Task<string> GenerateUniqueUserName(string firstName, string lastName)
     {
         var baseUserName = $"{firstName}{lastName}";
@@ -119,6 +164,7 @@ public class AuthService
         return uniqueUserName;
     }
 
+    // checks if username already exists (and is taken)
     public async Task<bool> UsernameExists(string username)
     {
         var normalizedUserName = username.ToUpperInvariant();
