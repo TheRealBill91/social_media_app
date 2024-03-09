@@ -5,15 +5,6 @@ export async function resetPassword(
   password: string,
   passwordConfirmation: string,
 ) {
-  // const fieldsSubmitted = {
-  //   newPassword: password,
-  //   newPasswordConfirmation: passwordConfirmation,
-  //   code,
-  //   passwordResetUserId,
-  // };
-
-  // console.log("fields submitted: " + JSON.stringify(fieldsSubmitted));
-
   const resetPasswordResponse = await fetch(
     `${env.API_URL}/api/auth/reset-password`,
     {

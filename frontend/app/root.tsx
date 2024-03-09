@@ -57,7 +57,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const userInfo = await getProfileInfo(request, env);
 
-  console.log("userInfo:" + userInfo);
+  // console.log("userInfo:" + userInfo);
 
   return json({ toast, userInfo }, { headers: headers });
 }
@@ -70,10 +70,12 @@ export default function App() {
     if (toast?.type === "error") {
       showToast.error(toast.text, {
         id: "errorId",
+        duration: toast.duration || 5000,
       });
     } else if (toast?.type === "success") {
       showToast.success(toast.text, {
         id: "successId",
+        duration: toast.duration || 5000,
       });
     }
   }, [toast]);
@@ -92,7 +94,6 @@ export default function App() {
           position="top-center"
           toastOptions={{
             unstyled: true,
-
             classNames: {
               toast:
                 "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",

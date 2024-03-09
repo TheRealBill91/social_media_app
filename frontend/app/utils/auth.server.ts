@@ -32,8 +32,6 @@ export async function getProfileInfo(request: Request, env: Env) {
     },
   );
 
-  console.log(JSON.stringify(getProfileInfoResponse));
-
   const profileInfoResponse: ProfileInfoResponse =
     await getProfileInfoResponse.json();
 

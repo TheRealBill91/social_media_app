@@ -141,8 +141,9 @@ export function jsonWithSuccess<T>(
   text: string,
   env: Env,
   init?: ResponseInit,
+  duration?: number,
 ) {
-  return jsonWithToast(data, { text, type: "success" }, env, init);
+  return jsonWithToast(data, { text, type: "success", duration }, env, init);
 }
 
 /**
@@ -159,8 +160,9 @@ export function jsonWithError<T>(
   text: string,
   env: Env,
   init?: ResponseInit,
+  duration?: number,
 ) {
-  return jsonWithToast(data, { text, type: "error" }, env, init);
+  return jsonWithToast(data, { text, type: "error", duration }, env, init);
 }
 
 /**
@@ -176,8 +178,9 @@ export function jsonWithInfo<T>(
   text: string,
   env: Env,
   init?: ResponseInit,
+  duration?: number,
 ) {
-  return jsonWithToast(data, { text, type: "info" }, env, init);
+  return jsonWithToast(data, { text, type: "info", duration }, env, init);
 }
 
 /**
@@ -206,8 +209,14 @@ export function redirectWithErrorToast(
   text: string,
   env: Env,
   init?: ResponseInit,
+  duration?: number,
 ) {
-  return redirectWithToast(redirectUrl, { text, type: "error" }, env, init);
+  return redirectWithToast(
+    redirectUrl,
+    { text, type: "error", duration },
+    env,
+    init,
+  );
 }
 
 /** Helper utility to redirect with success toast shown to the user */
@@ -216,8 +225,14 @@ export function redirectWithSuccessToast(
   text: string,
   env: Env,
   init?: ResponseInit,
+  duration?: number,
 ) {
-  return redirectWithToast(redirectUrl, { text, type: "success" }, env, init);
+  return redirectWithToast(
+    redirectUrl,
+    { text, type: "success", duration },
+    env,
+    init,
+  );
 }
 
 /**

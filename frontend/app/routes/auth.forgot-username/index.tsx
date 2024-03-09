@@ -1,16 +1,17 @@
-import { conform, useForm } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
 import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/cloudflare";
 import { useFetcher, useNavigation } from "@remix-run/react";
-import { z } from "zod";
-import { tw } from "~/utils/tw-identity-helper";
 import { useId } from "react";
-import { requestPasswordReset } from "./request-password-reset.server";
+import { z } from "zod";
+import { parse } from "@conform-to/zod";
+import { tw } from "~/utils/tw-identity-helper";
+import { conform, useForm } from "@conform-to/react";
+import { requestUsername } from "./request-username-reset.server";
+import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server";
 import { default as AlertCircle } from "~/components/icons/icon.tsx";
 import { Alert, AlertTitle } from "~/components/ui/Alert";
 
 export const meta: MetaFunction = () => {
-  return [{ title: "Disengage | Password Recovery" }];
+  return [{ title: "Disengage | Username Recovery" }];
 };
 
 const email = z
@@ -22,7 +23,7 @@ const email = z
   .min(3, { message: "Email is too short " })
   .max(50, { message: "Email is too long" });
 
-export const forgotPasswordSchema = z.object({ email: email });
+const requestUsernameSchema = z.object({ email: email });
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { env } = context.cloudflare;
@@ -33,45 +34,48 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   if (state === "submitting") return null;
 
-  const submission = parse(formData, { schema: forgotPasswordSchema });
+  const submission = parse(formData, { schema: requestUsernameSchema });
 
   if (submission.intent !== "submit" || !submission.value) {
     return json(submission);
   }
 
-  const requestPasswordResetResult = await requestPasswordReset(env, email);
+  const requestUsernameResult = await requestUsername(env, email);
 
-  if (
-    !requestPasswordResetResult.ok &&
-    requestPasswordResetResult.status === 429
-  ) {
-    const passwordResetRequestError: { DailyLimitMessage: string } =
-      await requestPasswordResetResult.json();
+  if (!requestUsernameResult.ok && requestUsernameResult.status === 429) {
+    const requestUsernameError: { DailyLimitMessage: string } =
+      await requestUsernameResult.json();
 
-    return json(passwordResetRequestError);
+    return json(requestUsernameError);
   } else if (
-    !requestPasswordResetResult.ok &&
-    requestPasswordResetResult.status === 404
+    !requestUsernameResult.ok &&
+    requestUsernameResult.status === 404
   ) {
-    const passwordResetRequestError: { NoAccountFoundMessage: string } =
-      await requestPasswordResetResult.json();
-
-    return json(passwordResetRequestError);
+    const requestUsernameError: { NoAccountFoundMessage: string } =
+      await requestUsernameResult.json();
+    return json(requestUsernameError);
   }
 
-  const passwordResetRequestResult: { ResponseMessage: string } =
-    await requestPasswordResetResult.json();
-  return json(passwordResetRequestResult);
+  const requestUsernameResultMessage: { ResponseMessage: string } =
+    await requestUsernameResult.json();
+
+  return redirectWithSuccessToast(
+    "/auth/login",
+    requestUsernameResultMessage.ResponseMessage,
+    env,
+    undefined,
+    8000,
+  );
 }
 
-export default function ForgotPassword() {
+export default function ForgotUsername() {
   const navigation = useNavigation();
 
-  const forgotPassword = useFetcher<typeof action>();
+  const forgotUsername = useFetcher<typeof action>();
 
   const id = useId();
 
-  const submissionData = forgotPassword.data;
+  const submissionData = forgotUsername.data;
 
   const lastSubmission =
     submissionData && "intent" in submissionData ? submissionData : null;
@@ -86,12 +90,7 @@ export default function ForgotPassword() {
       ? submissionData
       : null;
 
-  const requestPasswordResetSuccess =
-    submissionData && "ResponseMessage" in submissionData
-      ? submissionData
-      : null;
-
-  const requestPasswordResetError =
+  const requestUsernameError =
     dailyLimitMessage?.DailyLimitMessage ||
     noAccountFoundMessage?.NoAccountFoundMessage;
 
@@ -108,33 +107,31 @@ export default function ForgotPassword() {
     shouldValidate: "onBlur",
 
     onValidate({ formData }) {
-      return parse(formData, { schema: forgotPasswordSchema });
+      return parse(formData, { schema: requestUsernameSchema });
     },
   });
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
-      {requestPasswordResetError ? (
+      {requestUsernameError ? (
         <Alert className="md-shadow max-w-[24rem] bg-white">
           <AlertCircle
             icon="alert-circle"
             className="size-[22px] fill-red-400"
           />
           <AlertTitle className={tw`pb-0 ${alertTitleFontSize}`}>
-            {requestPasswordResetError}
+            {requestUsernameError}
           </AlertTitle>
         </Alert>
-      ) : requestPasswordResetSuccess ? (
-        <div className="w-full max-w-[24rem] p-3 pb-0">
-          <p className="text-sm ">
-            {requestPasswordResetSuccess.ResponseMessage}
-          </p>
-        </div>
       ) : null}
+
       <div className="mx-auto flex w-full max-w-[24rem] flex-col justify-start gap-6 rounded-lg border border-white bg-white p-6 px-8 py-6 shadow-md md:px-12">
-        <h2 className="mt-4 text-center text-2xl">Forgot Password?</h2>
+        <h2 className="mt-4 text-center text-2xl capitalize">
+          forgot username?
+        </h2>
+
         <div className="flex flex-col items-center">
-          <forgotPassword.Form method="post" {...form.props} className="w-full">
+          <forgotUsername.Form method="post" {...form.props} className="w-full">
             <input type="hidden" name="state" value={navigation.state} />
             <fieldset className="mt-5">
               <div className="mb-4 flex flex-col items-center gap-[6px]">
@@ -144,7 +141,7 @@ export default function ForgotPassword() {
                       fields.email.errors?.length
                         ? "border-red-700 focus:border-red-700"
                         : ""
-                    }signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-white px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-white px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
                     {...conform.input(fields.email, {
                       type: "email",
                     })}
@@ -177,9 +174,9 @@ export default function ForgotPassword() {
               className="h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-500 focus:ring-offset-2"
               type="submit"
             >
-              recover email
+              recover username
             </button>
-          </forgotPassword.Form>
+          </forgotUsername.Form>
         </div>
       </div>
     </main>

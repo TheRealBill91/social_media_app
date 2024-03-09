@@ -16,6 +16,9 @@ const toastMessageSchema = z.object({
 
   // type of notification
   type: z.custom<ToastTypes>(),
+
+  // duration for the toast (in milliseconds)
+  duration: z.number().optional(),
 });
 
 // Infers the type for later usage and type safety
