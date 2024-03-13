@@ -113,7 +113,7 @@ export default function ForgotPassword() {
   });
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
+    <main className="flex flex-1 flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
       {requestPasswordResetError ? (
         <Alert className="md-shadow max-w-[24rem] bg-white">
           <AlertCircle

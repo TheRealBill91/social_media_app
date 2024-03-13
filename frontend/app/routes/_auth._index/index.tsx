@@ -17,7 +17,7 @@ export default function Index() {
 
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-center gap-5">
+      <main className="flex flex-1 flex-col items-center justify-center gap-5">
         {userInfo ? (
           <h2 className="mb-2 px-4 py-2 text-2xl text-gray-600">
             Hi, {userInfo.UserName}

@@ -11,6 +11,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  ShouldRevalidateFunctionArgs,
   isRouteErrorResponse,
   useLoaderData,
   useRouteError,
@@ -24,15 +25,17 @@ import {
   href as CheckCircleOutline,
   href as GoogleLight,
   href as AlertCircle,
+  href as list,
 } from "./components/icons/icon.tsx";
 import { BackButton } from "./components/ui/BackButton.tsx";
 import { toast as showToast, Toaster } from "sonner";
 import { getToast } from "./utils/flash-session/flash-session.server.ts";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getProfileInfo } from "./utils/auth.server.ts";
+import { Header } from "./components/ui/Header.tsx";
 
 export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: styles },
+  { rel: "stylesheet", href: styles, as: "style" },
   { rel: "preload", href: Spinner, as: "image" },
   { rel: "preload", href: EyeOpen, as: "image" },
   { rel: "preload", href: EyeNone, as: "image" },
@@ -40,6 +43,7 @@ export const links: LinksFunction = () => [
   { rel: "preload", href: CheckCircleOutline, as: "image" },
   { rel: "preload", href: GoogleLight, as: "image" },
   { rel: "preload", href: AlertCircle, as: "image" },
+  { rel: "preload", href: list, as: "image" },
 ];
 
 export const meta: MetaFunction = () => [
@@ -62,9 +66,20 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   return json({ toast, userInfo }, { headers: headers });
 }
 
+// Only invoke the root loader if there was a form action in a root route
+export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
+  return formAction;
+}
+
 export default function App() {
   const data = useLoaderData<typeof loader>();
   const toast = data.toast;
+
+  const [menuVisible, setMenuVisibility] = useState(false);
+
+  function toggleMobileMenu() {
+    setMenuVisibility(!menuVisible);
+  }
 
   useEffect(() => {
     if (toast?.type === "error") {
@@ -88,22 +103,36 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="">
-        <Toaster
-          closeButton
-          position="top-center"
-          toastOptions={{
-            unstyled: true,
-            classNames: {
-              toast:
-                "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
-              title: "text-gray-700 ml-3",
-            },
-          }}
-        />
-        <Outlet />
-        <ScrollRestoration />
-        <Scripts />
+      <body>
+        <div className="flex min-h-screen flex-col">
+          <Header toggleMobileMenu={toggleMobileMenu} />
+          {menuVisible ? (
+            <div className="fixed inset-0 top-[61px] z-30  flex flex-1 flex-col items-center justify-center bg-gray-100/30 backdrop-blur-md">
+              <nav className="bg-green">
+                <ul>
+                  <li className="">settings</li>
+                </ul>
+              </nav>
+            </div>
+          ) : null}
+          {/* Turn this into a component */}
+
+          <Toaster
+            closeButton
+            position="top-center"
+            toastOptions={{
+              unstyled: true,
+              classNames: {
+                toast:
+                  "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
+                title: "text-gray-700 ml-3",
+              },
+            }}
+          />
+          <Outlet />
+          <ScrollRestoration />
+          <Scripts />
+        </div>
       </body>
     </html>
   );

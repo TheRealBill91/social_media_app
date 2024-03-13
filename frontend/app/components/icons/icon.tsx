@@ -16,6 +16,7 @@ export const iconNames = [
   "check",
   "eye-none",
   "eye-open",
+  "list",
   "spinner",
   "timer-sand-empty",
   "web_light_sq_na",

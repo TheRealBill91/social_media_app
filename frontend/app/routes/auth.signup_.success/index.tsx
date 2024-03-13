@@ -80,7 +80,7 @@ export default function SignupSuccess() {
   const submitting = fetcher.state === "submitting";
 
   return (
-    <main className="flex h-screen w-full  items-center justify-center bg-gray-100">
+    <main className="flex h-screen w-full flex-1  items-center justify-center bg-gray-100">
       <div className="mx-auto flex w-[350px] flex-col gap-2 space-y-6 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-10 shadow-md md:w-[400px]">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Account Created!</h1>

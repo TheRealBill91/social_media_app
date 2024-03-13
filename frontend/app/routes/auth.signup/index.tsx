@@ -106,12 +106,9 @@ export default function Signup() {
     },
   });
 
-  const navTo = "/";
-
   return (
-    <main className="flex min-h-screen flex-col items-center gap-12 bg-[#ffffff] px-8 py-10 md:p-12">
-      <BackButton navTo={navTo} twStyles="self-start" />
-      <div className="flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] p-6 sm:max-w-md md:px-10">
+    <main className="flex flex-1 flex-col items-center gap-12 bg-[#ffffff] px-8 py-10 md:p-12">
+      <div className="mt-6 flex w-full flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] p-6 sm:max-w-md md:px-10">
         <h1 className="mt-3 text-center text-[2rem] font-bold capitalize text-gray-700">
           sign up
         </h1>
