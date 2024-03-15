@@ -5,8 +5,9 @@ interface HeaderProps {
   toggleMobileMenu: () => void;
 }
 
+const nonMobileNavItems = [{ id: 1, name: "Settings", location: "/settings" }];
+
 export function Header({ toggleMobileMenu }: HeaderProps) {
-  console.log();
   return (
     <>
       <header className="sticky top-0 z-30 flex w-full flex-col border-b border-gray-200/50 bg-gray-100/30 bg-opacity-30 px-6 backdrop-blur-md">
@@ -16,6 +17,15 @@ export function Header({ toggleMobileMenu }: HeaderProps) {
               disengage
             </h1>
           </Link>
+          <div className="hidden pr-4 lg:flex">
+            <ul>
+              {nonMobileNavItems.map((mobileNavItem) => (
+                <li key={mobileNavItem.id}>
+                  <Link to={mobileNavItem.location}>{mobileNavItem.name}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
           <button onClick={toggleMobileMenu} className="lg:hidden">
             <HamburgerMenu className="size-8" icon="list" />
           </button>

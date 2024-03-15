@@ -106,16 +106,18 @@ export default function App() {
       <body>
         <div className="flex min-h-screen flex-col">
           <Header toggleMobileMenu={toggleMobileMenu} />
+          {/* Turn this into a component */}
           {menuVisible ? (
-            <div className="fixed inset-0 top-[61px] z-30  flex flex-1 flex-col items-center justify-center bg-gray-100/30 backdrop-blur-md">
+            <div className="fixed inset-0 top-[61px] z-30  flex flex-1 flex-col items-center justify-center bg-gray-300/70 backdrop-blur-md">
               <nav className="bg-green">
                 <ul>
-                  <li className="">settings</li>
+                  <li className="text-3xl capitalize text-gray-800">
+                    settings
+                  </li>
                 </ul>
               </nav>
             </div>
           ) : null}
-          {/* Turn this into a component */}
 
           <Toaster
             closeButton
