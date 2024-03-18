@@ -1,11 +1,12 @@
 import { Link } from "@remix-run/react";
 import { default as HamburgerMenu } from "~/components/icons/icon.tsx";
+import { UserNav } from "./UserNav";
 
 interface HeaderProps {
   toggleMobileMenu: () => void;
 }
 
-const nonMobileNavItems = [{ id: 1, name: "Settings", location: "/settings" }];
+// const nonMobileNavItems = [{ id: 1, name: "Settings", location: "/settings" }];
 
 export function Header({ toggleMobileMenu }: HeaderProps) {
   return (
@@ -18,13 +19,7 @@ export function Header({ toggleMobileMenu }: HeaderProps) {
             </h1>
           </Link>
           <div className="hidden pr-4 lg:flex">
-            <ul>
-              {nonMobileNavItems.map((mobileNavItem) => (
-                <li key={mobileNavItem.id}>
-                  <Link to={mobileNavItem.location}>{mobileNavItem.name}</Link>
-                </li>
-              ))}
-            </ul>
+            <UserNav />
           </div>
           <button onClick={toggleMobileMenu} className="lg:hidden">
             <HamburgerMenu className="size-8" icon="list" />

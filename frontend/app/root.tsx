@@ -25,7 +25,7 @@ import {
   href as CheckCircleOutline,
   href as GoogleLight,
   href as AlertCircle,
-  href as list,
+  href as List,
 } from "./components/icons/icon.tsx";
 import { BackButton } from "./components/ui/BackButton.tsx";
 import { toast as showToast, Toaster } from "sonner";
@@ -34,17 +34,20 @@ import { useEffect, useState } from "react";
 import { getProfileInfo } from "./utils/auth.server.ts";
 import { Header } from "./components/ui/Header.tsx";
 
-export const links: LinksFunction = () => [
-  { rel: "stylesheet", href: styles, as: "style" },
-  { rel: "preload", href: Spinner, as: "image" },
-  { rel: "preload", href: EyeOpen, as: "image" },
-  { rel: "preload", href: EyeNone, as: "image" },
-  { rel: "preload", href: TimerSandEmpty, as: "image" },
-  { rel: "preload", href: CheckCircleOutline, as: "image" },
-  { rel: "preload", href: GoogleLight, as: "image" },
-  { rel: "preload", href: AlertCircle, as: "image" },
-  { rel: "preload", href: list, as: "image" },
-];
+export const links: LinksFunction = () => {
+  return [
+    { rel: "stylesheet", href: styles, as: "style" },
+    { rel: "preload", href: Spinner, as: "image" },
+    { rel: "preload", href: EyeOpen, as: "image" },
+    { rel: "preload", href: EyeNone, as: "image" },
+    { rel: "preload", href: TimerSandEmpty, as: "image" },
+    { rel: "preload", href: CheckCircleOutline, as: "image" },
+    { rel: "preload", href: GoogleLight, as: "image" },
+    { rel: "preload", href: AlertCircle, as: "image" },
+    { rel: "preload", href: List, as: "image" },
+    { rel: "preload", href: "/assets/default-avatar.png", as: "image" },
+  ].filter(Boolean);
+};
 
 export const meta: MetaFunction = () => [
   {
