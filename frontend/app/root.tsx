@@ -64,8 +64,6 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const userInfo = await getProfileInfo(request, env);
 
-  // console.log("userInfo:" + userInfo);
-
   return json({ toast, userInfo }, { headers: headers });
 }
 
@@ -77,6 +75,8 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
 export default function App() {
   const data = useLoaderData<typeof loader>();
   const toast = data.toast;
+
+  const userInfo = data.userInfo;
 
   const [menuVisible, setMenuVisibility] = useState(false);
 
@@ -108,7 +108,7 @@ export default function App() {
       </head>
       <body>
         <div className="flex min-h-screen flex-col">
-          <Header toggleMobileMenu={toggleMobileMenu} />
+          <Header toggleMobileMenu={toggleMobileMenu} userInfo={userInfo} />
           {/* Turn this into a component */}
           {menuVisible ? (
             <div className="fixed inset-0 top-[61px] z-30  flex flex-1 flex-col items-center justify-center bg-gray-300/70 backdrop-blur-md">

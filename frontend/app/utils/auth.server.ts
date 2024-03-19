@@ -46,7 +46,7 @@ interface ProfileErrorResponse {
   ErrorMessage: "No user id available" | "Can't find the user";
 }
 
-interface ProfileSuccessResponse {
+export interface ProfileSuccessResponse {
   FirstName: string;
   LastName: string;
   UserName: string;

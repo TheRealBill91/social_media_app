@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./Avatar";
 import { Button } from "./Button";
 import {
@@ -10,8 +11,12 @@ import {
   DropdownMenuSeparator,
 } from "./DropdownMenu";
 import default_avatar from "~/../assets/default-avatar.png";
+import { Form, useSubmit } from "@remix-run/react";
 
 export function UserNav() {
+  const submit = useSubmit();
+  const formRef = useRef<HTMLFormElement>(null);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -33,7 +38,23 @@ export function UserNav() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="font-normal">Settings</DropdownMenuItem>
+          <DropdownMenuItem className="rounded font-normal transition-all hover:bg-gray-100">
+            Settings
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            className="rounded transition-all hover:bg-gray-100"
+            asChild
+            onSelect={(event) => {
+              event.preventDefault();
+              submit(formRef.current);
+            }}
+          >
+            <Form action="/auth/logout" method="POST" ref={formRef}>
+              <button className="" type="submit">
+                Logout
+              </button>
+            </Form>
+          </DropdownMenuItem>
         </DropdownMenuGroup>
         {/* We will need to conditionally render this dropdown  */}
       </DropdownMenuContent>
