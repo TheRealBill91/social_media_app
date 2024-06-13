@@ -7,8 +7,8 @@ export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Home" }];
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  await requireAuthUser(request);
+export function loader({ request }: LoaderFunctionArgs) {
+  requireAuthUser(request);
 
   return json({});
 }
@@ -18,7 +18,7 @@ export default function HomeFeed() {
   const userInfo = data?.userInfo;
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-[#ffffff]">
+    <main className="flex flex-1 flex-col items-center justify-center bg-[#ffffff]">
       {userInfo ? (
         <h3 className="mb-4 border-b border-gray-600 px-4 py-2 text-2xl text-gray-600">
           Hi, {userInfo.UserName}

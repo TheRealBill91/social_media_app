@@ -57,7 +57,10 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
+  const cookie = (await postSignupEmail.parse(cookieHeader)) as Record<
+    string,
+    string
+  > | null;
 
   return json({ postSignupCookie: cookie });
 }
@@ -65,7 +68,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 export default function ConfirmExpired() {
   const { postSignupCookie } = useLoaderData<typeof loader>();
 
-  const email: string = postSignupCookie.email || "";
+  const email = postSignupCookie?.email;
 
   const emailMissing = email ? false : true;
 
@@ -103,7 +106,7 @@ export default function ConfirmExpired() {
 
           <Link
             to="/"
-            className="inline-block w-full rounded-md bg-gray-800 px-4 py-2 text-center text-white outline-0 transition-all hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
+            className="inline-block w-full rounded-md bg-gray-800 px-4 py-2 text-center text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
           >
             Go Home
           </Link>

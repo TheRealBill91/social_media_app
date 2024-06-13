@@ -30,13 +30,13 @@ export default function ConfirmSuccess() {
           <div className="flex items-center gap-3">
             <Link
               to="/"
-              className="inline-block flex-1 rounded-md bg-gray-800 px-4 py-2 text-center capitalize text-white outline-0 transition-all hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
+              className="inline-block flex-1 rounded-md bg-gray-800 px-4 py-2 text-center capitalize text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             >
               go home
             </Link>
             <Link
               to="/auth/login"
-              className="inline-block flex-1 rounded-md bg-gray-800 px-4 py-2 text-center capitalize text-white outline-0 transition-all hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
+              className="inline-block flex-1 rounded-md bg-gray-800 px-4 py-2 text-center capitalize text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             >
               Log in
             </Link>

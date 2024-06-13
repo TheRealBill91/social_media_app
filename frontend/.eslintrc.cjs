@@ -19,6 +19,12 @@ module.exports = {
     commonjs: true,
     es6: true,
   },
+  ignorePatterns: [
+    "public/**",
+    "/node_modules/**",
+    "/functions/**",
+    "**/tailwind.css",
+  ],
 
   // Base config
   extends: ["eslint:recommended"],
@@ -27,9 +33,10 @@ module.exports = {
     // React
     {
       files: ["**/*.{js,jsx,ts,tsx}"],
-      plugins: ["react", "jsx-a11y"],
+      plugins: ["react", "jsx-a11y", "react-compiler"],
       rules: {
         "react/prop-types": 0,
+        "react-compiler/react-compiler": "error",
       },
       extends: [
         "plugin:react/recommended",
@@ -54,6 +61,10 @@ module.exports = {
       files: ["**/*.{ts,tsx}"],
       plugins: ["@typescript-eslint", "import"],
       parser: "@typescript-eslint/parser",
+      parserOptions: {
+        project: true,
+        tsconfigRootDir: "./",
+      },
       settings: {
         "import/internal-regex": "^~/",
         "import/resolver": {
@@ -69,7 +80,7 @@ module.exports = {
         },
       },
       extends: [
-        "plugin:@typescript-eslint/recommended",
+        "plugin:@typescript-eslint/recommended-type-checked",
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],

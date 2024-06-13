@@ -10,12 +10,15 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "./DropdownMenu";
-import default_avatar from "~/../assets/default-avatar.png";
-import { Form, useSubmit } from "@remix-run/react";
+import default_avatar from "/assets/default-avatar.png";
+import { Form, Link, useSubmit } from "@remix-run/react";
+import type { ProfileSuccessResponse as UserInfo } from "~/utils/auth.server";
 
-export function UserNav() {
+export function UserNav({ userInfo }: { userInfo: UserInfo | undefined }) {
   const submit = useSubmit();
   const formRef = useRef<HTMLFormElement>(null);
+
+  const profileURL = userInfo?.Photo_url ? userInfo.Photo_url : default_avatar;
 
   return (
     <DropdownMenu>
@@ -25,7 +28,7 @@ export function UserNav() {
           className="relative size-8 rounded-full focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-300 focus-visible:ring-offset-1"
         >
           <Avatar className="size-8">
-            <AvatarImage src={default_avatar} />F
+            <AvatarImage src={profileURL} />
             <AvatarFallback>FILLER</AvatarFallback>
           </Avatar>
         </Button>
@@ -33,14 +36,20 @@ export function UserNav() {
       <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-semibold">Filler username</p>
+            <p className="text-sm font-semibold">{userInfo?.UserName}</p>
+            <p className="text-xs text-muted-foreground">
+              {userInfo?.FirstName} {userInfo?.LastName}
+            </p>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
-          <DropdownMenuItem className="rounded font-normal transition-all hover:bg-gray-100">
-            Settings
-          </DropdownMenuItem>
+          <Link prefetch="intent" to={"/settings/profile"}>
+            <DropdownMenuItem className="cursor-pointer rounded font-normal transition-all hover:bg-gray-100">
+              Settings
+            </DropdownMenuItem>
+          </Link>
+          <DropdownMenuSeparator />
           <DropdownMenuItem
             className="rounded transition-all hover:bg-gray-100"
             asChild
@@ -56,7 +65,6 @@ export function UserNav() {
             </Form>
           </DropdownMenuItem>
         </DropdownMenuGroup>
-        {/* We will need to conditionally render this dropdown  */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

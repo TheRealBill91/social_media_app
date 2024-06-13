@@ -139,9 +139,9 @@ export default function ForgotUsername() {
                   <input
                     className={tw`${
                       fields.email.errors?.length
-                        ? "border-red-700 focus:border-red-700"
+                        ? "border-red-700 focus-visible:border-red-700"
                         : ""
-                    } signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-white px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-white px-3 py-[14px]  text-gray-700 placeholder-transparent  focus-visible:border-gray-700  focus-visible:outline-none`}
                     {...conform.input(fields.email, {
                       type: "email",
                     })}
@@ -152,9 +152,9 @@ export default function ForgotUsername() {
                     htmlFor={fields.email.id}
                     className={tw`${
                       fields.email.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2 bg-white px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-600 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    } absolute -top-2.5 left-2 bg-white px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-600 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                   >
                     email
                   </label>
@@ -171,7 +171,7 @@ export default function ForgotUsername() {
               </div>
             </fieldset>
             <button
-              className="h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-500 focus:ring-offset-2"
+              className="h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
               type="submit"
             >
               recover username

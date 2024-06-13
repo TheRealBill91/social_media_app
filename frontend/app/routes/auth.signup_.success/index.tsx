@@ -3,10 +3,14 @@ import {
   LoaderFunctionArgs,
   json,
 } from "@remix-run/cloudflare";
-import { Link, useFetcher, useLoaderData } from "@remix-run/react";
+import {
+  Link,
+  useFetcher,
+  useLoaderData,
+  MetaFunction,
+} from "@remix-run/react";
 import { resendConfirmationEmail } from "~/utils/resend-confirmation-email.server.ts";
 
-import { MetaFunction } from "@remix-run/cloudflare";
 import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
 import { resendEmailErrorResponse } from "types/resend-email-error.ts";
 import {
@@ -61,7 +65,10 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const { env } = context.cloudflare;
 
   const cookieHeader = request.headers.get("Cookie");
-  const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
+  const cookie = (await postSignupEmail.parse(cookieHeader)) as Record<
+    string,
+    string
+  >;
 
   const { toast, headers } = await getToast(request, env);
 
@@ -100,7 +107,7 @@ export default function SignupSuccess() {
 
           <Link
             to="/"
-            className="text-primary-foreground inline-flex w-full  cursor-pointer items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-white outline-0 transition-all hover:bg-gray-800/90 focus:ring focus:ring-gray-500 focus:ring-offset-2"
+            className="inline-flex w-full cursor-pointer  items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-primary-foreground text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             type="button"
           >
             Return to Home Page

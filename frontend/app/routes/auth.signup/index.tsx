@@ -8,15 +8,15 @@ import {
   json,
   redirect,
 } from "@remix-run/cloudflare";
-import { BackButton } from "~/components/ui/BackButton.tsx";
 import { tw } from "~/utils/tw-identity-helper.ts";
 import { AuthButton } from "~/components/ui/AuthButton.tsx";
 import { useId } from "react";
 import { createAccount } from "./create-account.server.ts";
 import { transformSignupErrors } from "./transform-signup-errors.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
-import { usePasswordReveal } from "~/utils/usePasswordReveal.ts";
+import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal.ts";
 import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn.tsx";
+import { cn } from "~/utils/misc.tsx";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup" }];
@@ -68,7 +68,15 @@ export async function action({ request, context }: ActionFunctionArgs) {
   }
 
   const cookieHeader = request.headers.get("Cookie");
-  const cookie = (await postSignupEmail.parse(cookieHeader)) || {};
+  const parsedCookie = (await postSignupEmail.parse(cookieHeader)) as Record<
+    string,
+    string
+  > | null;
+
+  const cookie: Record<string, string> | Record<string, never> = parsedCookie
+    ? parsedCookie
+    : {};
+
   cookie.email = email;
 
   return redirect("/auth/signup/success", {
@@ -84,9 +92,10 @@ export default function Signup() {
   const submitting = navigation.state === "submitting";
 
   const passwordReveal = usePasswordReveal();
+  const passwordConfirmationReveal = usePasswordReveal();
 
   const passwordInputType = passwordReveal.showPassword ? "text" : "password";
-  const passwordConfirmationInputType = passwordReveal.showPasswordConfirmation
+  const passwordConfirmationInputType = passwordConfirmationReveal.showPassword
     ? "text"
     : "password";
 
@@ -125,22 +134,22 @@ export default function Signup() {
             <input type="hidden" name="state" value={navigation.state}></input>
             <fieldset className="mt-5">
               <div className="mb-4 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full ">
+                <div className="relative w-full">
                   <input
                     className={tw`${
                       fields.firstName.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-[#ffffff] px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.firstName, { type: "text" })}
                     placeholder="john"
                   />
                   <label
                     className={tw`${
                       fields.firstName.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2   bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                     htmlFor={fields.firstName.id}
                   >
                     First name
@@ -152,7 +161,7 @@ export default function Signup() {
                     fields.firstName.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                   id={fields.firstName.errorId}
                 >
                   {fields.firstName.errors}
@@ -160,22 +169,22 @@ export default function Signup() {
               </div>
 
               <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full ">
+                <div className="relative w-full">
                   <input
                     className={tw`${
                       fields.lastName.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 focus-visible:border-red-700"
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.lastName, { type: "text" })}
                     placeholder="appleseed"
                   />
                   <label
                     className={tw`${
                       fields.lastName.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2   bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                     htmlFor={fields.lastName.id}
                   >
                     Last name
@@ -185,30 +194,30 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.lastName.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                   id={fields.lastName.errorId}
                 >
                   {fields.lastName.errors}
                 </span>
               </div>
 
-              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full ">
+              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full">
                   <input
                     className={tw`${
                       fields.username.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 focus-visible:border-red-700"
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.username, { type: "text" })}
                     placeholder="bob1234"
                   />
                   <label
                     className={tw`${
                       fields.username.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                     htmlFor={fields.username.id}
                   >
                     username
@@ -218,30 +227,32 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.username.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                   id={fields.username.errorId}
                 >
                   {fields.username.errors}
                 </span>
               </div>
 
-              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full ">
+              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full">
                   <input
-                    className={tw`${
+                    className={cn(
+                      "signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none",
                       fields.email.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
-                        : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                        ? "border-red-700 focus-visible:border-red-700"
+                        : "",
+                    )}
                     {...conform.input(fields.email, { type: "email" })}
                     placeholder="email@example.com"
                   />
                   <label
-                    className={tw`${
+                    className={cn(
+                      "absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
                       fields.email.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
-                        : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                        ? "text-red-700 peer-focus-visible:text-red-700"
+                        : "",
+                    )}
                     htmlFor={fields.email.id}
                   >
                     email
@@ -249,23 +260,23 @@ export default function Signup() {
                 </div>
 
                 <span
-                  className={tw`${
-                    fields.email.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
-                  id={fields.email.errorId}
+                  className={cn(
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                    fields.email.errors?.length ? "opacity-100" : "opacity-0",
+                  )}
                 >
                   {fields.email.errors}
                 </span>
               </div>
 
-              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full ">
+              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full">
                   <input
                     className={tw`${
                       fields.password.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 focus-visible:border-red-700"
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.password, {
                       type: passwordInputType,
                     })}
@@ -279,9 +290,9 @@ export default function Signup() {
                   <label
                     className={tw`${
                       fields.password.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                     htmlFor={fields.password.id}
                   >
                     password
@@ -291,40 +302,36 @@ export default function Signup() {
                 <span
                   className={tw`${
                     fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                   id={fields.password.errorId}
                 >
                   {fields.password.errors}
                 </span>
               </div>
 
-              <div className=" mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full ">
+              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
+                <div className="relative w-full">
                   <input
                     className={tw`${
                       fields.passwordConfirmation.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 focus-visible:border-red-700"
                         : ""
-                    }   peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.passwordConfirmation, {
                       type: passwordConfirmationInputType,
                     })}
                     placeholder="email@example.com"
                   />
                   <PasswordRevealBtn
-                    togglePasswordConfirmation={
-                      passwordReveal.togglePasswordConfirmation
-                    }
-                    showPasswordConfirmation={
-                      passwordReveal.showPasswordConfirmation
-                    }
+                    togglePassword={passwordConfirmationReveal.togglePassword}
+                    showPassword={passwordConfirmationReveal.showPassword}
                   />
                   <label
                     className={tw`${
                       fields.passwordConfirmation.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
+                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus-visible:-top-2.5 md:peer-focus-visible:text-sm`}
                     htmlFor={fields.passwordConfirmation.id}
                   >
                     Password confirmation
@@ -336,7 +343,7 @@ export default function Signup() {
                     fields.passwordConfirmation.errors?.length
                       ? "opacity-100"
                       : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                   id={fields.passwordConfirmation.errorId}
                 >
                   {fields.passwordConfirmation.errors}

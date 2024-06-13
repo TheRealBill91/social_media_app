@@ -6,8 +6,8 @@ import { type loader as rootLoader } from "~/root.tsx";
 
 export const meta: MetaFunction = () => [{ title: "Disengage" }];
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  await redirectLoggedInUser(request);
+export function loader({ request }: LoaderFunctionArgs) {
+  redirectLoggedInUser(request);
   return json({});
 }
 
@@ -28,7 +28,7 @@ export default function Index() {
           <div className="flex flex-col gap-4">
             {!userInfo ? (
               <Link
-                className="rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus:ring focus:ring-gray-600 focus:ring-offset-2"
+                className="rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus-visible:ring focus-visible:ring-gray-600 focus-visible:ring-offset-2"
                 to="/auth/login"
               >
                 login
@@ -37,7 +37,7 @@ export default function Index() {
               <form action="/auth/logout" method="POST">
                 <button
                   type="submit"
-                  className="w-full rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus:ring focus:ring-gray-600 focus:ring-offset-2"
+                  className="w-full rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus-visible:ring focus-visible:ring-gray-600 focus-visible:ring-offset-2"
                 >
                   logout
                 </button>
@@ -45,7 +45,7 @@ export default function Index() {
             )}
 
             <Link
-              className="rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus:ring focus:ring-slate-600 focus:ring-offset-2"
+              className="rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus-visible:ring focus-visible:ring-slate-600 focus-visible:ring-offset-2"
               to="/auth/signup"
             >
               sign up

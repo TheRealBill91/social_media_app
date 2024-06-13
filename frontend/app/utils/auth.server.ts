@@ -4,15 +4,11 @@ import { logout } from "~/routes/auth.logout/logout.server";
 import { redirectWithSuccessToast } from "./flash-session/flash-session.server";
 import { getAuthCookie } from "./cookie.server";
 
-export async function getUserId(request: Request) {
+export function getUserId(request: Request) {
   const cookieHeader = request.headers.get("Cookie");
   const cookieObj = parse(cookieHeader || "");
 
   const userIdValue: string = cookieObj["UserId"];
-
-  if (!userIdValue) {
-    console.log("eventually will throw logout here");
-  }
 
   return userIdValue;
 }
@@ -22,15 +18,12 @@ export async function getProfileInfo(request: Request, env: Env) {
 
   if (!authCookie) return undefined;
 
-  const getProfileInfoResponse = await fetch(
-    `${env.API_URL}/api/user-profile`,
-    {
-      method: "GET",
-      headers: {
-        cookie: authCookie,
-      },
+  const getProfileInfoResponse = await fetch(`${env.API_URL}/api/userprofile`, {
+    method: "GET",
+    headers: {
+      cookie: authCookie,
     },
-  );
+  });
 
   const profileInfoResponse: ProfileInfoResponse =
     await getProfileInfoResponse.json();
@@ -62,15 +55,15 @@ type ProfileInfoResponse = ProfileErrorResponse | ProfileSuccessResponse;
 /**
  * A route that requires user to be unauthenticated
  */
-export async function requireAnonymous(request: Request) {
-  const userId = await getUserId(request);
+export function requireAnonymous(request: Request) {
+  const userId = getUserId(request);
 
   if (userId) {
     throw redirect("/");
   }
 }
 
-export async function requireAuthUser(request: Request) {
+export function requireAuthUser(request: Request) {
   const authCookie = getAuthCookie(request);
 
   if (!authCookie) {
@@ -78,8 +71,8 @@ export async function requireAuthUser(request: Request) {
   }
 }
 
-export async function redirectLoggedInUser(request: Request) {
-  const userId = await getUserId(request);
+export function redirectLoggedInUser(request: Request) {
+  const userId = getUserId(request);
 
   if (userId) {
     throw redirect("/home");

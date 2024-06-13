@@ -6,7 +6,6 @@
     "prettier.config.cjs",
     "app/routes/_resource_.confirm-email",
     "app/routes/_resource.auth.$provider",
-    "vite.config.ts",
     "vite.config.ts"
   ],
   "compilerOptions": {

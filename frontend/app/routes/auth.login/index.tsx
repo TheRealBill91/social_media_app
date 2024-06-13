@@ -1,19 +1,18 @@
 import { useForm, conform } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
+import { parse, getFieldsetConstraint } from "@conform-to/zod";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
   json,
 } from "@remix-run/cloudflare";
-import { Form, useActionData, useNavigation } from "@remix-run/react";
-import { useId } from "react";
+import { Form, useActionData, useNavigation, Link } from "@remix-run/react";
 import { loginSchema } from "./login-schema.ts";
 import { tw } from "~/utils/tw-identity-helper";
 import { AuthButton } from "~/components/ui/AuthButton";
-import { RememberMeCheckbox } from "~/components/ui/RememberMeCheckbox.tsx";
+import { ErrorList, RememberMeCheckbox } from "~/components/Forms.tsx";
 import { login } from "./login.server.ts";
-import { usePasswordReveal } from "~/utils/usePasswordReveal.ts";
+import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal.ts";
 import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn.tsx";
 import { LoginErrorResponse, LoginSuccessResponse } from "./types.ts";
 import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server.ts";
@@ -21,44 +20,60 @@ import { createCloudflareCookie } from "~/utils/cookie.server.ts";
 import { requireAnonymous } from "~/utils/auth.server.ts";
 import { AuthDivider } from "~/components/ui/AuthDivider.tsx";
 import { ProviderConnectionForm } from "~/utils/connections.tsx";
-import { Link } from "@remix-run/react";
+import z from "zod";
+import { FormError } from "./FormError.tsx";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Log in" }];
 };
 
-export async function loader({ request }: LoaderFunctionArgs) {
-  await requireAnonymous(request);
+export function loader({ request }: LoaderFunctionArgs) {
+  requireAnonymous(request);
   return json({});
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { env } = context.cloudflare;
   const formData = await request.formData();
-  const username = String(formData.get("username"));
-  const password = String(formData.get("password"));
-  const rememberMe = formData.get("rememberMe") as string | null;
-
-  // Used in fetch request for logging in
-  const persistLogin: boolean = rememberMe === "on" ? true : false;
 
   const state = String(formData.get("state"));
 
   if (state === "submitting") return null;
 
-  const submission = parse(formData, { schema: loginSchema });
+  const submission = await parse(formData, {
+    schema: (intent) =>
+      loginSchema.transform(async (data, ctx) => {
+        if (intent !== "submit") return { ...data, loginResponse: null };
 
-  if (submission.intent !== "submit" || !submission.value) {
-    return json(submission);
+        const loginResponse = await login({ ...data, env });
+        if (!loginResponse.ok) {
+          const loginError: LoginErrorResponse = await loginResponse.json();
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: loginError.ErrorMessage,
+          });
+          return z.NEVER;
+        }
+
+        return { ...data, loginResponse };
+      }),
+    async: true,
+  });
+  delete submission.payload.password;
+
+  // means form validation not triggered by form submission
+  if (submission.intent !== "submit") {
+    // @ts-expect-error - wont be needed when we upgrade to Conform v1
+    delete submission.value?.password;
+    return json({ status: "idle", submission } as const);
   }
 
-  const loginResponse = await login(env, username, password, persistLogin);
-
-  if (!loginResponse.ok) {
-    const loginError: LoginErrorResponse = await loginResponse.json();
-
-    return json(loginError);
+  // means issue with login
+  if (!submission.value?.loginResponse) {
+    return json({ status: "error", submission } as const, { status: 400 });
   }
+
+  const { loginResponse } = submission.value;
 
   const authCookie = loginResponse.headers.getSetCookie().at(-1) as string;
 
@@ -82,7 +97,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   loginCookieHeaders.append("Set-Cookie", authCookie);
   loginCookieHeaders.append("Set-Cookie", userIdCookieHeader);
 
-  return redirectWithSuccessToast("/", "Successfully logged in", env, {
+  return redirectWithSuccessToast("/home", "Successfully logged in", env, {
     headers: loginCookieHeaders,
   });
 }
@@ -102,18 +117,12 @@ export default function Login() {
 
   const actionData = useActionData<typeof action>();
 
-  const lastSubmission =
-    actionData && "intent" in actionData ? actionData : null;
-
-  const loginErrorMessage =
-    actionData && "ErrorMessage" in actionData ? actionData : null;
-
-  const id = useId();
-
   const [form, fields] = useForm({
-    id,
-    lastSubmission,
+    id: "login-form",
+    lastSubmission: actionData?.submission,
+    constraint: getFieldsetConstraint(loginSchema),
     shouldValidate: "onBlur",
+    shouldRevalidate: "onBlur",
 
     onValidate({ formData }) {
       return parse(formData, { schema: loginSchema });
@@ -122,25 +131,14 @@ export default function Login() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-12 bg-[#ffffff] px-8 py-12 md:p-12">
-      <div
-        className="flex 
-        w-full max-w-[24rem] flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] px-8 py-6 md:px-12"
-      >
+      <div className="flex w-full max-w-[24rem] flex-col justify-start rounded-lg border border-gray-400 bg-[#ffffff] px-8 py-6 md:px-12">
         <h1 className="mt-3 text-center text-[2rem] font-bold capitalize text-gray-700">
           Log in
         </h1>
         <span className="my-2 self-center text-[1.1rem] italic text-gray-600">
           All fields are required
         </span>
-        {loginErrorMessage?.ErrorMessage ? (
-          <span
-            className={tw`${
-              loginErrorMessage.ErrorMessage ? "opacity-100" : "opacity-0"
-            } mt-3  self-center px-4 text-[1rem] text-red-700 transition-opacity duration-300 ease-in-out`}
-          >
-            {loginErrorMessage.ErrorMessage}
-          </span>
-        ) : null}
+        <FormError formError={form.error} />
         <div className="flex flex-col items-center">
           <Form replace method="post" className="w-full" {...form.props}>
             <input type="hidden" name="state" value={navigation.state} />
@@ -150,9 +148,9 @@ export default function Login() {
                   <input
                     className={tw`${
                       fields.username.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-[#ffffff] px-3 py-[14px]  text-gray-700 placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.username, {
                       type: "text",
                     })}
@@ -163,32 +161,28 @@ export default function Login() {
                     htmlFor={fields.username.id}
                     className={tw`${
                       fields.username.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2   bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                    } absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                   >
                     Username
                   </label>
                 </div>
 
-                <span
-                  className={tw`${
-                    fields.username.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out`}
-                  id={fields.username.errorId}
-                >
-                  {fields.username.errors}
-                </span>
+                <ErrorList
+                  className="self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out"
+                  errors={fields.username.errors}
+                />
               </div>
 
-              <div className="mt-8 flex w-full flex-col items-center gap-[6px]">
+              <div className="mt-8 flex flex-col items-center gap-[6px]">
                 <div className="relative w-full">
                   <input
                     className={tw`${
                       fields.password.errors?.length
-                        ? "border-red-700 focus:border-red-700  "
+                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
                         : ""
-                    }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                    } signupInputAutofill peer block w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                     {...conform.input(fields.password, {
                       type: passwordInputType,
                     })}
@@ -200,28 +194,24 @@ export default function Login() {
                   />
 
                   <label
+                    htmlFor={fields.password.id}
                     className={tw`${
                       fields.password.errors?.length
-                        ? "text-red-700 peer-focus:text-red-700  "
+                        ? "text-red-700 peer-focus-visible:text-red-700"
                         : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
-                    htmlFor={fields.password.id}
+                    } absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                   >
                     password
                   </label>
                 </div>
 
-                <span
-                  className={tw`${
-                    fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                  }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
-                  id={fields.password.errorId}
-                >
-                  {fields.password.errors}
-                </span>
+                <ErrorList
+                  className="self-start pl-1 text-red-700"
+                  errors={fields.password.errors}
+                />
               </div>
             </fieldset>
-            <div className="my-2 flex justify-between pt-1 *:text-gray-600">
+            <div className="my-2 mt-3 flex justify-between pt-1 *:text-gray-600">
               <Link
                 to="/auth/forgot-password"
                 className="transition-color text-sm capitalize hover:text-gray-800 hover:underline hover:decoration-gray-800 hover:underline-offset-2"
@@ -239,8 +229,11 @@ export default function Login() {
               checkBoxProps={conform.input(fields.rememberMe, {
                 type: "checkbox",
               })}
-              fields={fields}
               className="size-5"
+              labelProps={{
+                htmlFor: fields.rememberMe.id,
+                children: "Remember me",
+              }}
             />
             <AuthButton
               name={loginButtonName}

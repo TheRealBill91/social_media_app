@@ -18,7 +18,7 @@ import { useId } from "react";
 import { useForm, conform } from "@conform-to/react";
 import { parse } from "@conform-to/zod";
 import { tw } from "~/utils/tw-identity-helper";
-import { usePasswordReveal } from "~/utils/usePasswordReveal";
+import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal";
 import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn";
 import { resetPassword } from "./reset-password-action.server";
 import { Alert, AlertTitle } from "~/components/ui/Alert";
@@ -87,7 +87,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { env } = context.cloudflare;
-  await requireAnonymous(request);
+  requireAnonymous(request);
   const cookieHeaders = request.headers.get("Cookie");
 
   const cookieObj = cookieParse(cookieHeaders || "");
@@ -127,7 +127,7 @@ export default function ResetPassword() {
   const passwordReveal = usePasswordReveal();
 
   const passwordInputType = passwordReveal.showPassword ? "text" : "password";
-  const passwordConfirmationInputType = passwordReveal.showPasswordConfirmation
+  const passwordConfirmationInputType = passwordReveal.showPassword
     ? "text"
     : "password";
 
@@ -185,9 +185,9 @@ export default function ResetPassword() {
                 <input
                   className={tw`${
                     fields.password.errors?.length
-                      ? "border-red-700 focus:border-red-700  "
+                      ? "border-red-700 focus-visible:border-red-700"
                       : ""
-                  }   signupInputAutofill peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                  } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                   {...conform.input(fields.password, {
                     type: passwordInputType,
                   })}
@@ -201,9 +201,9 @@ export default function ResetPassword() {
                 <label
                   className={tw`${
                     fields.password.errors?.length
-                      ? "text-red-700 peer-focus:text-red-700  "
+                      ? "text-red-700 peer-focus-visible:text-red-700"
                       : ""
-                  }absolute -top-2.5 left-2 bg-[#ffffff]   px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700`}
+                  }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
                   htmlFor={fields.password.id}
                 >
                   password
@@ -213,40 +213,36 @@ export default function ResetPassword() {
               <span
                 className={tw`${
                   fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                 id={fields.password.errorId}
               >
                 {fields.password.error}
               </span>
             </div>
 
-            <div className=" mt-8 flex w-full flex-col items-center gap-[6px]">
-              <div className="relative w-full ">
+            <div className="mt-8 flex w-full flex-col items-center gap-[6px]">
+              <div className="relative w-full">
                 <input
                   className={tw`${
                     fields.passwordConfirmation.errors?.length
-                      ? "border-red-700 focus:border-red-700  "
+                      ? "border-red-700 focus-visible:border-red-700"
                       : ""
-                  }   peer block w-full rounded-md border  border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700  placeholder-transparent  focus:border-gray-700  focus:outline-none`}
+                  } peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
                   {...conform.input(fields.passwordConfirmation, {
                     type: passwordConfirmationInputType,
                   })}
                   placeholder="email@example.com"
                 />
                 <PasswordRevealBtn
-                  togglePasswordConfirmation={
-                    passwordReveal.togglePasswordConfirmation
-                  }
-                  showPasswordConfirmation={
-                    passwordReveal.showPasswordConfirmation
-                  }
+                  togglePassword={passwordReveal.togglePassword}
+                  showPassword={passwordReveal.showPassword}
                 />
                 <label
                   className={tw`${
                     fields.passwordConfirmation.errors?.length
-                      ? "text-red-700 peer-focus:text-red-700  "
+                      ? "text-red-700 peer-focus-visible:text-red-700"
                       : ""
-                  }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm   capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus:-top-2.5 peer-focus:text-sm peer-focus:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus:-top-2.5 md:peer-focus:text-sm`}
+                  }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus-visible:-top-2.5 md:peer-focus-visible:text-sm`}
                   htmlFor={fields.passwordConfirmation.id}
                 >
                   Password confirmation
@@ -258,7 +254,7 @@ export default function ResetPassword() {
                   fields.passwordConfirmation.errors?.length
                     ? "opacity-100"
                     : "opacity-0"
-                }    self-start  pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out `}
+                } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
                 id={fields.passwordConfirmation.errorId}
               >
                 {fields.passwordConfirmation.error}
@@ -266,7 +262,7 @@ export default function ResetPassword() {
             </div>
           </fieldset>
           <button
-            className="mt-6 h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus:outline-none focus:ring focus:ring-gray-500 focus:ring-offset-2"
+            className="mt-6 h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             type="submit"
           >
             reset password

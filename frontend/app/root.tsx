@@ -28,11 +28,12 @@ import {
   href as List,
 } from "./components/icons/icon.tsx";
 import { BackButton } from "./components/ui/BackButton.tsx";
-import { toast as showToast, Toaster } from "sonner";
 import { getToast } from "./utils/flash-session/flash-session.server.ts";
-import { useEffect, useState } from "react";
 import { getProfileInfo } from "./utils/auth.server.ts";
 import { Header } from "./components/ui/Header.tsx";
+import { Toast, ToastProps } from "./components/ui/Toast.tsx";
+import { useToast } from "./utils/hooks/useToast.ts";
+import default_avatar from "../assets/default-avatar.png";
 
 export const links: LinksFunction = () => {
   return [
@@ -45,7 +46,7 @@ export const links: LinksFunction = () => {
     { rel: "preload", href: GoogleLight, as: "image" },
     { rel: "preload", href: AlertCircle, as: "image" },
     { rel: "preload", href: List, as: "image" },
-    { rel: "preload", href: "/assets/default-avatar.png", as: "image" },
+    { rel: "preload", href: default_avatar, as: "image" },
   ].filter(Boolean);
 };
 
@@ -72,31 +73,27 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
   return formAction;
 }
 
+const toastProps: ToastProps = {
+  closeButton: true,
+  position: "top-center",
+  toastOptions: {
+    unstyled: true,
+    classNames: {
+      toast:
+        "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
+      title: "text-gray-700 ml-3",
+      closeButton: "sm:hidden md:hidden ",
+    },
+  },
+};
+
 export default function App() {
   const data = useLoaderData<typeof loader>();
   const toast = data.toast;
 
+  useToast(toast);
+
   const userInfo = data.userInfo;
-
-  const [menuVisible, setMenuVisibility] = useState(false);
-
-  function toggleMobileMenu() {
-    setMenuVisibility(!menuVisible);
-  }
-
-  useEffect(() => {
-    if (toast?.type === "error") {
-      showToast.error(toast.text, {
-        id: "errorId",
-        duration: toast.duration || 5000,
-      });
-    } else if (toast?.type === "success") {
-      showToast.success(toast.text, {
-        id: "successId",
-        duration: toast.duration || 5000,
-      });
-    }
-  }, [toast]);
 
   return (
     <html lang="en">
@@ -108,32 +105,8 @@ export default function App() {
       </head>
       <body>
         <div className="flex min-h-screen flex-col">
-          <Header toggleMobileMenu={toggleMobileMenu} userInfo={userInfo} />
-          {/* Turn this into a component */}
-          {menuVisible ? (
-            <div className="fixed inset-0 top-[61px] z-30  flex flex-1 flex-col items-center justify-center bg-gray-300/70 backdrop-blur-md">
-              <nav className="bg-green">
-                <ul>
-                  <li className="text-3xl capitalize text-gray-800">
-                    settings
-                  </li>
-                </ul>
-              </nav>
-            </div>
-          ) : null}
-
-          <Toaster
-            closeButton
-            position="top-center"
-            toastOptions={{
-              unstyled: true,
-              classNames: {
-                toast:
-                  "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
-                title: "text-gray-700 ml-3",
-              },
-            }}
-          />
+          <Header userInfo={userInfo} />
+          <Toast toastProps={toastProps} />
           <Outlet />
           <ScrollRestoration />
           <Scripts />

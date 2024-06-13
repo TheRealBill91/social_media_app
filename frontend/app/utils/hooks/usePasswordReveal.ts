@@ -6,18 +6,11 @@ import { useState } from "react";
 
 export function usePasswordReveal() {
   const [showPassword, setShowPassword] = useState(false);
-  const [showPasswordConfirmation, setShowPasswordConfirmation] =
-    useState(false);
 
   const togglePassword = () => setShowPassword(!showPassword);
 
-  const togglePasswordConfirmation = () =>
-    setShowPasswordConfirmation(!showPasswordConfirmation);
-
   return {
     togglePassword,
-    togglePasswordConfirmation,
     showPassword,
-    showPasswordConfirmation,
   };
 }
