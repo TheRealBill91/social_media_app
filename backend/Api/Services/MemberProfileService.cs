@@ -57,26 +57,17 @@ public class MemberProfileService
 
     public async Task<MemberProfileInfoResponse?> GetMemberProfile(Guid memberId)
     {
-        var memberProfile = await _context
-            .MemberProfile
-            .Where(mp => mp.MemberId == memberId && mp.DeletedAt == null)
-            .Join(
-                _context.Member,
-                memberProfile => memberProfile.MemberId,
-                member => member.Id,
-                (memberProfile, member) => new { MemberProfile = memberProfile, Member = member }
-            )
-            .Select(
-                mp =>
-                    new MemberProfileInfoResponse
-                    {
-                        UserName = mp.Member.UserName!,
-                        Photo_url = mp.MemberProfile.PhotoURL,
-                        Bio = mp.MemberProfile.Bio,
-                        Location = mp.MemberProfile.Location,
-                        Url = mp.MemberProfile.URL,
-                        CreatedAt = mp.MemberProfile.CreatedAt
-                    }
+        var memberProfileSQLVersion = await _context
+            .Database.SqlQuery<MemberProfileInfoDTO>(
+                @$"SELECT member.user_name,
+                      member_profile.photo_url,
+                      member_profile.bio,
+                      member_profile.location,
+                      member_profile.url,
+                      member_profile.created_at
+                   FROM member_profile
+                   LEFT JOIN member ON member_profile.member_id = member.id
+                   WHERE member_profile.member_id = {memberId} AND member_profile.deleted_at IS NULL"
             )
             .FirstOrDefaultAsync();
 

@@ -61,13 +61,21 @@ public class PostService
     public async Task<PostWithUpvoteCount?> GetPost(Guid id)
     {
         var postWithUpvotes = await _context
-            .Post
-            .Where(p => p.Id == id && p.DeletedAt == null)
-            .GroupJoin(
-                _context.PostUpvote,
-                post => post.Id,
-                upvote => upvote.PostId,
-                (post, upvotes) => new { Post = post, Upvotes = upvotes }
+            .Database.SqlQuery<PostWithUpvoteCount>(
+                @$"SELECT post.title,
+                   post.content,
+                   post.created_at,
+                   post.updated_at,
+                   post.author_id,
+                   COUNT(post_upvote.post_id) AS post_upvote_count
+                FROM post
+                LEFT JOIN post_upvote ON post.id = post_upvote.post_id
+                WHERE post.id = {id} AND post.deleted_at IS NULL
+                GROUP BY post.title,
+                   post.content,
+                   post.created_at,
+                   post.updated_at,
+                   post.author_id"
             )
             .Select(
                 pu =>
@@ -108,25 +116,23 @@ public class PostService
         int pagesToSkip = PageSize * (page - 1);
 
         var postWithUpvotes = await _context
-            .Post
-            .Where(p => p.DeletedAt == null)
-            .GroupJoin(
-                _context.PostUpvote,
-                post => post.Id,
-                upvote => upvote.PostId,
-                (post, upvotes) => new { Post = post, Upvotes = upvotes }
-            )
-            .Select(
-                pu =>
-                    new PostWithUpvoteCount
-                    {
-                        Title = pu.Post.Title,
-                        Content = pu.Post.Content,
-                        CreatedAt = pu.Post.CreatedAt,
-                        UpdatedAt = pu.Post.UpdatedAt,
-                        AuthorId = pu.Post.AuthorId,
-                        PostUpvoteCount = pu.Upvotes.Count()
-                    }
+            .Database.SqlQuery<PostWithUpvoteCount>(
+                @$"SELECT post.title,
+                      post.content,
+                      post.created_at,
+                      post.updated_at,
+                      post.author_id,
+                      COUNT(post_upvote.post_id) AS post_upvote_count
+                   FROM post
+                   LEFT JOIN post_upvote ON post.id = post_upvote.post_id
+                   WHERE post.deleted_at IS NULL
+                   GROUP BY post.title,
+                       post.content,
+                       post.created_at,
+                       post.updated_at,
+                       post.author_id
+                   ORDER BY post.created_at DESC
+                   LIMIT {PageSize} OFFSET {pagesToSkip}"
             )
             .OrderByDescending(pu => pu.CreatedAt)
             .Skip(pagesToSkip)
@@ -218,25 +224,24 @@ public class PostService
     public async Task<IEnumerable<PostWithUpvoteCount>> GetProfilePosts(Guid memberId)
     {
         var profilePosts = await _context
-            .Post
-            .Where(p => p.AuthorId == memberId && p.DeletedAt == null)
-            .GroupJoin(
-                _context.PostUpvote,
-                post => post.Id,
-                upvote => upvote.PostId,
-                (post, upvotes) => new { Post = post, Upvotes = upvotes }
-            )
-            .Select(
-                pu =>
-                    new PostWithUpvoteCount
-                    {
-                        Title = pu.Post.Title,
-                        Content = pu.Post.Content,
-                        CreatedAt = pu.Post.CreatedAt,
-                        UpdatedAt = pu.Post.UpdatedAt,
-                        AuthorId = pu.Post.AuthorId,
-                        PostUpvoteCount = pu.Upvotes.Count()
-                    }
+            .Database.SqlQuery<PostWithUpvoteCount>(
+                @$"SELECT post.title,
+	                   post.content,
+	                   post.created_at,
+	                   post.updated_at,
+	                   post.author_id,
+	                   COUNT(post_upvote.post_id) AS post_upvote_count
+                   FROM post
+                   LEFT JOIN post_upvote ON post.id = post_upvote.post_id
+                   WHERE post.author_id = {memberId}
+	                   AND post.deleted_AT IS NULL
+                   GROUP BY post.title,
+	                   post.content,
+	                   post.created_at,
+	                   post.updated_at,
+	                   post.author_id
+                   ORDER BY post.created_at DESC
+                   LIMIT 10"
             )
             .OrderByDescending(pu => pu.CreatedAt)
             .Take(10)

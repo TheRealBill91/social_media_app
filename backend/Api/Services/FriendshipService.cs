@@ -94,10 +94,18 @@ public class FriendshipService
 
     public async Task<IEnumerable<Guid>> GetFriendsIds(Guid currentUserId)
     {
-        var friendIds = await _context.Friendship
-            .Where(f => f.MemberId == currentUserId || f.FriendId == currentUserId)
-            .Select(f => f.MemberId == currentUserId ? f.FriendId : f.MemberId)
-            .Distinct()
+        var friendIds = await _context
+            .Database.SqlQuery<Guid>(
+                @$"SELECT DISTINCT CASE
+							        WHEN friendship.member_id = 
+                                         {currentUserId} THEN 
+                                    friendship.friend_id
+									ELSE friendship.member_id
+								 END AS friend_ids
+                  FROM friendship
+                  WHERE friendship.member_id = {currentUserId}
+	              OR friendship.friend_id = {currentUserId}"
+            )
             .ToListAsync();
 
         return friendIds;

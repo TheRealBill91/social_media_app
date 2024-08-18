@@ -62,16 +62,24 @@ public class CommentService
 
     public async Task<CommentWithUpvoteCount?> GetComment(Guid id)
     {
-        var commentWithUpvotes = await _context
-            .Comment
-            // First, filter the comments
-            .Where(c => c.Id == id && c.DeletedAt == null)
-            // Then, perform the left join with CommentUpvotes
-            .GroupJoin(
-                _context.CommentUpvote,
-                comment => comment.Id,
-                upvote => upvote.CommentId,
-                (comment, upvotes) => new { Comment = comment, Upvotes = upvotes }
+        var commentId = id;
+        return await _context
+            .Database.SqlQuery<CommentWithUpvoteCountDTO>(
+                @$"SELECT comment.content AS content, 
+                    comment.created_at AS created_at, 
+                    comment.author_id AS author_id, 
+                    comment.updated_at AS updated_at, q
+                    COUNT(comment_upvote.comment_id) AS comment_upvote_count, 
+                    member.first_name || ' ' || member.last_name AS author 
+                FROM comment 
+                LEFT JOIN comment_upvote ON comment.id = comment_upvote.comment_id 
+                LEFT JOIN member ON comment.author_id = member.id 
+                WHERE comment.id = {commentId} AND comment.deleted_at IS NULL 
+                GROUP BY comment.content, 
+                    comment.created_at, 
+                    comment.updated_at, 
+                    author, 
+                    comment.author_id"
             )
             // Now, select the data into a new shape
             .Select(
@@ -117,25 +125,24 @@ public class CommentService
         int pagesToSkip = PageSize * (page - 1);
 
         var commentsWithUpvotes = await _context
-            .Comment
-            .Where(c => c.PostId == postId)
-            .GroupJoin(
-                _context.CommentUpvote,
-                comment => comment.Id,
-                upvote => upvote.CommentId,
-                (comment, upvotes) => new { Comment = comment, Upvotes = upvotes }
-            )
-            .Select(
-                cu =>
-                    new CommentWithUpvoteCount
-                    {
-                        Content = cu.Comment.Content,
-                        CreatedAt = cu.Comment.CreatedAt,
-                        UpdatedAt = cu.Comment.UpdatedAt,
-                        AuthorId = cu.Comment.AuthorId,
-                        PostId = cu.Comment.PostId,
-                        CommentUpvoteCount = cu.Upvotes.Count()
-                    }
+            .Database.SqlQuery<CommentWithUpvoteCountDTO>(
+                @$"SELECT comment.content AS content, 
+                    comment.created_at AS created_at, 
+                    comment.author_id AS author_id, 
+                    comment.updated_at AS updated_at, 
+                    COUNT(comment_upvote.comment_id) AS comment_upvote_count, 
+                    member.first_name || ' ' || member.last_name AS author 
+                FROM comment 
+                LEFT JOIN comment_upvote ON comment.id = comment_upvote.comment_id 
+                LEFT JOIN member ON comment.author_id = member.id 
+                WHERE comment.post_id = {postId} AND comment.deleted_at IS NULL 
+                GROUP BY comment.content, 
+                    comment.created_at, 
+                    comment.updated_at, 
+                    author, 
+                    comment.author_id 
+                ORDER BY comment.created_at DESC 
+                LIMIT {PageSize} OFFSET {pagesToSkip}"
             )
             .OrderByDescending(cu => cu.CreatedAt)
             .Skip(pagesToSkip)
