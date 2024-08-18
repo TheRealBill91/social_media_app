@@ -19,7 +19,14 @@ public class FriendshipService
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
         var result = await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO friendship (member_id, friend_id, created_at, updated_at) VALUES ({memberId}, {friendId}, {createdAt}, {updatedAt})"
+            @$"INSERT INTO friendship (member_id, 
+                                       friend_id, 
+                                       created_at, 
+                                       updated_at) 
+               VALUES                  ({memberId}, 
+                                        {friendId}, 
+                                        {createdAt}, 
+                                        {updatedAt})"
         );
 
         if (result > 0)
@@ -44,9 +51,14 @@ public class FriendshipService
 
     public async Task<Friendship?> GetFriendship(Guid memberId, Guid friendId)
     {
-        var friendship = await _context.Friendship
-            .FromSql(
-                $"SELECT * FROM friendship WHERE (member_id = {memberId} AND friend_id = {friendId}) OR (member_id = {friendId} AND friend_id = {memberId})"
+        var friendship = await _context
+            .Friendship.FromSql(
+                @$"SELECT *
+                   FROM friendship
+                   WHERE (member_id = {memberId}
+                          AND friend_id = {friendId})
+                     OR (member_id = {friendId}
+                         AND friend_id = {memberId})"
             )
             .FirstOrDefaultAsync();
 
@@ -56,7 +68,10 @@ public class FriendshipService
     public async Task<FriendshipDeletionResponse> DeleteFriendship(Guid memberId, Guid friendId)
     {
         var friendshipDeletionResult = await _context.Database.ExecuteSqlAsync(
-            $"DELETE from friendship WHERE (member_id = {memberId} AND friend_id = {friendId})"
+            @$"DELETE
+               FROM friendship
+               WHERE (member_id = {memberId}
+                      AND friend_id = {friendId})"
         );
 
         if (friendshipDeletionResult > 0)

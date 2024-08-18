@@ -22,11 +22,21 @@ public class PostService
         var updatedAt = DateTime.UtcNow;
         var Id = Guid.NewGuid();
 
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"INSERT INTO post (id, title, content, created_at, updated_at, author_id ) VALUES ( {Id},{post.Title}, {post.Content}, {createdAt}, {updatedAt}, {authorId})"
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"INSERT INTO post 
+                            (id, 
+                            title, 
+                            content, 
+                            created_at, 
+                            updated_at, 
+                            author_id ) 
+               VALUES      ( {Id},
+                            {post.Title}, 
+                            {post.Content}, 
+                            {createdAt}, 
+                            {updatedAt}, 
+                            {authorId})"
+        );
 
         if (result > 0)
         {
@@ -129,11 +139,13 @@ public class PostService
     public async Task<PostUpdateResponse> UpdatePostAsync(Guid id, PostDTO postToUpdate)
     {
         var updatedAt = DateTime.UtcNow;
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"UPDATE post SET title = {postToUpdate.Title}, content = {postToUpdate.Content}, updated_at = {updatedAt} WHERE id = {id} "
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"UPDATE post 
+               SET title = {postToUpdate.Title}, 
+                      content = {postToUpdate.Content}, 
+                      updated_at = {updatedAt} 
+               WHERE id = {id}"
+        );
 
         if (result > 0)
         {
@@ -149,11 +161,12 @@ public class PostService
     public async Task<PostDeletionResponse> DeletePostAsync(Guid id)
     {
         var deletedAt = DateTime.UtcNow;
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"UPDATE post SET deleted_at = {deletedAt}, updated_at = {deletedAt}  WHERE id = {id} "
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"UPDATE post
+               SET deleted_at = {deletedAt},
+                   updated_at = {deletedAt}
+               WHERE id = {id} "
+        );
 
         if (result > 0)
         {

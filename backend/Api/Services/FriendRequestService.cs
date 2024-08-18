@@ -26,11 +26,19 @@ public class FriendRequestService
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
 
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"INSERT INTO friend_request (requester_id, receiver_id, status, created_at, updated_at) VALUES ({requesterId}, {receiverId}, 'pending', {createdAt}, {updatedAt})"
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"INSERT INTO friend_request
+                               (requester_id,
+                               receiver_id,
+                               status,
+                               created_at,
+                               updated_at)
+               VALUES          ({requesterId},
+                               {receiverId},
+                               'pending',
+                               {createdAt},
+                               {updatedAt})"
+        );
 
         if (result > 0)
         {
@@ -74,11 +82,13 @@ public class FriendRequestService
         if (result.Success)
         {
             var updatedAt = DateTime.UtcNow;
-            var acceptFriendRequest = await _context
-                .Database
-                .ExecuteSqlAsync(
-                    $"UPDATE friend_request SET status = 'accepted', updated_at = {updatedAt} WHERE requester_id = {friendRequestId} AND receiver_id = {currentUserId}"
-                );
+            await _context.Database.ExecuteSqlAsync(
+                @$"UPDATE friend_request
+                   SET status = 'accepted',
+                       updated_at = {updatedAt}
+                   WHERE requester_id = {friendRequestId}
+                     AND receiver_id = {currentUserId}"
+            );
             return new FriendRequestAcceptResponse
             {
                 Success = true,
@@ -100,9 +110,14 @@ public class FriendRequestService
     public async Task<FriendRequest?> GetFriendRequest(Guid friendRequestId, Guid currentUserId)
     {
         var friendRequest = await _context
-            .FriendRequest
-            .FromSql(
-                $"SELECT * FROM friend_request WHERE (requester_id = {friendRequestId} AND receiver_id = {currentUserId}) OR (requester_id = {currentUserId} AND receiver_id = {friendRequestId}) AND status != 'rejected'"
+            .FriendRequest.FromSql(
+                @$"SELECT *
+                   FROM friend_request
+                   WHERE (requester_id = {friendRequestId}
+                          AND receiver_id = {currentUserId})
+                     OR (requester_id = {currentUserId}
+                         AND receiver_id = {friendRequestId})
+                     AND status != 'rejected'"
             )
             .FirstOrDefaultAsync();
 
@@ -123,9 +138,12 @@ public class FriendRequestService
     public async Task<List<FriendRequest>> IncomingFriendRequests(Guid currentUserId)
     {
         var incomingFriendRequests = await _context
-            .FriendRequest
-            .FromSql(
-                $"SELECT * FROM friend_request WHERE receiver_id = {currentUserId} AND status = 'pending' ORDER BY created_at DESC"
+            .FriendRequest.FromSql(
+                @$"SELECT *
+                   FROM friend_request
+                   WHERE receiver_id = {currentUserId}
+                     AND status = 'pending'
+                   ORDER BY created_at DESC"
             )
             .ToListAsync();
 
@@ -135,9 +153,12 @@ public class FriendRequestService
     public async Task<List<FriendRequest>> OutgoingFriendRequests(Guid currentUserId)
     {
         var outgoingFriendRequests = await _context
-            .FriendRequest
-            .FromSql(
-                $"SELECT * FROM friend_request WHERE requester_id = {currentUserId} AND status = 'pending' ORDER BY created_at DESC"
+            .FriendRequest.FromSql(
+                @$"SELECT *
+                   FROM friend_request
+                   WHERE requester_id = {currentUserId}
+                     AND status = 'pending'
+                   ORDER BY created_at DESC"
             )
             .ToListAsync();
 
@@ -149,11 +170,12 @@ public class FriendRequestService
         Guid currentUserId
     )
     {
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"DELETE FROM friend_request WHERE (requester_id = {currentUserId} AND receiver_id = {friendRequestId})"
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"DELETE
+               FROM friend_request
+               WHERE (requester_id = {currentUserId}
+                      AND receiver_id = {friendRequestId})"
+        );
 
         if (result > 0)
         {
@@ -179,11 +201,13 @@ public class FriendRequestService
     )
     {
         var updatedAt = DateTime.UtcNow;
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"UPDATE friend_request SET status = 'rejected', updated_at = {updatedAt} WHERE receiver_id = {currentUserId} AND requester_id = {friendRequestId}"
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"UPDATE friend_request
+               SET status = 'rejected',
+                   updated_at = {updatedAt}
+               WHERE receiver_id = {currentUserId}
+                 AND requester_id = {friendRequestId}"
+        );
 
         if (result > 0)
         {
@@ -209,10 +233,14 @@ public class FriendRequestService
         Guid currentUserId
     )
     {
-        var friendRequestDeletionResult = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"DELETE FROM friend_request WHERE (receiver_id = {currentUserId} AND requester_id = {friendRequestId}) OR (receiver_id = {friendRequestId} AND requester_id = {currentUserId})"
+        var friendRequestDeletionResult =
+            await _context.Database.ExecuteSqlAsync(
+                @$"DELETE
+                   FROM friend_request
+                   WHERE (receiver_id = {currentUserId}
+                          AND requester_id = {friendRequestId})
+                     OR (receiver_id = {friendRequestId}
+                         AND requester_id = {currentUserId})"
             );
 
         if (friendRequestDeletionResult > 0)

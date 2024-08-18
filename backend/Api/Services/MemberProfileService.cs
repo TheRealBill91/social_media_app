@@ -17,11 +17,25 @@ public class MemberProfileService
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
-        var profileCreationResult = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"INSERT INTO member_profile (member_id, photo_url, bio, location, url, created_at, updated_at, deleted_at) VALUES ({memberId}, null, null, null, null, {createdAt}, {updatedAt}, null)"
-            );
+        var profileCreationResult = await _context.Database.ExecuteSqlAsync(
+            @$"INSERT INTO member_profile 
+                               (member_id, 
+                               photo_url, 
+                               bio, 
+                               location, 
+                               url, 
+                               created_at, 
+                               updated_at, 
+                               deleted_at) 
+                   VALUES      ({memberId}, 
+                               null, 
+                               null, 
+                               null, 
+                               null, 
+                               {createdAt}, 
+                               {updatedAt}, 
+                               null)"
+        );
 
         if (profileCreationResult > 0)
         {
