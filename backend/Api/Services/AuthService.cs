@@ -30,11 +30,11 @@ public class AuthService
     public async Task UpdateUserLastActivityDateAsync(Guid userId)
     {
         var lastActivityDate = DateTime.UtcNow;
-        await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"UPDATE member SET updated_at = {lastActivityDate} WHERE id = {userId} "
-            );
+        await _context.Database.ExecuteSqlAsync(
+            @$"UPDATE member 
+               SET updated_at = {lastActivityDate} 
+               WHERE id = {userId} "
+        );
     }
 
     public async Task<string> GenerateEmailContentFromTemplate(
@@ -237,11 +237,13 @@ public class AuthService
         Guid userId
     )
     {
-        var result = await _context
-            .Database
-            .ExecuteSqlAsync(
-                $"INSERT INTO password_history (id, password_hash) VALUES ( {userId}, {passwordHash})"
-            );
+        var result = await _context.Database.ExecuteSqlAsync(
+            @$"INSERT INTO password_history 
+                           (id, 
+                           password_hash) 
+                VALUES     ({userId},
+                           {passwordHash})"
+        );
 
         if (result > 0)
         {

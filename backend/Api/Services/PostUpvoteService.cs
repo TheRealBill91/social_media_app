@@ -15,9 +15,12 @@ public class PostUpvoteService
 
     public async Task<PostUpvote?> GetPostUpvote(Guid? postId, Guid? authorId)
     {
-        var postUpvote = await _context.PostUpvote
-            .FromSql(
-                $"SELECT * FROM post_upvote WHERE post_id = {postId} AND author_id = {authorId}"
+        var postUpvote = await _context
+            .PostUpvote.FromSql(
+                @$"SELECT *
+                   FROM  post_upvote
+                   WHERE post_id = {postId}
+                          AND author_id = {authorId}"
             )
             .FirstOrDefaultAsync();
 
@@ -27,7 +30,9 @@ public class PostUpvoteService
     public async Task<UpvoteDeletionResponse> DeletePostUpvote(Guid? postId, Guid? authorId)
     {
         var result = await _context.Database.ExecuteSqlAsync(
-            $"DELETE from post_upvote WHERE (post_id = {postId} AND author_id = {authorId})"
+            @$"DELETE FROM post_upvote
+               WHERE (post_id = {postId}
+                       AND author_id = {authorId})"
         );
 
         if (result > 0)
@@ -54,7 +59,15 @@ public class PostUpvoteService
         var updatedAt = createdAt;
 
         var result = await _context.Database.ExecuteSqlAsync(
-            $"INSERT INTO post_upvote (created_at, updated_at, author_id, post_id) VALUES ( {createdAt},{updatedAt},{authorId},{postId})"
+            @$"INSERT INTO post_upvote
+                           (created_at,
+                           updated_at,
+                           author_id,
+                           post_id)
+               VALUES      ({createdAt},
+                           {updatedAt},
+                           {authorId},
+                           {postId})"
         );
 
         if (result > 0)
