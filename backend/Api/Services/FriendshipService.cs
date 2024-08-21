@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using SocialMediaApp.Data;
 using SocialMediaApp.Models;
 
@@ -92,7 +91,7 @@ public class FriendshipService
         }
     }
 
-    public async Task<IEnumerable<Guid>> GetFriendsIds(Guid currentUserId)
+    public async Task<IReadOnlyList<Guid>> GetFriendsIds(Guid currentUserId)
     {
         var friendIds = await _context
             .Database.SqlQuery<Guid>(

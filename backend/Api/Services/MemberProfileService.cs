@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
+using SocialMediaApp.DTOs;
 
 namespace SocialMediaApp.Services;
 
@@ -55,9 +56,9 @@ public class MemberProfileService
         }
     }
 
-    public async Task<MemberProfileInfoResponse?> GetMemberProfile(Guid memberId)
+    public async Task<MemberProfileInfoDTO?> GetMemberProfile(Guid memberId)
     {
-        var memberProfileSQLVersion = await _context
+        return await _context
             .Database.SqlQuery<MemberProfileInfoDTO>(
                 @$"SELECT member.user_name,
                       member_profile.photo_url,
@@ -70,8 +71,6 @@ public class MemberProfileService
                    WHERE member_profile.member_id = {memberId} AND member_profile.deleted_at IS NULL"
             )
             .FirstOrDefaultAsync();
-
-        return memberProfile;
     }
 
     public async Task<MemberProfileUpdateResponse> UpdateMemberProfile(

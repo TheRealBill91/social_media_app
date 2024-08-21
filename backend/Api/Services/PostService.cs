@@ -77,24 +77,12 @@ public class PostService
                    post.updated_at,
                    post.author_id"
             )
-            .Select(
-                pu =>
-                    new PostWithUpvoteCount
-                    {
-                        Title = pu.Post.Title,
-                        Content = pu.Post.Content,
-                        CreatedAt = pu.Post.CreatedAt,
-                        UpdatedAt = pu.Post.UpdatedAt,
-                        AuthorId = pu.Post.AuthorId,
-                        PostUpvoteCount = pu.Upvotes.Count()
-                    }
-            )
-            .FirstOrDefaultAsync();
+            .SingleOrDefaultAsync();
 
         return postWithUpvotes;
     }
 
-    public async Task<List<PostWithUpvoteCount>> GetPosts(int page)
+    public async Task<IReadOnlyList<PostWithUpvoteCount>> GetPosts(int page)
     {
         int PageSize = 10;
         int totalPosts = await _context
@@ -134,9 +122,6 @@ public class PostService
                    ORDER BY post.created_at DESC
                    LIMIT {PageSize} OFFSET {pagesToSkip}"
             )
-            .OrderByDescending(pu => pu.CreatedAt)
-            .Skip(pagesToSkip)
-            .Take(PageSize)
             .ToListAsync();
 
         return postWithUpvotes;
@@ -189,9 +174,14 @@ public class PostService
     }
 
     // Get posts for logged in users home feed
-    public async Task<List<PostWithUpvoteCount>> GetHomeFeedPosts(Guid currentUserId)
+    public async Task<IReadOnlyList<PostWithUpvoteCount>> GetHomeFeedPosts(
+        Guid currentUserId
+    )
     {
         var friendIds = await _friendshipService.GetFriendsIds(currentUserId);
+
+        // ! Using LINQ instead of vanilla SQL as we cant use the IN
+        // ! operator with the List of friendIds
         var homeFeedPosts = await _context
             .Post
             .Where(p => friendIds.Contains(p.AuthorId) && p.DeletedAt == null)
@@ -220,8 +210,9 @@ public class PostService
         return homeFeedPosts;
     }
 
-    // Get posts for the member profile
-    public async Task<IEnumerable<PostWithUpvoteCount>> GetProfilePosts(Guid memberId)
+    public async Task<IReadOnlyList<PostWithUpvoteCount>> GetProfilePosts(
+        Guid memberId
+    )
     {
         var profilePosts = await _context
             .Database.SqlQuery<PostWithUpvoteCount>(
@@ -243,8 +234,6 @@ public class PostService
                    ORDER BY post.created_at DESC
                    LIMIT 10"
             )
-            .OrderByDescending(pu => pu.CreatedAt)
-            .Take(10)
             .ToListAsync();
 
         return profilePosts;

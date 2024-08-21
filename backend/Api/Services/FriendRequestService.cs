@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
 using SocialMediaApp.Models;
@@ -135,7 +134,9 @@ public class FriendRequestService
         return null;
     }
 
-    public async Task<List<FriendRequest>> IncomingFriendRequests(Guid currentUserId)
+    public async Task<IReadOnlyList<FriendRequest>> IncomingFriendRequests(
+        Guid currentUserId
+    )
     {
         var incomingFriendRequests = await _context
             .FriendRequest.FromSql(
@@ -150,7 +151,9 @@ public class FriendRequestService
         return incomingFriendRequests;
     }
 
-    public async Task<List<FriendRequest>> OutgoingFriendRequests(Guid currentUserId)
+    public async Task<IReadOnlyList<FriendRequest>> OutgoingFriendRequests(
+        Guid currentUserId
+    )
     {
         var outgoingFriendRequests = await _context
             .FriendRequest.FromSql(

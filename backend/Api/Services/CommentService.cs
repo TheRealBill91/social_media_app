@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using SocialMediaApp.Data;
+using SocialMediaApp.DTOs;
 using SocialMediaApp.Models;
 
 namespace SocialMediaApp.Services;
@@ -60,7 +61,7 @@ public class CommentService
         }
     }
 
-    public async Task<CommentWithUpvoteCount?> GetComment(Guid id)
+    public async Task<CommentWithUpvoteCountDTO?> GetComment(Guid id)
     {
         var commentId = id;
         return await _context
@@ -81,26 +82,13 @@ public class CommentService
                     author, 
                     comment.author_id"
             )
-            // Now, select the data into a new shape
-            .Select(
-                cu =>
-                    new CommentWithUpvoteCount
-                    {
-                        Content = cu.Comment.Content,
-                        CreatedAt = cu.Comment.CreatedAt,
-                        UpdatedAt = cu.Comment.UpdatedAt,
-                        AuthorId = cu.Comment.AuthorId,
-                        PostId = cu.Comment.PostId,
-                        CommentUpvoteCount = cu.Upvotes.Count() // This is how you'd count the upvotes
-                    }
-            )
-            // Finally, get the first or default result asynchronously
-            .FirstOrDefaultAsync();
-
-        return commentWithUpvotes;
+            .SingleOrDefaultAsync();
     }
 
-    public async Task<List<CommentWithUpvoteCount>?> GetComments(int page, Guid postId)
+    public async Task<IReadOnlyList<CommentWithUpvoteCountDTO>?> GetComments(
+        int page,
+        Guid postId
+    )
     {
         int PageSize = 10;
         int totalComments = await _context
@@ -144,15 +132,15 @@ public class CommentService
                 ORDER BY comment.created_at DESC 
                 LIMIT {PageSize} OFFSET {pagesToSkip}"
             )
-            .OrderByDescending(cu => cu.CreatedAt)
-            .Skip(pagesToSkip)
-            .Take(PageSize)
             .ToListAsync();
 
         return commentsWithUpvotes;
     }
 
-    public async Task<CommentUpdateResponse> UpdateCommentAsync(Guid id, CommentDTO commentToUpdate)
+    public async Task<CommentUpdateResponse> UpdateComment(
+        Guid id,
+        CommentDTO commentToUpdate
+    )
     {
         var updatedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
@@ -181,7 +169,7 @@ public class CommentService
     }
 
     // Apply a soft delete to the target comment document
-    public async Task<CommentDeletionResponse> DeleteCommentAsync(Guid id)
+    public async Task<CommentDeletionResponse> DeleteComment(Guid id)
     {
         var deletedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
