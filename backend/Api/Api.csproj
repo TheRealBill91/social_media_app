@@ -3,7 +3,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
-        <RootNamespace>SocialMediaApp.Web</RootNamespace>
+        <RootNamespace>SocialMediaApp</RootNamespace>
         <UserSecretsId>812e1cfa-5244-41e5-8501-2abf6075d4f2</UserSecretsId>
     </PropertyGroup>
     <ItemGroup>
