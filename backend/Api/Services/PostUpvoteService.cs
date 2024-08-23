@@ -27,7 +27,10 @@ public class PostUpvoteService
         return postUpvote;
     }
 
-    public async Task<UpvoteDeletionResponse> DeletePostUpvote(Guid? postId, Guid? authorId)
+    public async Task<UpvoteDeletionResponse> DeletePostUpvote(
+        Guid? postId,
+        Guid? authorId
+    )
     {
         var result = await _context.Database.ExecuteSqlAsync(
             @$"DELETE FROM post_upvote
@@ -53,7 +56,10 @@ public class PostUpvoteService
         }
     }
 
-    public async Task<UpvoteCreationResponse> CreatePostUpvote(Guid? postId, Guid? authorId)
+    public async Task<UpvoteCreationResponse> CreatePostUpvote(
+        Guid? postId,
+        Guid? authorId
+    )
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;

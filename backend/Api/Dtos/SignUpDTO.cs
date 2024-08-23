@@ -24,7 +24,11 @@ public class SignUpDTO
     public string LastName { get; set; } = null!;
 
     [Required(ErrorMessage = "Password is required")]
-    [StringLength(50, ErrorMessage = "{0} length must be between {2} and {1}.", MinimumLength = 8)]
+    [StringLength(
+        50,
+        ErrorMessage = "{0} length must be between {2} and {1}.",
+        MinimumLength = 8
+    )]
     [DataType(DataType.Password)]
     public string Password { get; set; } = null!;
 

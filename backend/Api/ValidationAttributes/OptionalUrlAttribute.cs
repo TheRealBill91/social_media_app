@@ -4,7 +4,10 @@ namespace SocialMediaApp.ValidationAttributes;
 
 public class OptionalUrlAttribute : ValidationAttribute
 {
-    protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
+    protected override ValidationResult? IsValid(
+        object? value,
+        ValidationContext validationContext
+    )
     {
         if (value == null || string.IsNullOrEmpty(value.ToString()))
         {
@@ -17,7 +20,9 @@ public class OptionalUrlAttribute : ValidationAttribute
 
         if (!urlAttribute.IsValid(value))
         {
-            return new ValidationResult(this.ErrorMessage ?? "Invalid URL format.");
+            return new ValidationResult(
+                this.ErrorMessage ?? "Invalid URL format."
+            );
         }
 
         return ValidationResult.Success;

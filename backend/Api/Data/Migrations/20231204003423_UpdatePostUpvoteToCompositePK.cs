@@ -13,20 +13,21 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropPrimaryKey(
                 name: "pk_post_upvote",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
             migrationBuilder.DropIndex(
                 name: "ix_post_upvote_author_id",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
-            migrationBuilder.DropColumn(
-                name: "id",
-                table: "post_upvote");
+            migrationBuilder.DropColumn(name: "id", table: "post_upvote");
 
             migrationBuilder.AddPrimaryKey(
                 name: "pk_post_upvote",
                 table: "post_upvote",
-                columns: new[] { "author_id", "post_id" });
+                columns: new[] { "author_id", "post_id" }
+            );
         }
 
         /// <inheritdoc />
@@ -34,24 +35,28 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropPrimaryKey(
                 name: "pk_post_upvote",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
             migrationBuilder.AddColumn<Guid>(
                 name: "id",
                 table: "post_upvote",
                 type: "uuid",
                 nullable: false,
-                defaultValue: new Guid("00000000-0000-0000-0000-000000000000"));
+                defaultValue: new Guid("00000000-0000-0000-0000-000000000000")
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "pk_post_upvote",
                 table: "post_upvote",
-                column: "id");
+                column: "id"
+            );
 
             migrationBuilder.CreateIndex(
                 name: "ix_post_upvote_author_id",
                 table: "post_upvote",
-                column: "author_id");
+                column: "author_id"
+            );
         }
     }
 }

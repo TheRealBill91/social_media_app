@@ -13,7 +13,10 @@ public class FriendshipService
         _context = context;
     }
 
-    public async Task<FriendshipCreationResponse> CreateFriendship(Guid memberId, Guid friendId)
+    public async Task<FriendshipCreationResponse> CreateFriendship(
+        Guid memberId,
+        Guid friendId
+    )
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
@@ -64,7 +67,10 @@ public class FriendshipService
         return friendship;
     }
 
-    public async Task<FriendshipDeletionResponse> DeleteFriendship(Guid memberId, Guid friendId)
+    public async Task<FriendshipDeletionResponse> DeleteFriendship(
+        Guid memberId,
+        Guid friendId
+    )
     {
         var friendshipDeletionResult = await _context.Database.ExecuteSqlAsync(
             @$"DELETE

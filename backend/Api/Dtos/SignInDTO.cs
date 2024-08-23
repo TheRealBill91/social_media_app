@@ -8,7 +8,11 @@ public class SignInDTO
     public required string Username { get; set; }
 
     [Required(ErrorMessage = "Password is required")]
-    [StringLength(50, ErrorMessage = "{0} length must be between {2} and {1}.", MinimumLength = 8)]
+    [StringLength(
+        50,
+        ErrorMessage = "{0} length must be between {2} and {1}.",
+        MinimumLength = 8
+    )]
     [DataType(DataType.Password)]
     public required string Password { get; set; }
 

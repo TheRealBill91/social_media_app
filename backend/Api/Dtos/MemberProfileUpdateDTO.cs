@@ -22,20 +22,32 @@ public class MemberProfileUpdateDTO
     public string UserName { get; set; } = null!;
 
     // url for profile photo
-    [StringLength(200, ErrorMessage = "Maximum URL length of 200 characters exceeded.")]
+    [StringLength(
+        200,
+        ErrorMessage = "Maximum URL length of 200 characters exceeded."
+    )]
     [OptionalUrl(ErrorMessage = "Invalid URL format.")]
     [DataType(DataType.Text)]
     public string? Photo_url { get; set; }
 
-    [MaxLength(500, ErrorMessage = "Maximum bio length of 500 characters exceeded.")]
+    [MaxLength(
+        500,
+        ErrorMessage = "Maximum bio length of 500 characters exceeded."
+    )]
     [DataType(DataType.Text)]
     public string? Bio { get; set; }
 
-    [MaxLength(100, ErrorMessage = "Maximum location length of 100 characters exceeded.")]
+    [MaxLength(
+        100,
+        ErrorMessage = "Maximum location length of 100 characters exceeded."
+    )]
     public string? Location { get; set; }
 
     // url for linking to another website for example
     [OptionalUrl(ErrorMessage = "Invalid URL format.")]
-    [MaxLength(200, ErrorMessage = "Maximum URL length of 200 characters exceeded.")]
+    [MaxLength(
+        200,
+        ErrorMessage = "Maximum URL length of 200 characters exceeded."
+    )]
     public string? Url { get; set; }
 }

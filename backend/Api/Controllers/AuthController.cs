@@ -65,7 +65,9 @@ public class AuthController : BaseApiController
     {
         if (User.Identity!.IsAuthenticated)
         {
-            return BadRequest(new { ErrorMessage = "User is already authenticated" });
+            return BadRequest(
+                new { ErrorMessage = "User is already authenticated" }
+            );
         }
 
         // Find the user by email
@@ -78,8 +80,11 @@ public class AuthController : BaseApiController
 
         if (user == null || user.UserName == null)
         {
+            // look at documentation for why you use this password sign in here
             await _signInManager.PasswordSignInAsync(user, "", false, false);
-            return BadRequest(new { ErrorMessage = "Invalid username and/or password" });
+            return BadRequest(
+                new { ErrorMessage = "Invalid username and/or password" }
+            );
         }
 
         bool rememberMe = form.RememberMe == true;
@@ -99,16 +104,23 @@ public class AuthController : BaseApiController
         else if (result.IsLockedOut)
         {
             return BadRequest(
-                new { ErrorMessage = "Too many failed signin attempts, please try in 30 minutes" }
+                new
+                {
+                    ErrorMessage = "Too many failed sign-in attempts, please try in 30 minutes"
+                }
             );
         }
         else if (result.IsNotAllowed)
         {
-            return BadRequest(new { ErrorMessage = "Please confirm your email to sign in" });
+            return BadRequest(
+                new { ErrorMessage = "Please confirm your email to sign in" }
+            );
         }
         else
         {
-            return BadRequest(new { ErrorMessage = "Invalid username and/or password" });
+            return BadRequest(
+                new { ErrorMessage = "Invalid username and/or password" }
+            );
         }
     }
 
@@ -140,13 +152,16 @@ public class AuthController : BaseApiController
             newUser,
             form.Password
         );
-        var userResult = await userValidator.ValidateAsync(_userManager, newUser);
+        var userResult = await userValidator.ValidateAsync(
+            _userManager,
+            newUser
+        );
 
         if (user != null)
         {
             var logins = await _userManager.GetLoginsAsync(user);
-            var googleLoginExists = logins.FirstOrDefault(
-                l => l.LoginProvider == GoogleDefaults.AuthenticationScheme
+            var googleLoginExists = logins.FirstOrDefault(l =>
+                l.LoginProvider == GoogleDefaults.AuthenticationScheme
             );
 
             bool passwordSet = await _userManager.HasPasswordAsync(user);
@@ -154,7 +169,10 @@ public class AuthController : BaseApiController
             // google external account exists but no password set on it (yet)
             if (googleLoginExists != null && !passwordSet)
             {
-                var addPasswordResult = await _userManager.AddPasswordAsync(user, form.Password);
+                var addPasswordResult = await _userManager.AddPasswordAsync(
+                    user,
+                    form.Password
+                );
                 if (addPasswordResult.Succeeded)
                 {
                     await _signInManager.SignInAsync(user, isPersistent: true);
@@ -174,14 +192,20 @@ public class AuthController : BaseApiController
                     {
                         foreach (var error in passwordResult.Errors)
                         {
-                            ModelState.AddModelError(error.Code, error.Description);
+                            ModelState.AddModelError(
+                                error.Code,
+                                error.Description
+                            );
                         }
                     }
                     if (!userResult.Succeeded)
                     {
                         foreach (var error in userResult.Errors)
                         {
-                            ModelState.AddModelError(error.Code, error.Description);
+                            ModelState.AddModelError(
+                                error.Code,
+                                error.Description
+                            );
                         }
                     }
                 }
@@ -200,7 +224,10 @@ public class AuthController : BaseApiController
             return BadRequest(ModelState);
         }
 
-        var createUserResult = await _userManager.CreateAsync(newUser, form.Password);
+        var createUserResult = await _userManager.CreateAsync(
+            newUser,
+            form.Password
+        );
 
         var newLocalUser = await _userManager.FindByEmailAsync(form.Email);
 
@@ -219,10 +246,8 @@ public class AuthController : BaseApiController
 
         var userId = newLocalUser.Id;
 
-        var addPasswordToHistoryResult = await _authService.AddPasswordToHistory(
-            passwordHash!,
-            userId
-        );
+        var addPasswordToHistoryResult =
+            await _authService.AddPasswordToHistory(passwordHash!, userId);
 
         if (!addPasswordToHistoryResult.Success)
         {
@@ -232,7 +257,9 @@ public class AuthController : BaseApiController
 
         // * Commented out just for testing AddPasswordToHistory functionality
 
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(newUser);
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(
+            newUser
+        );
 
         var baseUrl = _apiSettingsOptions.BaseUrl;
         var frontendURL = _apiSettingsOptions.FrontendUrl;
@@ -253,9 +280,13 @@ public class AuthController : BaseApiController
     //[EnableRateLimiting("confirmEmailSlidingWindow")]
     [HttpPost("confirm-email")]
     [AllowAnonymous]
-    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailDTO emailFields)
+    public async Task<IActionResult> ConfirmEmail(
+        [FromBody] ConfirmEmailDTO emailFields
+    )
     {
-        var user = await _userManager.FindByIdAsync(emailFields.UserId.ToString());
+        var user = await _userManager.FindByIdAsync(
+            emailFields.UserId.ToString()
+        );
         if (user == null)
         {
             return NotFound(new { ErrorMessage = "User not found" });
@@ -270,13 +301,19 @@ public class AuthController : BaseApiController
         if (result.Succeeded)
         {
             // create member profile
-            var memberProfileCreation = await _memberProfileService.CreateMemberProfile(
-                emailFields.UserId
-            );
+            var memberProfileCreation =
+                await _memberProfileService.CreateMemberProfile(
+                    emailFields.UserId
+                );
             if (!memberProfileCreation.Success)
             {
                 // should not get here
-                return BadRequest(new { ErrorMessage = "Failed to create the member profile." });
+                return BadRequest(
+                    new
+                    {
+                        ErrorMessage = "Failed to create the member profile."
+                    }
+                );
             }
 
             await _authService.UpdateUserLastActivityDateAsync(user.Id);
@@ -285,9 +322,13 @@ public class AuthController : BaseApiController
         else
         {
             bool tokenExpired = result
-                .Errors
-                .Select(e => e.Description)
-                .Any(e => e.Contains("invalid token.", StringComparison.OrdinalIgnoreCase));
+                .Errors.Select(e => e.Description)
+                .Any(e =>
+                    e.Contains(
+                        "invalid token.",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                );
 
             if (tokenExpired)
             {
@@ -300,7 +341,9 @@ public class AuthController : BaseApiController
             }
             else
             {
-                return BadRequest(new { ErrorMessage = "Error confirming email confirmation" });
+                return BadRequest(
+                    new { ErrorMessage = "Error confirming email confirmation" }
+                );
             }
         }
     }
@@ -313,7 +356,9 @@ public class AuthController : BaseApiController
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!string.IsNullOrEmpty(userId))
         {
-            await _authService.UpdateUserLastActivityDateAsync(Guid.Parse(userId));
+            await _authService.UpdateUserLastActivityDateAsync(
+                Guid.Parse(userId)
+            );
         }
         await _signInManager.SignOutAsync();
         return NoContent();
@@ -331,7 +376,9 @@ public class AuthController : BaseApiController
 
         if (user != null)
         {
-            var emailIsVerified = await _userManager.IsEmailConfirmedAsync(user);
+            var emailIsVerified = await _userManager.IsEmailConfirmedAsync(
+                user
+            );
             if (emailIsVerified)
             {
                 // will only be reached if user is allowed to manually input email to send new confirmation email
@@ -345,29 +392,39 @@ public class AuthController : BaseApiController
                     StatusCode = 409
                 };
             }
-            string userId = user.Id.ToString();
-            bool canRequestEmailConfirmation = _authService.CanSendNewConfirmationEmail(user);
+            bool canRequestEmailConfirmation =
+                _authService.CanSendNewConfirmationEmail(user);
 
             if (canRequestEmailConfirmation)
             {
-                string code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                string code =
+                    await _userManager.GenerateEmailConfirmationTokenAsync(
+                        user
+                    );
 
                 string baseUrl = _apiSettingsOptions.BaseUrl;
 
                 string callbackURL =
                     $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                string emailHTML = await _authService.GenerateEmailContentFromTemplate(
-                    callbackURL,
-                    "EmailConfirmationTemplate.html"
-                );
+                string emailHTML =
+                    await _authService.GenerateEmailContentFromTemplate(
+                        callbackURL,
+                        "EmailConfirmationTemplate.html"
+                    );
 
                 if (user.Email == null)
                 {
-                    return BadRequest(new { ErrorMessage = "Email is missing" });
+                    return BadRequest(
+                        new { ErrorMessage = "Email is missing" }
+                    );
                 }
 
-                await _emailSender.SendEmailAsync(user.Email, "Confirm your email", emailHTML);
+                await _emailSender.SendEmailAsync(
+                    user.Email,
+                    "Confirm your email",
+                    emailHTML
+                );
 
                 await _memberService.UpdateEmailConfirmationSendDate(Guid.Parse(userId));
 
@@ -376,7 +433,12 @@ public class AuthController : BaseApiController
                     Guid.Parse(userId)
                 );
 
-                return Ok(new { successMessage = "Successfully resent email confirmation" });
+                return Ok(
+                    new
+                    {
+                        successMessage = "Successfully resent email confirmation"
+                    }
+                );
             }
             else
             {
@@ -392,7 +454,9 @@ public class AuthController : BaseApiController
             }
         }
 
-        return NotFound(new { ErrorMessage = "Issue sending email confirmation" });
+        return NotFound(
+            new { ErrorMessage = "Issue sending email confirmation" }
+        );
     }
 
     // [EnableRateLimiting("signInSlidingWindow")]
@@ -401,10 +465,11 @@ public class AuthController : BaseApiController
     public IActionResult GoogleSignin(string? returnUrl = null)
     {
         var redirectUrl = Url.Action("GoogleResponse", "Auth");
-        var properties = _signInManager.ConfigureExternalAuthenticationProperties(
-            GoogleDefaults.AuthenticationScheme,
-            redirectUrl
-        );
+        var properties =
+            _signInManager.ConfigureExternalAuthenticationProperties(
+                GoogleDefaults.AuthenticationScheme,
+                redirectUrl
+            );
 
         return Challenge(properties, GoogleDefaults.AuthenticationScheme);
     }
@@ -431,13 +496,16 @@ public class AuthController : BaseApiController
         // return URL of the Remix BFF callback loader
         var redirectURL = $"{frontendURL}/auth/google/callback";
 
-        var externalSigninInfo = await _signInManager.GetExternalLoginInfoAsync();
+        var externalSigninInfo =
+            await _signInManager.GetExternalLoginInfoAsync();
 
         if (externalSigninInfo == null)
         {
-            Response
-                .Cookies
-                .Append("ExternalSigninError", "We ran into an unexpected issue", cookieOptions);
+            Response.Cookies.Append(
+                "ExternalSigninError",
+                "We ran into an unexpected issue",
+                cookieOptions
+            );
             return Redirect(redirectURL);
         }
 
@@ -451,15 +519,23 @@ public class AuthController : BaseApiController
 
         var claims = externalSigninInfo.Principal.Claims;
 
-        Claim? emailClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email);
-        Claim? firstNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.GivenName);
-        Claim? lastNameClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Surname);
+        Claim? emailClaim = claims.FirstOrDefault(c =>
+            c.Type == ClaimTypes.Email
+        );
+        Claim? firstNameClaim = claims.FirstOrDefault(c =>
+            c.Type == ClaimTypes.GivenName
+        );
+        Claim? lastNameClaim = claims.FirstOrDefault(c =>
+            c.Type == ClaimTypes.Surname
+        );
         string userName = await _authService.GenerateUniqueUserName(
             firstNameClaim!.Value,
             lastNameClaim!.Value
         );
 
-        var pictureClaim = externalSigninInfo.Principal.FindFirstValue("urn:google:picture");
+        var pictureClaim = externalSigninInfo.Principal.FindFirstValue(
+            "urn:google:picture"
+        );
 
         if (signInResult.Succeeded)
         // User successfully signed in with Google; no further action needed.
@@ -468,9 +544,10 @@ public class AuthController : BaseApiController
 
             var userId = user?.Id.ToString();
 
-            var memberProfile = await _context
-                .MemberProfile
-                .FirstOrDefaultAsync(mp => mp.MemberId.ToString() == userId);
+            var memberProfile =
+                await _context.MemberProfile.FirstOrDefaultAsync(mp =>
+                    mp.MemberId.ToString() == userId
+                );
 
             if (memberProfile?.PhotoURL == null)
             {
@@ -483,9 +560,11 @@ public class AuthController : BaseApiController
             // override default maxAge to match the auth cookie maxAge
             cookieOptions.MaxAge = TimeSpan.FromDays(3);
 
-            Response
-                .Cookies
-                .Append("MessageCookie", "Sign in successful! Welcome back.", cookieOptions);
+            Response.Cookies.Append(
+                "MessageCookie",
+                "Sign in successful! Welcome back.",
+                cookieOptions
+            );
 
             // override the path so the user id cookie persists across different
             // paths on the frontend
@@ -497,13 +576,11 @@ public class AuthController : BaseApiController
         }
         else if (signInResult.IsLockedOut)
         {
-            Response
-                .Cookies
-                .Append(
-                    "LockedOutMessage",
-                    "Too many login attempts, try again in 30 minutes",
-                    cookieOptions
-                );
+            Response.Cookies.Append(
+                "LockedOutMessage",
+                "Too many login attempts, try again in 30 minutes",
+                cookieOptions
+            );
 
             return Redirect(redirectURL);
         }
@@ -512,7 +589,10 @@ public class AuthController : BaseApiController
             // Checking if account already exists using email claim
             if (emailClaim == null)
             {
-                Response.Cookies.Append("EmailClaimError", "We ran into an unexpected issue");
+                Response.Cookies.Append(
+                    "EmailClaimError",
+                    "We ran into an unexpected issue"
+                );
                 return Redirect(redirectURL);
             }
 
@@ -521,10 +601,11 @@ public class AuthController : BaseApiController
             if (user != null)
             // Linking user's local account to their google account and signing them in
             {
-                IdentityResult externalLinkResult = await _authService.LinkExternalLogin(
-                    user,
-                    externalSigninInfo
-                );
+                IdentityResult externalLinkResult =
+                    await _authService.LinkExternalLogin(
+                        user,
+                        externalSigninInfo
+                    );
                 if (externalLinkResult.Succeeded)
                 {
                     var userId = user.Id.ToString();
@@ -538,24 +619,20 @@ public class AuthController : BaseApiController
 
                     await _signInManager.SignInAsync(user, isPersistent: true);
 
-                    Response
-                        .Cookies
-                        .Append(
-                            "MessageCookie",
-                            "Account linked successfully! You are now logged in.",
-                            cookieOptions
-                        );
+                    Response.Cookies.Append(
+                        "MessageCookie",
+                        "Account linked successfully! You are now logged in.",
+                        cookieOptions
+                    );
 
                     return Redirect(redirectURL);
                 }
                 else
                 {
-                    Response
-                        .Cookies
-                        .Append(
-                            "CreateOrLinkError",
-                            "We ran into an issue creating or linking your accounts"
-                        );
+                    Response.Cookies.Append(
+                        "CreateOrLinkError",
+                        "We ran into an issue creating or linking your accounts"
+                    );
                     return Redirect(redirectURL);
                 }
             }
@@ -573,25 +650,25 @@ public class AuthController : BaseApiController
                     UpdatedAt = DateTime.UtcNow,
                     EmailConfirmationSentCount = 0
                 };
-                var externalLoginCreationResult = await _authService.CreateAndLinkExternalLogin(
-                    newUser,
-                    externalSigninInfo
-                );
+                var externalLoginCreationResult =
+                    await _authService.CreateAndLinkExternalLogin(
+                        newUser,
+                        externalSigninInfo
+                    );
                 if (externalLoginCreationResult.Succeeded)
                 {
                     // create member profile
-                    var memberProfileCreation = await _memberProfileService.CreateMemberProfile(
-                        newUser.Id
-                    );
+                    var memberProfileCreation =
+                        await _memberProfileService.CreateMemberProfile(
+                            newUser.Id
+                        );
                     if (!memberProfileCreation.Success)
                     {
                         // should not get here
-                        Response
-                            .Cookies
-                            .Append(
-                                "CreateOrLinkError",
-                                "We ran into an issue creating or linking your accounts"
-                            );
+                        Response.Cookies.Append(
+                            "CreateOrLinkError",
+                            "We ran into an issue creating or linking your accounts"
+                        );
                         return Redirect(redirectURL);
                     }
 
@@ -604,25 +681,24 @@ public class AuthController : BaseApiController
 
                     Response.Cookies.Append("UserId", userId, cookieOptions);
 
-                    await _signInManager.SignInAsync(newUser, isPersistent: true);
+                    await _signInManager.SignInAsync(
+                        newUser,
+                        isPersistent: true
+                    );
 
-                    Response
-                        .Cookies
-                        .Append(
-                            "MessageCookie",
-                            "Account created successfully! You are now logged in"
-                        );
+                    Response.Cookies.Append(
+                        "MessageCookie",
+                        "Account created successfully! You are now logged in"
+                    );
 
                     return Redirect(redirectURL);
                 }
                 else
                 {
-                    Response
-                        .Cookies
-                        .Append(
-                            "CreateOrLinkError",
-                            "We ran into an issue creating or linking your accounts"
-                        );
+                    Response.Cookies.Append(
+                        "CreateOrLinkError",
+                        "We ran into an issue creating or linking your accounts"
+                    );
                     return Redirect(redirectURL);
                 }
             }
@@ -642,11 +718,14 @@ public class AuthController : BaseApiController
         if (user != null)
         {
             var userId = user.Id.ToString();
-            var canRequestPasswordResetEmail = _authService.CanSendNewPasswordResetEmail(user);
+            var canRequestPasswordResetEmail =
+                _authService.CanSendNewPasswordResetEmail(user);
 
             if (canRequestPasswordResetEmail)
             {
-                var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var code = await _userManager.GeneratePasswordResetTokenAsync(
+                    user
+                );
 
                 // just for testing, delete or comment out in prod
                 // return Ok(new { code, userId });
@@ -656,14 +735,21 @@ public class AuthController : BaseApiController
                 var callbackURL =
                     $"{baseUrl}/auth/validate-password-reset-token?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                var emailHTML = await _authService.GenerateEmailContentFromTemplate(
-                    callbackURL,
-                    "EmailPasswordResetTemplate.html"
+                var emailHTML =
+                    await _authService.GenerateEmailContentFromTemplate(
+                        callbackURL,
+                        "EmailPasswordResetTemplate.html"
+                    );
+
+                await _emailSender.SendEmailAsync(
+                    user.Email!,
+                    "Reset your password",
+                    emailHTML
                 );
 
-                await _emailSender.SendEmailAsync(user.Email!, "Reset your password", emailHTML);
-
-                await _memberService.UpdatePasswordResetSendDate(Guid.Parse(userId));
+                await _memberService.UpdatePasswordResetSendDate(
+                    Guid.Parse(userId)
+                );
 
                 await _memberService.UpdatePasswordResetSendCount(
                     user.PasswordResetEmailSentCount,
@@ -698,7 +784,10 @@ public class AuthController : BaseApiController
 
     [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpGet("validate-password-reset-token")]
-    public async Task<IActionResult> ValidatePasswordResetToken(Guid userId, string code)
+    public async Task<IActionResult> ValidatePasswordResetToken(
+        Guid userId,
+        string code
+    )
     {
         var frontendURL = _apiSettingsOptions.FrontendUrl;
         var redirectURL = $"{frontendURL}/auth/reset-password";
@@ -732,15 +821,21 @@ public class AuthController : BaseApiController
 
         if (passwordResetTokenValid)
         {
-            Response.Cookies.Append("PasswordResetUserId", user.Id.ToString(), cookieOptions);
+            Response.Cookies.Append(
+                "PasswordResetUserId",
+                user.Id.ToString(),
+                cookieOptions
+            );
             Response.Cookies.Append("Code", code, cookieOptions);
             return Redirect(redirectURL);
         }
         else if (!passwordResetTokenValid)
         {
-            Response
-                .Cookies
-                .Append("ExpiredMessage", "Password reset token is no longer valid", cookieOptions);
+            Response.Cookies.Append(
+                "ExpiredMessage",
+                "Password reset token is no longer valid",
+                cookieOptions
+            );
 
             return Redirect(redirectURL);
         }
@@ -753,7 +848,9 @@ public class AuthController : BaseApiController
     // [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpPost("reset-password")]
     [AllowAnonymous]
-    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDTO form)
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordDTO form
+    )
     {
         var userId = form.PasswordResetUserId.ToString();
         var code = form.Code;
@@ -761,7 +858,10 @@ public class AuthController : BaseApiController
         var user = await _userManager.FindByIdAsync(userId);
         if (user != null)
         {
-            var passwordExists = await _authService.PasswordAlreadyExists(user, form.NewPassword);
+            var passwordExists = await _authService.PasswordAlreadyExists(
+                user,
+                form.NewPassword
+            );
 
             if (passwordExists.Result == true)
             {

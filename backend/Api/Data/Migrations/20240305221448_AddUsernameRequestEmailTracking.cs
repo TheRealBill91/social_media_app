@@ -16,14 +16,25 @@ namespace social_media_api.Migrations
                 table: "member",
                 type: "timestamp with time zone",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    DateTimeKind.Unspecified
+                )
+            );
 
             migrationBuilder.AddColumn<int>(
                 name: "username_request_email_sent_count",
                 table: "member",
                 type: "integer",
                 nullable: false,
-                defaultValue: 0);
+                defaultValue: 0
+            );
         }
 
         /// <inheritdoc />
@@ -31,11 +42,13 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "last_username_request_email_sent_date",
-                table: "member");
+                table: "member"
+            );
 
             migrationBuilder.DropColumn(
                 name: "username_request_email_sent_count",
-                table: "member");
+                table: "member"
+            );
         }
     }
 }

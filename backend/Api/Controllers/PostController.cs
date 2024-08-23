@@ -54,7 +54,11 @@ public class PostController : BaseApiController
         var result = await _postService.CreatePost(post, user.Id);
         if (result.Success)
         {
-            return CreatedAtAction(nameof(GetPost), new { id = result.PostCreationId }, result);
+            return CreatedAtAction(
+                nameof(GetPost),
+                new { id = result.PostCreationId },
+                result
+            );
         }
         else
         {
@@ -107,7 +111,10 @@ public class PostController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            postAuthorId
+        );
 
         // return 403 if users aren't friends or the logged in user is not the author
         // of the post
@@ -122,7 +129,10 @@ public class PostController : BaseApiController
     [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{id:guid}")]
-    public async Task<IActionResult> UpdatePost(Guid? id, [FromBody] PostDTO postToUpdate)
+    public async Task<IActionResult> UpdatePost(
+        Guid? id,
+        [FromBody] PostDTO postToUpdate
+    )
     {
         if (id == null)
         {

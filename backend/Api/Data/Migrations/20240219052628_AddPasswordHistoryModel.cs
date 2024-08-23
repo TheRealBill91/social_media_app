@@ -16,19 +16,22 @@ namespace social_media_api.Migrations
                 columns: table => new
                 {
                     id = table.Column<Guid>(type: "uuid", nullable: false),
-                    password_hash = table.Column<string>(type: "text", nullable: false)
+                    password_hash = table.Column<string>(
+                        type: "text",
+                        nullable: false
+                    )
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("pk_password_history", x => x.id);
-                });
+                }
+            );
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "password_history");
+            migrationBuilder.DropTable(name: "password_history");
         }
     }
 }

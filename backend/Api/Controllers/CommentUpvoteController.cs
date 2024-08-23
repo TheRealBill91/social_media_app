@@ -35,7 +35,10 @@ public class CommentUpvoteController : BaseApiController
     [EnableRateLimiting("resourceUpvoteTokenBucket")]
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> ToggleCommentUpvote(Guid? postId, Guid? commentId)
+    public async Task<IActionResult> ToggleCommentUpvote(
+        Guid? postId,
+        Guid? commentId
+    )
     {
         if (postId == null || commentId == null)
         {
@@ -65,7 +68,10 @@ public class CommentUpvoteController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            postAuthorId
+        );
 
         // return 403 if users aren't friends or the logged in user is not the author
         // of the post
@@ -83,10 +89,11 @@ public class CommentUpvoteController : BaseApiController
         if (commentUpvote != null)
         {
             // delete comment upvote and return 200
-            var upvoteDeletionResponse = await _commentUpvoteService.DeleteCommentUpvote(
-                commentId,
-                Guid.Parse(userId)
-            );
+            var upvoteDeletionResponse =
+                await _commentUpvoteService.DeleteCommentUpvote(
+                    commentId,
+                    Guid.Parse(userId)
+                );
 
             if (upvoteDeletionResponse.Success)
             {
@@ -99,10 +106,11 @@ public class CommentUpvoteController : BaseApiController
         }
 
         // create the comment upvote since it is not null
-        var upvoteCreationReponse = await _commentUpvoteService.CreateCommentUpvote(
-            commentId,
-            Guid.Parse(userId)
-        );
+        var upvoteCreationReponse =
+            await _commentUpvoteService.CreateCommentUpvote(
+                commentId,
+                Guid.Parse(userId)
+            );
 
         if (upvoteCreationReponse.Success)
         {

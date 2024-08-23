@@ -51,7 +51,10 @@ public class AuthService
         return htmlContent.Replace("{callbackUrl}", callbackUrl);
     }
 
-    public async Task<string> GenerateForgotUsernameEmailHtml(string username, string emailTemplate)
+    public async Task<string> GenerateForgotUsernameEmailHtml(
+        string username,
+        string emailTemplate
+    )
     {
         var filePath = Path.Combine(
             Directory.GetCurrentDirectory(),
@@ -67,12 +70,14 @@ public class AuthService
     {
         if (user != null)
         {
-            DateTime LastEmailConfirmationSentDate = user.LastEmailConfirmationSentDate;
+            DateTime LastEmailConfirmationSentDate =
+                user.LastEmailConfirmationSentDate;
             DateTime CurrentDateTime = DateTime.UtcNow;
             int emailConfirmationSentCount = user.EmailConfirmationSentCount;
 
             var twentyFourHoursPassed =
-                (CurrentDateTime - LastEmailConfirmationSentDate) > TimeSpan.FromHours(24);
+                (CurrentDateTime - LastEmailConfirmationSentDate)
+                > TimeSpan.FromHours(24);
 
             if (!twentyFourHoursPassed && emailConfirmationSentCount >= 3)
             {
@@ -97,12 +102,14 @@ public class AuthService
     {
         if (user != null)
         {
-            DateTime LastEmailConfirmationSentDate = user.LastPasswordResetEmailSentDate;
+            DateTime LastEmailConfirmationSentDate =
+                user.LastPasswordResetEmailSentDate;
             DateTime CurrentDateTime = DateTime.UtcNow;
             int passwordResetSentCount = user.PasswordResetEmailSentCount;
 
             var twentyFourHoursPassed =
-                (CurrentDateTime - LastEmailConfirmationSentDate) > TimeSpan.FromHours(24);
+                (CurrentDateTime - LastEmailConfirmationSentDate)
+                > TimeSpan.FromHours(24);
 
             if (!twentyFourHoursPassed && passwordResetSentCount >= 3)
             {
@@ -127,12 +134,15 @@ public class AuthService
     {
         if (user != null)
         {
-            var LastUserNameRequestEmailSentDate = user.LastUsernameRequestEmailSentDate;
+            var LastUserNameRequestEmailSentDate =
+                user.LastUsernameRequestEmailSentDate;
             var CurrentDateTime = DateTime.UtcNow;
-            int usernameRequestEmailSentCount = user.UsernameRequestEmailSentCount;
+            int usernameRequestEmailSentCount =
+                user.UsernameRequestEmailSentCount;
 
             var twentyFourHoursPassed =
-                (CurrentDateTime - LastUserNameRequestEmailSentDate) > TimeSpan.FromHours(24);
+                (CurrentDateTime - LastUserNameRequestEmailSentDate)
+                > TimeSpan.FromHours(24);
 
             if (!twentyFourHoursPassed && usernameRequestEmailSentCount >= 3)
             {
@@ -153,7 +163,10 @@ public class AuthService
         throw new Exception("Cant find user!");
     }
 
-    public async Task<string> GenerateUniqueUserName(string firstName, string lastName)
+    public async Task<string> GenerateUniqueUserName(
+        string firstName,
+        string lastName
+    )
     {
         var baseUserName = $"{firstName}{lastName}";
         var uniqueUserName = baseUserName;
@@ -173,11 +186,17 @@ public class AuthService
         ExternalLoginInfo externalLoginInfo
     )
     {
-        IdentityResult result = await _userManager.AddLoginAsync(user, externalLoginInfo);
+        IdentityResult result = await _userManager.AddLoginAsync(
+            user,
+            externalLoginInfo
+        );
 
         if (!result.Succeeded)
         {
-            _logger.LogError("Failed to link external login for user {UserId}", user.Id);
+            _logger.LogError(
+                "Failed to link external login for user {UserId}",
+                user.Id
+            );
             return result;
         }
 
@@ -188,10 +207,16 @@ public class AuthService
         }
         else
         {
-            _logger.LogWarning("Google picture claim data is missing for {UserId}", user.Id);
+            _logger.LogWarning(
+                "Google picture claim data is missing for {UserId}",
+                user.Id
+            );
         }
 
-        _logger.LogInformation("Successfully linked external login for {UserId}", user.Id);
+        _logger.LogInformation(
+            "Successfully linked external login for {UserId}",
+            user.Id
+        );
         return IdentityResult.Success;
     }
 
@@ -214,7 +239,9 @@ public class AuthService
         result = await _userManager.AddLoginAsync(newUser, externalLoginInfo);
         if (result.Succeeded)
         {
-            var pictureClaim = externalLoginInfo.Principal.FindFirst("urn:google:picture");
+            var pictureClaim = externalLoginInfo.Principal.FindFirst(
+                "urn:google:picture"
+            );
             if (pictureClaim != null)
             {
                 await _userManager.AddClaimAsync(newUser, pictureClaim);
@@ -222,7 +249,10 @@ public class AuthService
             }
             else
             {
-                _logger.LogWarning("Google picture claim data is missing for {UserId}", newUser.Id);
+                _logger.LogWarning(
+                    "Google picture claim data is missing for {UserId}",
+                    newUser.Id
+                );
             }
         }
         _logger.LogInformation(
@@ -259,17 +289,29 @@ public class AuthService
         }
     }
 
-    public async Task<PasswordExistsResponse> PasswordAlreadyExists(Member user, string newPassword)
+    /// <summary>
+    /// Checks if the given password has been used previously by the user.
+    /// </summary>
+    /// <param name="user">The user whose password history is checked.</param>
+    /// <param name="newPassword">The new password to check against the user's history.</param>
+    /// <returns>A <see cref="PasswordExistsResponse"/> indicating if the password has been previously used.</returns>
+    public async Task<PasswordExistsResponse> PasswordAlreadyExists(
+        Member user,
+        string newPassword
+    )
     {
         var passwordHashes = await _context
-            .PasswordHistory
-            .Select(p => p.PasswordHash)
+            .PasswordHistory.Select(p => p.PasswordHash)
             .Distinct()
             .ToListAsync();
 
         var hasUsedPassword = passwordHashes.Any(hash =>
         {
-            var res = _userManager.PasswordHasher.VerifyHashedPassword(user, hash, newPassword);
+            var res = _userManager.PasswordHasher.VerifyHashedPassword(
+                user,
+                hash,
+                newPassword
+            );
             return res == PasswordVerificationResult.Success;
         });
 

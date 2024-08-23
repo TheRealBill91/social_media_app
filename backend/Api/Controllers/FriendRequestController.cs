@@ -49,12 +49,17 @@ public class FriendRequestController : BaseApiController
 
         if (friendRequestExists != null)
         {
-            return BadRequest("Friend request already exists between you and the receipent");
+            return BadRequest(
+                "Friend request already exists between you and the receipent"
+            );
         }
 
         var requesterId = Guid.Parse(userId);
 
-        var result = await _friendRequestService.CreateFriendRequest(requesterId, receiverId);
+        var result = await _friendRequestService.CreateFriendRequest(
+            requesterId,
+            receiverId
+        );
 
         if (result.Success)
         {
@@ -101,7 +106,9 @@ public class FriendRequestController : BaseApiController
 
         if (friendRequest == null)
         {
-            return NotFound("No friend request exists between you and the user");
+            return NotFound(
+                "No friend request exists between you and the user"
+            );
         }
 
         // reject if signed in user id does not equal the friend request receiver id
@@ -197,9 +204,10 @@ public class FriendRequestController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var incomingFriendRequests = await _friendRequestService.IncomingFriendRequests(
-            Guid.Parse(userId)
-        );
+        var incomingFriendRequests =
+            await _friendRequestService.IncomingFriendRequests(
+                Guid.Parse(userId)
+            );
 
         return Ok(incomingFriendRequests);
     }
@@ -224,9 +232,10 @@ public class FriendRequestController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var outgoingFriendRequests = await _friendRequestService.OutgoingFriendRequests(
-            Guid.Parse(userId)
-        );
+        var outgoingFriendRequests =
+            await _friendRequestService.OutgoingFriendRequests(
+                Guid.Parse(userId)
+            );
 
         return Ok(outgoingFriendRequests);
     }
@@ -263,7 +272,9 @@ public class FriendRequestController : BaseApiController
 
         if (friendRequest == null)
         {
-            return NotFound("No friend request exists between you and the user");
+            return NotFound(
+                "No friend request exists between you and the user"
+            );
         }
 
         // reject if signed in user id does not equal the friend requester id
@@ -319,7 +330,9 @@ public class FriendRequestController : BaseApiController
 
         if (friendRequest == null)
         {
-            return NotFound("No friend request exists between you and the user");
+            return NotFound(
+                "No friend request exists between you and the user"
+            );
         }
 
         // reject if signed in user id does not equal the friend request receiver id

@@ -11,14 +11,17 @@ public class ErrorController : ControllerBase
     public IActionResult HandleError() => Problem();
 
     [Route("/error-development")]
-    public IActionResult HandleErrorDevelopment([FromServices] IHostEnvironment hostEnvironment)
+    public IActionResult HandleErrorDevelopment(
+        [FromServices] IHostEnvironment hostEnvironment
+    )
     {
         if (!hostEnvironment.IsDevelopment())
         {
             return NotFound();
         }
 
-        var exceptionHandlerFeature = HttpContext.Features.Get<IExceptionHandlerFeature>()!;
+        var exceptionHandlerFeature =
+            HttpContext.Features.Get<IExceptionHandlerFeature>()!;
 
         return Problem(
             detail: exceptionHandlerFeature.Error.StackTrace,

@@ -27,7 +27,9 @@ public static class IdentityServiceExtensions
                 options.Password.RequiredUniqueChars = 0;
 
                 // Lockout settings
-                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(30);
+                options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(
+                    30
+                );
                 options.Lockout.MaxFailedAccessAttempts = 5;
                 options.Lockout.AllowedForNewUsers = true;
 
@@ -35,27 +37,29 @@ public static class IdentityServiceExtensions
 
                 options.User.RequireUniqueEmail = true;
 
-                options
-                    .Tokens
-                    .ProviderMap
-                    .Add(
-                        "CustomEmailConfirmation",
-                        new TokenProviderDescriptor(
-                            typeof(CustomEmailConfirmationTokenProvider<Member>)
-                        )
-                    );
-                options.Tokens.EmailConfirmationTokenProvider = "CustomEmailConfirmation";
+                options.Tokens.ProviderMap.Add(
+                    "CustomEmailConfirmation",
+                    new TokenProviderDescriptor(
+                        typeof(CustomEmailConfirmationTokenProvider<Member>)
+                    )
+                );
+                options.Tokens.EmailConfirmationTokenProvider =
+                    "CustomEmailConfirmation";
             })
             .AddEntityFrameworkStores<DataContext>()
             .AddDefaultTokenProviders();
 
         var googleClientId = env.IsDevelopment()
             ? configuration["Authentication:Google:ClientId"]
-            : Environment.GetEnvironmentVariable("Authentication:Google:ClientId");
+            : Environment.GetEnvironmentVariable(
+                "Authentication:Google:ClientId"
+            );
 
         var googleClientSecret = env.IsDevelopment()
             ? configuration["Authentication:Google:ClientSecret"]
-            : Environment.GetEnvironmentVariable("Authentication:Google:ClientSecret");
+            : Environment.GetEnvironmentVariable(
+                "Authentication:Google:ClientSecret"
+            );
 
         services
             .AddAuthentication()
@@ -63,7 +67,11 @@ public static class IdentityServiceExtensions
             {
                 googleOptions.ClientId = googleClientId!;
                 googleOptions.ClientSecret = googleClientSecret!;
-                googleOptions.ClaimActions.MapJsonKey("urn:google:picture", "picture", "url");
+                googleOptions.ClaimActions.MapJsonKey(
+                    "urn:google:picture",
+                    "picture",
+                    "url"
+                );
                 googleOptions.CallbackPath = new PathString("/signin-google");
 
                 // This is a workaround in order to allow users

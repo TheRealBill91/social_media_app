@@ -13,7 +13,10 @@ public class CommentUpvoteService
         _context = context;
     }
 
-    public async Task<CommentUpvote?> GetCommentUpvote(Guid? commentId, Guid? authorId)
+    public async Task<CommentUpvote?> GetCommentUpvote(
+        Guid? commentId,
+        Guid? authorId
+    )
     {
         var commentUpvote = await _context
             .CommentUpvote.FromSql(
@@ -27,7 +30,10 @@ public class CommentUpvoteService
         return commentUpvote;
     }
 
-    public async Task<UpvoteDeletionResponse> DeleteCommentUpvote(Guid? commentId, Guid? authorId)
+    public async Task<UpvoteDeletionResponse> DeleteCommentUpvote(
+        Guid? commentId,
+        Guid? authorId
+    )
     {
         var result = await _context.Database.ExecuteSqlAsync(
             @$"DELETE FROM comment_upvote
@@ -53,7 +59,10 @@ public class CommentUpvoteService
         }
     }
 
-    public async Task<UpvoteCreationResponse> CreateCommentUpvote(Guid? commentId, Guid authorId)
+    public async Task<UpvoteCreationResponse> CreateCommentUpvote(
+        Guid? commentId,
+        Guid authorId
+    )
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;

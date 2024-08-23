@@ -26,7 +26,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -34,31 +36,32 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = SignInSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = SignInSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        SignInSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow = SignInSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    SignInSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    SignInSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    SignInSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    SignInSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 15,
-                                QueueLimit = SignInSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    SignInSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 15,
+                            QueueLimit = SignInSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                SignInSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -79,7 +82,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -87,31 +92,32 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = SignUpSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = SignUpSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        SignUpSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow = SignUpSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    SignUpSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    SignUpSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    SignUpSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    SignUpSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 15,
-                                QueueLimit = SignUpSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    SignUpSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 15,
+                            QueueLimit = SignUpSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                SignUpSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -132,7 +138,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -140,32 +148,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = ConfirmEmailSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = ConfirmEmailSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        ConfirmEmailSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        ConfirmEmailSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    ConfirmEmailSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    ConfirmEmailSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    ConfirmEmailSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    ConfirmEmailSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 3,
-                                QueueLimit = ConfirmEmailSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    ConfirmEmailSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 3,
+                            QueueLimit =
+                                ConfirmEmailSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                ConfirmEmailSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -186,7 +195,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -194,32 +205,32 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = SignoutSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = SignoutSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        SignoutSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        SignoutSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    SignoutSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    SignoutSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    SignoutSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    SignoutSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 5,
-                                QueueLimit = SignoutSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    SignoutSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 5,
+                            QueueLimit = SignoutSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                SignoutSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -227,11 +238,15 @@ public static class RateLimiterConfigurator
         });
 
         // resend confirmation email sliding window rate limit configuration
-        var ResendConfirmationEmailSlidingWindowOptions = new SlidingWindowPolicy();
+        var ResendConfirmationEmailSlidingWindowOptions =
+            new SlidingWindowPolicy();
         configuration
-            .GetSection("RateLimiting:Authentication:ResendConfirmationEmailSlidingWindow")
+            .GetSection(
+                "RateLimiting:Authentication:ResendConfirmationEmailSlidingWindow"
+            )
             .Bind(ResendConfirmationEmailSlidingWindowOptions);
-        var ResendConfirmationEmailPolicyName = "resendConfirmationEmailSlidingWindow";
+        var ResendConfirmationEmailPolicyName =
+            "resendConfirmationEmailSlidingWindow";
 
         services.AddRateLimiter(options =>
         {
@@ -240,7 +255,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -248,34 +265,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit =
-                                        ResendConfirmationEmailSlidingWindowOptions.PermitLimit,
-                                    QueueLimit =
-                                        ResendConfirmationEmailSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        ResendConfirmationEmailSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        ResendConfirmationEmailSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    ResendConfirmationEmailSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    ResendConfirmationEmailSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    ResendConfirmationEmailSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    ResendConfirmationEmailSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 3,
-                                QueueLimit = ResendConfirmationEmailSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    ResendConfirmationEmailSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 3,
+                            QueueLimit =
+                                ResendConfirmationEmailSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                ResendConfirmationEmailSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -283,12 +299,16 @@ public static class RateLimiterConfigurator
         });
 
         // password reset request sliding window rate limit configuration
-        var PasswordResetRequestSlidingWindowOptions = new SlidingWindowPolicy();
+        var PasswordResetRequestSlidingWindowOptions =
+            new SlidingWindowPolicy();
         configuration
-            .GetSection("RateLimiting:Authentication:PasswordResetRequestSlidingWindow")
+            .GetSection(
+                "RateLimiting:Authentication:PasswordResetRequestSlidingWindow"
+            )
             .Bind(PasswordResetRequestSlidingWindowOptions);
 
-        var PasswordResetRequestPolicyName = "passwordResetRequestSlidingWindow";
+        var PasswordResetRequestPolicyName =
+            "passwordResetRequestSlidingWindow";
 
         services.AddRateLimiter(options =>
         {
@@ -297,7 +317,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -305,34 +327,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit =
-                                        PasswordResetRequestSlidingWindowOptions.PermitLimit,
-                                    QueueLimit =
-                                        PasswordResetRequestSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        PasswordResetRequestSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        PasswordResetRequestSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    PasswordResetRequestSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    PasswordResetRequestSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    PasswordResetRequestSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    PasswordResetRequestSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 3,
-                                QueueLimit = PasswordResetRequestSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    PasswordResetRequestSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 3,
+                            QueueLimit =
+                                PasswordResetRequestSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                PasswordResetRequestSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -354,7 +375,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -362,32 +385,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = GetResourceSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = GetResourceSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        GetResourceSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        GetResourceSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    GetResourceSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    GetResourceSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    GetResourceSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    GetResourceSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 30,
-                                QueueLimit = GetResourceSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    GetResourceSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 30,
+                            QueueLimit =
+                                GetResourceSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                GetResourceSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -408,7 +432,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -416,32 +442,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = CreateResourceSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = CreateResourceSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        CreateResourceSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        CreateResourceSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    CreateResourceSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    CreateResourceSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    CreateResourceSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    CreateResourceSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 6,
-                                QueueLimit = CreateResourceSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    CreateResourceSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 6,
+                            QueueLimit =
+                                CreateResourceSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                CreateResourceSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -462,7 +489,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -470,32 +499,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = UpdateResourceSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = UpdateResourceSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        UpdateResourceSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        UpdateResourceSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    UpdateResourceSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    UpdateResourceSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    UpdateResourceSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    UpdateResourceSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 15,
-                                QueueLimit = UpdateResourceSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    UpdateResourceSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 15,
+                            QueueLimit =
+                                UpdateResourceSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                UpdateResourceSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -516,7 +546,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -524,32 +556,33 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetSlidingWindowLimiter(
                             partitionKey,
-                            factory =>
-                                new SlidingWindowRateLimiterOptions
-                                {
-                                    PermitLimit = DeleteResourceSlidingWindowOptions.PermitLimit,
-                                    QueueLimit = DeleteResourceSlidingWindowOptions.QueueLimit,
-                                    Window = TimeSpan.FromMinutes(
-                                        DeleteResourceSlidingWindowOptions.WindowInMinutes
-                                    ),
-                                    SegmentsPerWindow =
-                                        DeleteResourceSlidingWindowOptions.SegmentsPerWindow
-                                }
+                            factory => new SlidingWindowRateLimiterOptions
+                            {
+                                PermitLimit =
+                                    DeleteResourceSlidingWindowOptions.PermitLimit,
+                                QueueLimit =
+                                    DeleteResourceSlidingWindowOptions.QueueLimit,
+                                Window = TimeSpan.FromMinutes(
+                                    DeleteResourceSlidingWindowOptions.WindowInMinutes
+                                ),
+                                SegmentsPerWindow =
+                                    DeleteResourceSlidingWindowOptions.SegmentsPerWindow
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetSlidingWindowLimiter(
                         "Anon",
-                        factory =>
-                            new SlidingWindowRateLimiterOptions
-                            {
-                                PermitLimit = 7,
-                                QueueLimit = DeleteResourceSlidingWindowOptions.QueueLimit,
-                                Window = TimeSpan.FromMinutes(
-                                    DeleteResourceSlidingWindowOptions.WindowInMinutes
-                                ),
-                                SegmentsPerWindow = 6
-                            }
+                        factory => new SlidingWindowRateLimiterOptions
+                        {
+                            PermitLimit = 7,
+                            QueueLimit =
+                                DeleteResourceSlidingWindowOptions.QueueLimit,
+                            Window = TimeSpan.FromMinutes(
+                                DeleteResourceSlidingWindowOptions.WindowInMinutes
+                            ),
+                            SegmentsPerWindow = 6
+                        }
                     );
                 }
             );
@@ -570,7 +603,9 @@ public static class RateLimiterConfigurator
                 partitioner: httpContext =>
                 {
                     string partitionKey =
-                        httpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        httpContext
+                            ?.User.FindFirst(ClaimTypes.NameIdentifier)
+                            ?.Value
                         ?? httpContext?.Connection.RemoteIpAddress?.ToString()
                         ?? string.Empty;
 
@@ -578,32 +613,34 @@ public static class RateLimiterConfigurator
                     {
                         return RateLimitPartition.GetTokenBucketLimiter(
                             partitionKey,
-                            factory =>
-                                new TokenBucketRateLimiterOptions
-                                {
-                                    TokenLimit = ResourceUpvoteTokenBucketOptions.TokenLimit,
-                                    TokensPerPeriod =
-                                        ResourceUpvoteTokenBucketOptions.TokensPerPeriod,
-                                    ReplenishmentPeriod = TimeSpan.FromSeconds(
-                                        ResourceUpvoteTokenBucketOptions.ReplenishmentPeriod
-                                    ),
-                                    QueueLimit = ResourceUpvoteTokenBucketOptions.QueueLimit
-                                }
+                            factory => new TokenBucketRateLimiterOptions
+                            {
+                                TokenLimit =
+                                    ResourceUpvoteTokenBucketOptions.TokenLimit,
+                                TokensPerPeriod =
+                                    ResourceUpvoteTokenBucketOptions.TokensPerPeriod,
+                                ReplenishmentPeriod = TimeSpan.FromSeconds(
+                                    ResourceUpvoteTokenBucketOptions.ReplenishmentPeriod
+                                ),
+                                QueueLimit =
+                                    ResourceUpvoteTokenBucketOptions.QueueLimit
+                            }
                         );
                     }
 
                     return RateLimitPartition.GetTokenBucketLimiter(
                         "Anon",
-                        factory =>
-                            new TokenBucketRateLimiterOptions
-                            {
-                                TokenLimit = 15,
-                                TokensPerPeriod = ResourceUpvoteTokenBucketOptions.TokensPerPeriod,
-                                ReplenishmentPeriod = TimeSpan.FromSeconds(
-                                    ResourceUpvoteTokenBucketOptions.ReplenishmentPeriod
-                                ),
-                                QueueLimit = ResourceUpvoteTokenBucketOptions.QueueLimit
-                            }
+                        factory => new TokenBucketRateLimiterOptions
+                        {
+                            TokenLimit = 15,
+                            TokensPerPeriod =
+                                ResourceUpvoteTokenBucketOptions.TokensPerPeriod,
+                            ReplenishmentPeriod = TimeSpan.FromSeconds(
+                                ResourceUpvoteTokenBucketOptions.ReplenishmentPeriod
+                            ),
+                            QueueLimit =
+                                ResourceUpvoteTokenBucketOptions.QueueLimit
+                        }
                     );
                 }
             );

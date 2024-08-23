@@ -65,13 +65,21 @@ public class DataContext : IdentityDbContext<Member, IdentityRole<Guid>, Guid>
         });
 
         modelBuilder.HasPostgresEnum<FriendRequestStatus>();
-        modelBuilder.Entity<Post>().HasOne<Member>().WithMany().HasForeignKey(p => p.AuthorId);
+        modelBuilder
+            .Entity<Post>()
+            .HasOne<Member>()
+            .WithMany()
+            .HasForeignKey(p => p.AuthorId);
         modelBuilder
             .Entity<PostUpvote>()
             .HasOne<Member>()
             .WithMany()
             .HasForeignKey(p => p.AuthorId);
-        modelBuilder.Entity<PostUpvote>().HasOne<Post>().WithMany().HasForeignKey(p => p.PostId);
+        modelBuilder
+            .Entity<PostUpvote>()
+            .HasOne<Post>()
+            .WithMany()
+            .HasForeignKey(p => p.PostId);
         modelBuilder
             .Entity<MemberProfile>()
             .HasOne<Member>()
@@ -97,8 +105,16 @@ public class DataContext : IdentityDbContext<Member, IdentityRole<Guid>, Guid>
             .HasOne<Member>()
             .WithMany()
             .HasForeignKey(f => f.ReceiverId);
-        modelBuilder.Entity<Comment>().HasOne<Member>().WithMany().HasForeignKey(c => c.AuthorId);
-        modelBuilder.Entity<Comment>().HasOne<Post>().WithMany().HasForeignKey(c => c.PostId);
+        modelBuilder
+            .Entity<Comment>()
+            .HasOne<Member>()
+            .WithMany()
+            .HasForeignKey(c => c.AuthorId);
+        modelBuilder
+            .Entity<Comment>()
+            .HasOne<Post>()
+            .WithMany()
+            .HasForeignKey(c => c.PostId);
         modelBuilder
             .Entity<CommentUpvote>()
             .HasOne<Member>()

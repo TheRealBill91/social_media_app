@@ -62,7 +62,10 @@ public class MemberService
     }
 
     // Update email confirmation send count
-    public async Task UpdateEmailConfirmationSendCount(int emailConfirmationSendCount, Guid id)
+    public async Task UpdateEmailConfirmationSendCount(
+        int emailConfirmationSendCount,
+        Guid id
+    )
     {
         emailConfirmationSendCount++;
         var newEmailConfirmationSendCount = emailConfirmationSendCount;
@@ -86,7 +89,10 @@ public class MemberService
     }
 
     // Update password reset send count
-    public async Task UpdatePasswordResetSendCount(int passwordResetSendCount, Guid id)
+    public async Task UpdatePasswordResetSendCount(
+        int passwordResetSendCount,
+        Guid id
+    )
     {
         passwordResetSendCount++;
         int newEmailConfirmationSendCount = passwordResetSendCount;
@@ -110,7 +116,10 @@ public class MemberService
     }
 
     // Update username request email send count
-    public async Task UpdateUsernameRequestSendCount(int usernameRequestSendCount, Guid id)
+    public async Task UpdateUsernameRequestSendCount(
+        int usernameRequestSendCount,
+        Guid id
+    )
     {
         usernameRequestSendCount++;
         int newUsernameRequestSendCount = usernameRequestSendCount;
@@ -129,7 +138,8 @@ public class MemberService
         var LastUsernameUpdateDate = lastUserNameUpdateDate;
         var CurrentDateTime = DateTime.UtcNow;
 
-        var thirtyDaysPassed = (CurrentDateTime - LastUsernameUpdateDate) > TimeSpan.FromDays(30);
+        var thirtyDaysPassed =
+            (CurrentDateTime - LastUsernameUpdateDate) > TimeSpan.FromDays(30);
 
         if (thirtyDaysPassed)
         {
@@ -153,7 +163,10 @@ public class MemberService
     }
 
     // Updates the members username
-    public async Task<UsernameUpdateResponse> UpdateUsername(string newUsername, Guid memberId)
+    public async Task<UsernameUpdateResponse> UpdateUsername(
+        string newUsername,
+        Guid memberId
+    )
     {
         var normalizedUserName = newUsername.ToUpperInvariant();
 

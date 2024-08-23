@@ -14,7 +14,9 @@ public class MemberProfileService
     }
 
     // create the member profile
-    public async Task<MemberProfileCreationResponse> CreateMemberProfile(Guid memberId)
+    public async Task<MemberProfileCreationResponse> CreateMemberProfile(
+        Guid memberId
+    )
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = createdAt;
@@ -80,7 +82,9 @@ public class MemberProfileService
     {
         var updateResponse = new MemberProfileUpdateResponse();
 
-        var member = await _context.Member.FirstOrDefaultAsync(m => m.Id == memberId);
+        var member = await _context.Member.FirstOrDefaultAsync(m =>
+            m.Id == memberId
+        );
         if (member == null)
         {
             updateResponse.Success = false;
@@ -94,9 +98,9 @@ public class MemberProfileService
         member.NormalizedUserName = updatedInfo.UserName.ToUpperInvariant();
         member.UpdatedAt = DateTime.UtcNow;
 
-        var memberProfile = await _context
-            .MemberProfile
-            .FirstOrDefaultAsync(mp => mp.MemberId == memberId);
+        var memberProfile = await _context.MemberProfile.FirstOrDefaultAsync(
+            mp => mp.MemberId == memberId
+        );
         if (memberProfile == null)
         {
             updateResponse.Success = false;
