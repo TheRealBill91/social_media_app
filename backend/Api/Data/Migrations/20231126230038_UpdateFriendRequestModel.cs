@@ -13,65 +13,97 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_member_members_id",
-                table: "comment");
+                table: "comment"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_post_posts_id",
-                table: "comment");
+                table: "comment"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_upvote_comment_comments_id",
-                table: "comment_upvote");
+                table: "comment_upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_upvote_member_members_id",
-                table: "comment_upvote");
+                table: "comment_upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friend_request_member_members_id",
-                table: "friend_request");
+                table: "friend_request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friend_request_member_members_id1",
-                table: "friend_request");
+                table: "friend_request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friendship_member_members_id",
-                table: "friendship");
+                table: "friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friendship_member_members_id1",
-                table: "friendship");
+                table: "friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_member_profile_member_members_id",
-                table: "member_profile");
+                table: "member_profile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_post_member_members_id",
-                table: "post");
+                table: "post"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_post_upvote_member_members_id",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_post_upvote_post_posts_id",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "created_at",
                 table: "friend_request",
                 type: "timestamp with time zone",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    DateTimeKind.Unspecified
+                )
+            );
 
             migrationBuilder.AddColumn<DateTime>(
                 name: "updated_at",
                 table: "friend_request",
                 type: "timestamp with time zone",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    DateTimeKind.Unspecified
+                )
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_member_member_id",
@@ -79,7 +111,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_post_post_id",
@@ -87,7 +120,8 @@ namespace social_media_api.Migrations
                 column: "post_id",
                 principalTable: "post",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_upvote_comment_comment_id",
@@ -95,7 +129,8 @@ namespace social_media_api.Migrations
                 column: "comment_id",
                 principalTable: "comment",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_upvote_member_member_id",
@@ -103,7 +138,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friend_request_member_member_id",
@@ -111,7 +147,8 @@ namespace social_media_api.Migrations
                 column: "receiver_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friend_request_member_member_id1",
@@ -119,7 +156,8 @@ namespace social_media_api.Migrations
                 column: "requester_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friendship_member_member_id",
@@ -127,7 +165,8 @@ namespace social_media_api.Migrations
                 column: "member_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friendship_member_member_id1",
@@ -135,7 +174,8 @@ namespace social_media_api.Migrations
                 column: "friend_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_member_profile_member_member_id1",
@@ -143,7 +183,8 @@ namespace social_media_api.Migrations
                 column: "member_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_post_member_member_id",
@@ -151,7 +192,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_post_upvote_member_member_id",
@@ -159,7 +201,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_post_upvote_post_post_id",
@@ -167,7 +210,8 @@ namespace social_media_api.Migrations
                 column: "post_id",
                 principalTable: "post",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -175,59 +219,73 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_member_member_id",
-                table: "comment");
+                table: "comment"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_post_post_id",
-                table: "comment");
+                table: "comment"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_upvote_comment_comment_id",
-                table: "comment_upvote");
+                table: "comment_upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_comment_upvote_member_member_id",
-                table: "comment_upvote");
+                table: "comment_upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friend_request_member_member_id",
-                table: "friend_request");
+                table: "friend_request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friend_request_member_member_id1",
-                table: "friend_request");
+                table: "friend_request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friendship_member_member_id",
-                table: "friendship");
+                table: "friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_friendship_member_member_id1",
-                table: "friendship");
+                table: "friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_member_profile_member_member_id1",
-                table: "member_profile");
+                table: "member_profile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_post_member_member_id",
-                table: "post");
+                table: "post"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_post_upvote_member_member_id",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "fk_post_upvote_post_post_id",
-                table: "post_upvote");
+                table: "post_upvote"
+            );
 
             migrationBuilder.DropColumn(
                 name: "created_at",
-                table: "friend_request");
+                table: "friend_request"
+            );
 
             migrationBuilder.DropColumn(
                 name: "updated_at",
-                table: "friend_request");
+                table: "friend_request"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_member_members_id",
@@ -235,7 +293,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_post_posts_id",
@@ -243,7 +302,8 @@ namespace social_media_api.Migrations
                 column: "post_id",
                 principalTable: "post",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_upvote_comment_comments_id",
@@ -251,7 +311,8 @@ namespace social_media_api.Migrations
                 column: "comment_id",
                 principalTable: "comment",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_comment_upvote_member_members_id",
@@ -259,7 +320,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friend_request_member_members_id",
@@ -267,7 +329,8 @@ namespace social_media_api.Migrations
                 column: "receiver_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friend_request_member_members_id1",
@@ -275,7 +338,8 @@ namespace social_media_api.Migrations
                 column: "requester_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friendship_member_members_id",
@@ -283,7 +347,8 @@ namespace social_media_api.Migrations
                 column: "friend_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_friendship_member_members_id1",
@@ -291,7 +356,8 @@ namespace social_media_api.Migrations
                 column: "member_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_member_profile_member_members_id",
@@ -299,7 +365,8 @@ namespace social_media_api.Migrations
                 column: "member_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_post_member_members_id",
@@ -307,7 +374,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_post_upvote_member_members_id",
@@ -315,7 +383,8 @@ namespace social_media_api.Migrations
                 column: "author_id",
                 principalTable: "member",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "fk_post_upvote_post_posts_id",
@@ -323,7 +392,8 @@ namespace social_media_api.Migrations
                 column: "post_id",
                 principalTable: "post",
                 principalColumn: "id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

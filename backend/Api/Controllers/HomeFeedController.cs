@@ -46,7 +46,9 @@ public class HomeFeedController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var homeFeedPosts = await _postService.GetHomeFeedPosts(Guid.Parse(userId));
+        var homeFeedPosts = await _postService.GetHomeFeedPosts(
+            Guid.Parse(userId)
+        );
 
         return Ok(homeFeedPosts);
     }

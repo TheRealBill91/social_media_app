@@ -16,7 +16,17 @@ namespace social_media_api.Migrations
                 table: "member",
                 type: "timestamp with time zone",
                 nullable: false,
-                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+                defaultValue: new DateTime(
+                    1,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    DateTimeKind.Unspecified
+                )
+            );
         }
 
         /// <inheritdoc />
@@ -24,7 +34,8 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "last_username_update_date",
-                table: "member");
+                table: "member"
+            );
         }
     }
 }

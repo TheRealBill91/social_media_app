@@ -4,7 +4,10 @@ namespace SocialMediaApp.Extensions;
 
 public static class HttpLoggingExtensions
 {
-    public static void AddHttpLogging(this IServiceCollection services, IWebHostEnvironment env)
+    public static void AddHttpLogging(
+        this IServiceCollection services,
+        IWebHostEnvironment env
+    )
     {
         if (env.IsDevelopment())
         {
@@ -24,10 +27,10 @@ public static class HttpLoggingExtensions
         }
         else if (env.IsProduction())
         {
-            services.AddHttpLogging(
-                logging =>
-                    logging.LoggingFields =
-                        HttpLoggingFields.RequestPath | HttpLoggingFields.ResponseStatusCode
+            services.AddHttpLogging(logging =>
+                logging.LoggingFields =
+                    HttpLoggingFields.RequestPath
+                    | HttpLoggingFields.ResponseStatusCode
             );
         }
     }

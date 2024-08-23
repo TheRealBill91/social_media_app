@@ -62,7 +62,9 @@ public class UserProfileController : BaseApiController
             memberId = Guid.Parse(userId);
         }
 
-        var memberProfile = await _memberProfileService.GetMemberProfile(memberId.Value);
+        var memberProfile = await _memberProfileService.GetMemberProfile(
+            memberId.Value
+        );
 
         return Ok(memberProfile);
     }
@@ -104,7 +106,9 @@ public class UserProfileController : BaseApiController
             }
 
             // get profile posts for logged in users friend
-            var otherUserProfilePosts = await _postService.GetProfilePosts(memberId.Value);
+            var otherUserProfilePosts = await _postService.GetProfilePosts(
+                memberId.Value
+            );
             return Ok(otherUserProfilePosts);
         }
 
@@ -112,7 +116,9 @@ public class UserProfileController : BaseApiController
         memberId = Guid.Parse(userId);
 
         // retrieve profile posts of the logged in user
-        var currentUserProfilePosts = await _postService.GetProfilePosts(memberId.Value);
+        var currentUserProfilePosts = await _postService.GetProfilePosts(
+            memberId.Value
+        );
 
         return Ok(currentUserProfilePosts);
     }
@@ -150,14 +156,19 @@ public class UserProfileController : BaseApiController
         // then the username does not exist globally
         var usingSameUsername = updatedInfo.UserName == user.UserName;
 
-        var usernameTaken = await _memberService.UsernameExists(updatedInfo.UserName);
+        var usernameTaken = await _memberService.UsernameExists(
+            updatedInfo.UserName
+        );
 
         if (!usingSameUsername && usernameTaken)
         {
             return Conflict("Username already exists, please choose another");
         }
 
-        var profileUpdated = await _memberProfileService.UpdateMemberProfile(memberId, updatedInfo);
+        var profileUpdated = await _memberProfileService.UpdateMemberProfile(
+            memberId,
+            updatedInfo
+        );
 
         return Ok();
 

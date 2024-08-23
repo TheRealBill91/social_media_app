@@ -67,7 +67,10 @@ public class PostUpvoteController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            postAuthorId
+        );
 
         // return 403 if users aren't friends or the logged in user is not the author
         // of the post
@@ -77,15 +80,19 @@ public class PostUpvoteController : BaseApiController
         }
 
         //check for existing post upvote for the current user
-        var postUpvote = await _postUpvoteService.GetPostUpvote(postId, Guid.Parse(userId));
+        var postUpvote = await _postUpvoteService.GetPostUpvote(
+            postId,
+            Guid.Parse(userId)
+        );
 
         if (postUpvote != null)
         {
             // delete post upvote and return 200
-            var upvoteDeletionResponse = await _postUpvoteService.DeletePostUpvote(
-                postId,
-                Guid.Parse(userId)
-            );
+            var upvoteDeletionResponse =
+                await _postUpvoteService.DeletePostUpvote(
+                    postId,
+                    Guid.Parse(userId)
+                );
 
             if (upvoteDeletionResponse.Success)
             {

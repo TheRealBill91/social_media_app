@@ -14,7 +14,10 @@ public class MembersController : BaseApiController
 
     private readonly UserManager<Member> _userManager;
 
-    public MembersController(MemberService memberService, UserManager<Member> userManager)
+    public MembersController(
+        MemberService memberService,
+        UserManager<Member> userManager
+    )
     {
         _memberService = memberService;
         _userManager = userManager;
@@ -37,13 +40,20 @@ public class MembersController : BaseApiController
     public async Task<IActionResult> CreateMember([FromBody] Member member)
     {
         await _memberService.AddAsync(member);
-        return CreatedAtAction(nameof(GetMember), new { id = member.Id }, member);
+        return CreatedAtAction(
+            nameof(GetMember),
+            new { id = member.Id },
+            member
+        );
     }
 
     [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{memberId:guid}")]
-    public async Task<IActionResult> UpdateUsername([FromBody] string newUsername, string memberId)
+    public async Task<IActionResult> UpdateUsername(
+        [FromBody] string newUsername,
+        string memberId
+    )
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
@@ -69,11 +79,16 @@ public class MembersController : BaseApiController
         var lastUserNameUpdateDate = user.LastUsernameUpdateDate;
 
         // First can they update the username (one allowed per 30 day period)
-        var usernameUpdateAllowed = _memberService.CanUpdateUsername(lastUserNameUpdateDate);
+        var usernameUpdateAllowed = _memberService.CanUpdateUsername(
+            lastUserNameUpdateDate
+        );
 
         if (!usernameUpdateAllowed)
         {
-            return StatusCode(StatusCodes.Status403Forbidden, new { Message = "" });
+            return StatusCode(
+                StatusCodes.Status403Forbidden,
+                new { Message = "" }
+            );
         }
 
         // checking to see if the user is enters the same username they already
@@ -85,7 +100,9 @@ public class MembersController : BaseApiController
 
         if (!usingSameUsername && usernameTaken)
         {
-            return Conflict("Username already exists, please choose another one");
+            return Conflict(
+                "Username already exists, please choose another one"
+            );
         }
 
         var updateUsernameResponse = await _memberService.UpdateUsername(

@@ -16,7 +16,10 @@ public class PostService
         _friendshipService = friendshipService;
     }
 
-    public async Task<PostCreationResponse> CreatePost(PostDTO post, Guid authorId)
+    public async Task<PostCreationResponse> CreatePost(
+        PostDTO post,
+        Guid authorId
+    )
     {
         var createdAt = DateTime.UtcNow;
         var updatedAt = DateTime.UtcNow;
@@ -86,8 +89,7 @@ public class PostService
     {
         int PageSize = 10;
         int totalPosts = await _context
-            .Database
-            .SqlQuery<int>($"SELECT COUNT(id) AS \"Value\" FROM post")
+            .Database.SqlQuery<int>($"SELECT COUNT(id) AS \"Value\" FROM post")
             .SingleAsync();
 
         int totalPages = (int)Math.Ceiling(totalPosts / (double)PageSize);
@@ -127,7 +129,10 @@ public class PostService
         return postWithUpvotes;
     }
 
-    public async Task<PostUpdateResponse> UpdatePostAsync(Guid id, PostDTO postToUpdate)
+    public async Task<PostUpdateResponse> UpdatePostAsync(
+        Guid id,
+        PostDTO postToUpdate
+    )
     {
         var updatedAt = DateTime.UtcNow;
         var result = await _context.Database.ExecuteSqlAsync(
@@ -140,11 +145,19 @@ public class PostService
 
         if (result > 0)
         {
-            return new PostUpdateResponse { Success = true, Message = "Post successfully updated" };
+            return new PostUpdateResponse
+            {
+                Success = true,
+                Message = "Post successfully updated"
+            };
         }
         else
         {
-            return new PostUpdateResponse { Success = false, Message = "Failed to update post" };
+            return new PostUpdateResponse
+            {
+                Success = false,
+                Message = "Failed to update post"
+            };
         }
     }
 
@@ -169,7 +182,11 @@ public class PostService
         }
         else
         {
-            return new PostDeletionResponse { Success = false, Message = "Post deletion failed" };
+            return new PostDeletionResponse
+            {
+                Success = false,
+                Message = "Post deletion failed"
+            };
         }
     }
 
@@ -183,26 +200,24 @@ public class PostService
         // ! Using LINQ instead of vanilla SQL as we cant use the IN
         // ! operator with the List of friendIds
         var homeFeedPosts = await _context
-            .Post
-            .Where(p => friendIds.Contains(p.AuthorId) && p.DeletedAt == null)
+            .Post.Where(p =>
+                friendIds.Contains(p.AuthorId) && p.DeletedAt == null
+            )
             .GroupJoin(
                 _context.PostUpvote,
                 post => post.Id,
                 upvote => upvote.PostId,
                 (post, upvotes) => new { Post = post, Upvotes = upvotes }
             )
-            .Select(
-                pu =>
-                    new PostWithUpvoteCount
-                    {
-                        Title = pu.Post.Title,
-                        Content = pu.Post.Content,
-                        CreatedAt = pu.Post.CreatedAt,
-                        UpdatedAt = pu.Post.UpdatedAt,
-                        AuthorId = pu.Post.AuthorId,
-                        PostUpvoteCount = pu.Upvotes.Count()
-                    }
-            )
+            .Select(pu => new PostWithUpvoteCount
+            {
+                Title = pu.Post.Title,
+                Content = pu.Post.Content,
+                CreatedAt = pu.Post.CreatedAt,
+                UpdatedAt = pu.Post.UpdatedAt,
+                AuthorId = pu.Post.AuthorId,
+                PostUpvoteCount = pu.Upvotes.Count()
+            })
             .OrderByDescending(pu => pu.CreatedAt)
             .Take(10)
             .ToListAsync();

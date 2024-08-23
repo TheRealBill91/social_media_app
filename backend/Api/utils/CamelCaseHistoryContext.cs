@@ -10,7 +10,9 @@ public class CamelCaseHistoryContext : NpgsqlHistoryRepository
     public CamelCaseHistoryContext(HistoryRepositoryDependencies dependencies)
         : base(dependencies) { }
 
-    protected override void ConfigureTable(EntityTypeBuilder<HistoryRow> history)
+    protected override void ConfigureTable(
+        EntityTypeBuilder<HistoryRow> history
+    )
     {
         base.ConfigureTable(history);
 

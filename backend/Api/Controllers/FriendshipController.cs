@@ -50,7 +50,10 @@ public class FriendshipController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), friendId.Value);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            friendId.Value
+        );
 
         if (friendship == null)
         {
@@ -84,29 +87,36 @@ public class FriendshipController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), friendId.Value);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            friendId.Value
+        );
 
         if (friendship == null)
         {
             return NotFound("Friendship does not exist");
         }
 
-        var friendshipDeletionResult = await _friendshipService.DeleteFriendship(
-            Guid.Parse(userId),
-            friendId.Value
-        );
+        var friendshipDeletionResult =
+            await _friendshipService.DeleteFriendship(
+                Guid.Parse(userId),
+                friendId.Value
+            );
 
         if (friendshipDeletionResult.Success)
         {
-            var friendRequestDeletionResult = await _friendRequestService.DeleteFriendRequest(
-                friendId.Value,
-                Guid.Parse(userId)
-            );
+            var friendRequestDeletionResult =
+                await _friendRequestService.DeleteFriendRequest(
+                    friendId.Value,
+                    Guid.Parse(userId)
+                );
 
             if (!friendRequestDeletionResult.Success)
             {
                 // should not get here
-                return BadRequest("Failed to delete friend request when deleting friendship");
+                return BadRequest(
+                    "Failed to delete friend request when deleting friendship"
+                );
             }
 
             return Ok(friendshipDeletionResult.Message);

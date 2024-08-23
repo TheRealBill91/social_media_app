@@ -17,7 +17,11 @@ public class EmailSender : IEmailSender
 
     public AuthMessageSenderOptions Options { get; } //Set with Secret Manager.
 
-    public async Task SendEmailAsync(string toEmail, string subject, string message)
+    public async Task SendEmailAsync(
+        string toEmail,
+        string subject,
+        string message
+    )
     {
         if (string.IsNullOrEmpty(Options.SendGridKey))
         {
@@ -26,7 +30,12 @@ public class EmailSender : IEmailSender
         await Execute(Options.SendGridKey, subject, message, toEmail);
     }
 
-    public async Task Execute(string apiKey, string subject, string message, string toEmail)
+    public async Task Execute(
+        string apiKey,
+        string subject,
+        string message,
+        string toEmail
+    )
     {
         var client = new SendGridClient(apiKey);
         var msg = new SendGridMessage()

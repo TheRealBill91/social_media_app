@@ -12,83 +12,102 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserClaims_AspNetUsers_UserId",
-                table: "AspNetUserClaims");
+                table: "AspNetUserClaims"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserLogins_AspNetUsers_UserId",
-                table: "AspNetUserLogins");
+                table: "AspNetUserLogins"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserRoles_AspNetUsers_UserId",
-                table: "AspNetUserRoles");
+                table: "AspNetUserRoles"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserTokens_AspNetUsers_UserId",
-                table: "AspNetUserTokens");
+                table: "AspNetUserTokens"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Comment_AspNetUsers_AuthorId",
-                table: "Comment");
+                table: "Comment"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Comment_Upvote_AspNetUsers_AuthorId",
-                table: "Comment_Upvote");
+                table: "Comment_Upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friend_Request_AspNetUsers_ReceiverId",
-                table: "Friend_Request");
+                table: "Friend_Request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friend_Request_AspNetUsers_RequesterId",
-                table: "Friend_Request");
+                table: "Friend_Request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friendship_AspNetUsers_FriendId",
-                table: "Friendship");
+                table: "Friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friendship_AspNetUsers_MemberId",
-                table: "Friendship");
+                table: "Friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Member_Profile_AspNetUsers_MemberId",
-                table: "Member_Profile");
+                table: "Member_Profile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Post_AspNetUsers_AuthorId",
-                table: "Post");
+                table: "Post"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Post_Upvote_AspNetUsers_AuthorId",
-                table: "Post_Upvote");
+                table: "Post_Upvote"
+            );
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_AspNetUsers",
-                table: "AspNetUsers");
+                table: "AspNetUsers"
+            );
 
             migrationBuilder.RenameTable(
                 name: "AspNetUsers",
-                newName: "Members");
+                newName: "Members"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_AspNetUsers_UserName",
                 table: "Members",
-                newName: "IX_Members_UserName");
+                newName: "IX_Members_UserName"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_AspNetUsers_Id",
                 table: "Members",
-                newName: "IX_Members_Id");
+                newName: "IX_Members_Id"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_AspNetUsers_Email",
                 table: "Members",
-                newName: "IX_Members_Email");
+                newName: "IX_Members_Email"
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_Members",
                 table: "Members",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserClaims_Members_UserId",
@@ -96,7 +115,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserLogins_Members_UserId",
@@ -104,7 +124,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserRoles_Members_UserId",
@@ -112,7 +133,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserTokens_Members_UserId",
@@ -120,7 +142,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Comment_Members_AuthorId",
@@ -128,7 +151,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Comment_Upvote_Members_AuthorId",
@@ -136,7 +160,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friend_Request_Members_ReceiverId",
@@ -144,7 +169,8 @@ namespace social_media_api.Migrations
                 column: "ReceiverId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friend_Request_Members_RequesterId",
@@ -152,7 +178,8 @@ namespace social_media_api.Migrations
                 column: "RequesterId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friendship_Members_FriendId",
@@ -160,7 +187,8 @@ namespace social_media_api.Migrations
                 column: "FriendId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friendship_Members_MemberId",
@@ -168,7 +196,8 @@ namespace social_media_api.Migrations
                 column: "MemberId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Member_Profile_Members_MemberId",
@@ -176,7 +205,8 @@ namespace social_media_api.Migrations
                 column: "MemberId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Post_Members_AuthorId",
@@ -184,7 +214,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Post_Upvote_Members_AuthorId",
@@ -192,7 +223,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "Members",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
 
         /// <inheritdoc />
@@ -200,83 +232,102 @@ namespace social_media_api.Migrations
         {
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserClaims_Members_UserId",
-                table: "AspNetUserClaims");
+                table: "AspNetUserClaims"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserLogins_Members_UserId",
-                table: "AspNetUserLogins");
+                table: "AspNetUserLogins"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserRoles_Members_UserId",
-                table: "AspNetUserRoles");
+                table: "AspNetUserRoles"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_AspNetUserTokens_Members_UserId",
-                table: "AspNetUserTokens");
+                table: "AspNetUserTokens"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Comment_Members_AuthorId",
-                table: "Comment");
+                table: "Comment"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Comment_Upvote_Members_AuthorId",
-                table: "Comment_Upvote");
+                table: "Comment_Upvote"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friend_Request_Members_ReceiverId",
-                table: "Friend_Request");
+                table: "Friend_Request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friend_Request_Members_RequesterId",
-                table: "Friend_Request");
+                table: "Friend_Request"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friendship_Members_FriendId",
-                table: "Friendship");
+                table: "Friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Friendship_Members_MemberId",
-                table: "Friendship");
+                table: "Friendship"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Member_Profile_Members_MemberId",
-                table: "Member_Profile");
+                table: "Member_Profile"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Post_Members_AuthorId",
-                table: "Post");
+                table: "Post"
+            );
 
             migrationBuilder.DropForeignKey(
                 name: "FK_Post_Upvote_Members_AuthorId",
-                table: "Post_Upvote");
+                table: "Post_Upvote"
+            );
 
             migrationBuilder.DropPrimaryKey(
                 name: "PK_Members",
-                table: "Members");
+                table: "Members"
+            );
 
             migrationBuilder.RenameTable(
                 name: "Members",
-                newName: "AspNetUsers");
+                newName: "AspNetUsers"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_Members_UserName",
                 table: "AspNetUsers",
-                newName: "IX_AspNetUsers_UserName");
+                newName: "IX_AspNetUsers_UserName"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_Members_Id",
                 table: "AspNetUsers",
-                newName: "IX_AspNetUsers_Id");
+                newName: "IX_AspNetUsers_Id"
+            );
 
             migrationBuilder.RenameIndex(
                 name: "IX_Members_Email",
                 table: "AspNetUsers",
-                newName: "IX_AspNetUsers_Email");
+                newName: "IX_AspNetUsers_Email"
+            );
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_AspNetUsers",
                 table: "AspNetUsers",
-                column: "Id");
+                column: "Id"
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserClaims_AspNetUsers_UserId",
@@ -284,7 +335,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserLogins_AspNetUsers_UserId",
@@ -292,7 +344,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserRoles_AspNetUsers_UserId",
@@ -300,7 +353,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_AspNetUserTokens_AspNetUsers_UserId",
@@ -308,7 +362,8 @@ namespace social_media_api.Migrations
                 column: "UserId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Comment_AspNetUsers_AuthorId",
@@ -316,7 +371,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Comment_Upvote_AspNetUsers_AuthorId",
@@ -324,7 +380,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friend_Request_AspNetUsers_ReceiverId",
@@ -332,7 +389,8 @@ namespace social_media_api.Migrations
                 column: "ReceiverId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friend_Request_AspNetUsers_RequesterId",
@@ -340,7 +398,8 @@ namespace social_media_api.Migrations
                 column: "RequesterId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friendship_AspNetUsers_FriendId",
@@ -348,7 +407,8 @@ namespace social_media_api.Migrations
                 column: "FriendId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Friendship_AspNetUsers_MemberId",
@@ -356,7 +416,8 @@ namespace social_media_api.Migrations
                 column: "MemberId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Member_Profile_AspNetUsers_MemberId",
@@ -364,7 +425,8 @@ namespace social_media_api.Migrations
                 column: "MemberId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Post_AspNetUsers_AuthorId",
@@ -372,7 +434,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Post_Upvote_AspNetUsers_AuthorId",
@@ -380,7 +443,8 @@ namespace social_media_api.Migrations
                 column: "AuthorId",
                 principalTable: "AspNetUsers",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                onDelete: ReferentialAction.Cascade
+            );
         }
     }
 }

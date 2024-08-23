@@ -10,7 +10,10 @@ public class FriendRequestService
 
     private readonly FriendshipService _friendshipService;
 
-    public FriendRequestService(DataContext context, FriendshipService friendshipService)
+    public FriendRequestService(
+        DataContext context,
+        FriendshipService friendshipService
+    )
     {
         _context = context;
         _friendshipService = friendshipService;
@@ -64,7 +67,10 @@ public class FriendRequestService
         Guid currentUserId
     )
     {
-        var friendship = await _friendshipService.GetFriendship(currentUserId, friendRequestId);
+        var friendship = await _friendshipService.GetFriendship(
+            currentUserId,
+            friendRequestId
+        );
 
         if (friendship != null)
         {
@@ -76,7 +82,10 @@ public class FriendRequestService
             };
         }
 
-        var result = await _friendshipService.CreateFriendship(currentUserId, friendRequestId);
+        var result = await _friendshipService.CreateFriendship(
+            currentUserId,
+            friendRequestId
+        );
 
         if (result.Success)
         {
@@ -106,7 +115,10 @@ public class FriendRequestService
         }
     }
 
-    public async Task<FriendRequest?> GetFriendRequest(Guid friendRequestId, Guid currentUserId)
+    public async Task<FriendRequest?> GetFriendRequest(
+        Guid friendRequestId,
+        Guid currentUserId
+    )
     {
         var friendRequest = await _context
             .FriendRequest.FromSql(
@@ -126,7 +138,10 @@ public class FriendRequestService
         }
 
         // Check if the current user is involved in the friend request
-        if (friendRequest.RequesterId == currentUserId || friendRequest.ReceiverId == currentUserId)
+        if (
+            friendRequest.RequesterId == currentUserId
+            || friendRequest.ReceiverId == currentUserId
+        )
         {
             return friendRequest;
         }

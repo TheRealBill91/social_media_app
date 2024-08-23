@@ -85,7 +85,10 @@ public class CommentController : BaseApiController
     [EnableRateLimiting("createResourceSlidingWindow")]
     [Authorize]
     [HttpPost]
-    public async Task<IActionResult> CreateComment([FromBody] CommentDTO comment, Guid postId)
+    public async Task<IActionResult> CreateComment(
+        [FromBody] CommentDTO comment,
+        Guid postId
+    )
     {
         if (comment == null)
         {
@@ -115,7 +118,10 @@ public class CommentController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            postAuthorId
+        );
 
         // return 403 if users aren't friends or the logged in user is not the author
         // of the post
@@ -124,7 +130,11 @@ public class CommentController : BaseApiController
             return Forbid();
         }
 
-        var result = await _commentService.CreateComment(comment, user.Id, postId);
+        var result = await _commentService.CreateComment(
+            comment,
+            user.Id,
+            postId
+        );
         Console.WriteLine(result.CommentCreationId);
         if (result.Success)
         {
@@ -173,7 +183,10 @@ public class CommentController : BaseApiController
             return NotFound("Can't find the user");
         }
 
-        var friendship = await _friendshipService.GetFriendship(Guid.Parse(userId), postAuthorId);
+        var friendship = await _friendshipService.GetFriendship(
+            Guid.Parse(userId),
+            postAuthorId
+        );
 
         // return 403 if users aren't friends or the logged in user is not the author
         // of the post
@@ -190,7 +203,10 @@ public class CommentController : BaseApiController
     [EnableRateLimiting("updateResourceSlidingWindow")]
     [Authorize]
     [HttpPatch("{id:guid}")]
-    public async Task<IActionResult> UpdateComment(Guid? id, [FromBody] CommentDTO commentToUpdate)
+    public async Task<IActionResult> UpdateComment(
+        Guid? id,
+        [FromBody] CommentDTO commentToUpdate
+    )
     {
         if (id == null)
         {
@@ -215,7 +231,10 @@ public class CommentController : BaseApiController
             return Forbid();
         }
 
-        var result = await _commentService.UpdateCommentAsync(commentId, commentToUpdate);
+        var result = await _commentService.UpdateComment(
+            commentId,
+            commentToUpdate
+        );
         if (result.Success)
         {
             return Ok(result.Message);
@@ -253,7 +272,7 @@ public class CommentController : BaseApiController
             return Forbid();
         }
 
-        var result = await _commentService.DeleteCommentAsync(commentId);
+        var result = await _commentService.DeleteComment(commentId);
         if (result.Success)
         {
             return Ok(result.Message);

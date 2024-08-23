@@ -2,7 +2,12 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 
-public class CustomEmailConfirmationTokenProvider<TUser> : DataProtectorTokenProvider<TUser>
+/// <summary>
+/// Custom token provider for email confirmation tokens.
+/// </summary>
+/// <typeparam name="TUser">The type of user object.</typeparam>
+public class CustomEmailConfirmationTokenProvider<TUser>
+    : DataProtectorTokenProvider<TUser>
     where TUser : class
 {
     public CustomEmailConfirmationTokenProvider(
@@ -13,7 +18,11 @@ public class CustomEmailConfirmationTokenProvider<TUser> : DataProtectorTokenPro
         : base(dataProtectionProvider, options, logger) { }
 }
 
-public class EmailConfirmationTokenProviderOptions : DataProtectionTokenProviderOptions
+/// <summary>
+/// Options class for configuring the email confirmation token provider.
+/// </summary>
+public class EmailConfirmationTokenProviderOptions
+    : DataProtectionTokenProviderOptions
 {
     public EmailConfirmationTokenProviderOptions()
     {

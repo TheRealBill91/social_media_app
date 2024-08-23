@@ -24,19 +24,18 @@ if (builder.Environment.IsDevelopment())
     dataSourceBuilder.MapEnum<FriendRequestStatus>();
     var dataSource = dataSourceBuilder.Build();
 
-    builder
-        .Services
-        .AddDbContext<DataContext>(
-            options =>
-                options
-                    .UseNpgsql(dataSource)
-                    .ReplaceService<IHistoryRepository, CamelCaseHistoryContext>()
-                    .UseSnakeCaseNamingConvention()
-        );
+    builder.Services.AddDbContext<DataContext>(options =>
+        options
+            .UseNpgsql(dataSource)
+            .ReplaceService<IHistoryRepository, CamelCaseHistoryContext>()
+            .UseSnakeCaseNamingConvention()
+    );
 }
 else
 {
-    connection = Environment.GetEnvironmentVariable("POSTGRES_CONNECTION_STRING");
+    connection = Environment.GetEnvironmentVariable(
+        "POSTGRES_CONNECTION_STRING"
+    );
 }
 
 builder.Services.AddCustomRateLimiting(builder.Configuration);
@@ -44,8 +43,7 @@ builder.Services.AddCustomRateLimiting(builder.Configuration);
 builder.Services.AddHttpLogging(builder.Environment);
 
 builder
-    .Services
-    .AddControllers()
+    .Services.AddControllers()
     .ConfigureApiBehaviorOptions(options =>
     {
         options.SuppressModelStateInvalidFilter = true;
@@ -53,31 +51,34 @@ builder
     .AddJsonOptions(options =>
     {
         // Serializes enum's to string's
-        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter()
+        );
 
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
-builder.Services.Configure<RouteOptions>(options => options.LowercaseUrls = true);
+builder.Services.Configure<RouteOptions>(options =>
+    options.LowercaseUrls = true
+);
 
 builder.Services.Configure<AuthMessageSenderOptions>(builder.Configuration);
-builder
-    .Services
-    .Configure<DataProtectionTokenProviderOptions>(options =>
-    {
-        options.TokenLifespan = TimeSpan.FromHours(3);
-    });
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromHours(3);
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddIdentityServices(builder.Environment, builder.Configuration);
+builder.Services.AddIdentityServices(
+    builder.Environment,
+    builder.Configuration
+);
 
-builder
-    .Services
-    .Configure<PasswordHasherOptions>(option =>
-    {
-        option.IterationCount = 210000;
-    });
+builder.Services.Configure<PasswordHasherOptions>(option =>
+{
+    option.IterationCount = 210000;
+});
 
 builder.Services.AddModelServices();
 builder.Services.AddConfigurationOptions(builder.Configuration);
@@ -89,7 +90,8 @@ app.UseHostFiltering();
 app.UseForwardedHeaders(
     new ForwardedHeadersOptions
     {
-        ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        ForwardedHeaders =
+            ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
     }
 );
 
