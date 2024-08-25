@@ -21,6 +21,8 @@
     },
     "https": {
       "commandName": "Project",
+      "executablePath": "${workspaceFolder}/Api/bin/Debug/net8.0/Api.dll",
+      "cwd": "${workspaceFolder}/Api",
       "dotnetRunMessages": true,
       "launchBrowser": false,
       "launchUrl": "swagger",
