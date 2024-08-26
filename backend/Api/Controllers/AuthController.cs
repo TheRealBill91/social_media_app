@@ -267,12 +267,12 @@ public class AuthController : BaseApiController
         var callbackURL =
             $"{frontendURL}/confirm-email?userId={newUser.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-        string emailHTML = await _authService.GenerateEmailContentFromTemplate(
+        await GenerateAndSendEmail(
             callbackURL,
-            "EmailConfirmationTemplate.html"
+            "EmailConfirmationTemplate.html",
+            "Confirm your email",
+            newUser.Email
         );
-
-        await _emailSender.SendEmailAsync(newUser.Email, "Confirm your email", emailHTML);
 
         return Ok(new { UserId = newUser.Id });
     }
@@ -407,12 +407,6 @@ public class AuthController : BaseApiController
                 string callbackURL =
                     $"{frontendURL}/confirm-email?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                string emailHTML =
-                    await _authService.GenerateEmailContentFromTemplate(
-                        callbackURL,
-                        "EmailConfirmationTemplate.html"
-                    );
-
                 if (user.Email == null)
                 {
                     return BadRequest(
@@ -420,10 +414,11 @@ public class AuthController : BaseApiController
                     );
                 }
 
-                await _emailSender.SendEmailAsync(
-                    user.Email,
+                await GenerateAndSendEmail(
+                    callbackURL,
+                    "EmailConfirmationTemplate.html",
                     "Confirm your email",
-                    emailHTML
+                    user.Email
                 );
 
                 await _memberService.UpdateEmailConfirmationSendDate(Guid.Parse(userId));
@@ -669,6 +664,7 @@ public class AuthController : BaseApiController
                             "CreateOrLinkError",
                             "We ran into an issue creating or linking your accounts"
                         );
+
                         return Redirect(redirectURL);
                     }
 
@@ -735,16 +731,11 @@ public class AuthController : BaseApiController
                 var callbackURL =
                     $"{baseUrl}/auth/validate-password-reset-token?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
-                var emailHTML =
-                    await _authService.GenerateEmailContentFromTemplate(
-                        callbackURL,
-                        "EmailPasswordResetTemplate.html"
-                    );
-
-                await _emailSender.SendEmailAsync(
-                    user.Email!,
+                await GenerateAndSendEmail(
+                    callbackURL,
+                    "EmailPasswordResetTemplate.html",
                     "Reset your password",
-                    emailHTML
+                    user.Email!
                 );
 
                 await _memberService.UpdatePasswordResetSendDate(
@@ -991,4 +982,20 @@ public class AuthController : BaseApiController
  
          return Ok(new { UserId = adminUser.Id });
      } */
+
+
+    private async Task GenerateAndSendEmail(
+        string emailTemplate,
+        string emailSubject,
+        string userEmail,
+        string callbackURL
+    )
+    {
+        string emailHTML = await _authService.GenerateEmailContentFromTemplate(
+            callbackURL,
+            emailTemplate
+        );
+
+        await _emailSender.SendEmailAsync(userEmail, emailSubject, emailHTML);
+    }
 }
