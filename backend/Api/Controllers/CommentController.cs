@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
@@ -33,7 +32,6 @@ public class CommentController : BaseApiController
     }
 
     [EnableRateLimiting("getResourceSlidingWindow")]
-    [Authorize]
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetComment(Guid? id)
     {
@@ -83,7 +81,6 @@ public class CommentController : BaseApiController
     }
 
     [EnableRateLimiting("createResourceSlidingWindow")]
-    [Authorize]
     [HttpPost]
     public async Task<IActionResult> CreateComment(
         [FromBody] CommentDTO comment,
@@ -151,7 +148,6 @@ public class CommentController : BaseApiController
     }
 
     [EnableRateLimiting("getResourceSlidingWindow")]
-    [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAllComments(int page, Guid? postId)
     {
@@ -201,7 +197,6 @@ public class CommentController : BaseApiController
     }
 
     [EnableRateLimiting("updateResourceSlidingWindow")]
-    [Authorize]
     [HttpPatch("{id:guid}")]
     public async Task<IActionResult> UpdateComment(
         Guid? id,
@@ -246,7 +241,6 @@ public class CommentController : BaseApiController
     }
 
     [EnableRateLimiting("deleteResourceSlidingWindow")]
-    [Authorize]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> DeleteComment(Guid? id)
     {
