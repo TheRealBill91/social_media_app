@@ -881,6 +881,9 @@ public class AuthController : BaseApiController
             }
             else
             {
+                // Because this API endpoint is only accessed through the Remix frontend/BFF,
+                // the user shouldn't reach this point. The validate password reset endpoint validates
+                // the token, and the Remix BFF will check for a strong password
                 return BadRequest(passwordResetResult.Errors);
             }
         }

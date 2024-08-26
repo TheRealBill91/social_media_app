@@ -66,6 +66,12 @@ public class AuthService
         return htmlContent.Replace("{username}", username);
     }
 
+    /// <summary>
+    /// Determines if a new confirmation email can be sent to the specified user.
+    /// </summary>
+    /// <param name="user">The user to check.</param>
+    /// <returns>True if a new confirmation email can be sent, otherwise false.</returns>
+    /// <exception cref="Exception">Thrown if the user is null.</exception>
     public bool CanSendNewConfirmationEmail(Member user)
     {
         if (user != null)
@@ -98,6 +104,12 @@ public class AuthService
         throw new Exception("Cant find user!");
     }
 
+    /// <summary>
+    /// Determines if a new password reset email can be sent to the specified user.
+    /// </summary>
+    /// <param name="user">The user to check.</param>
+    /// <returns>True if a new password reset email can be sent, otherwise false.</returns>
+    /// <exception cref="Exception">Thrown if the user is null.</exception>
     public bool CanSendNewPasswordResetEmail(Member user)
     {
         if (user != null)
@@ -130,6 +142,12 @@ public class AuthService
         throw new Exception("Cant find user!");
     }
 
+    /// <summary>
+    /// Determines if a new username request email can be sent to the specified user.
+    /// </summary>
+    /// <param name="user">The user to check.</param>
+    /// <returns>True if a new username request email can be sent, otherwise false.</returns>
+    /// <exception cref="Exception">Thrown if the user is null.</exception>
     public bool CanSendUsernameEmail(Member user)
     {
         if (user != null)
