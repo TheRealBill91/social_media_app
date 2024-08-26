@@ -402,10 +402,10 @@ public class AuthController : BaseApiController
                         user
                     );
 
-                string baseUrl = _apiSettingsOptions.BaseUrl;
+                string frontendURL = _apiSettingsOptions.FrontendUrl;
 
                 string callbackURL =
-                    $"{baseUrl}/auth/confirmemail?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
+                    $"{frontendURL}/confirm-email?userId={user.Id}&code={WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code))}";
 
                 string emailHTML =
                     await _authService.GenerateEmailContentFromTemplate(
