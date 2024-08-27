@@ -49,11 +49,6 @@ public class EmailSender : IEmailSender
         // See https://sendgrid.com/docs/User_Guide/Settings/tracking.html
         msg.SetClickTracking(false, false);
         var response = await client.SendEmailAsync(msg);
-        Console.WriteLine(response);
-    }
-
-    Task IEmailSender.SendEmailAsync(string email, string subject, string htmlMessage)
-    {
-        throw new NotImplementedException();
+        Console.WriteLine(new { SendGridResponse = response });
     }
 }
