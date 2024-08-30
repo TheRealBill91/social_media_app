@@ -329,10 +329,14 @@ public class AuthController : BaseApiController
 
             if (tokenExpired)
             {
+                bool canRequestEmailConfirmation =
+                    _authService.CanSendNewConfirmationEmail(user);
+
                 var errorResponse = new EmailConfirmationResponse
                 {
                     ErrorMessage = "Email Confirmation has expired",
-                    Email = user.Email!
+                    Email = user.Email!,
+                    CanRequestNewEmailConfirmation = canRequestEmailConfirmation
                 };
                 return BadRequest(errorResponse);
             }
