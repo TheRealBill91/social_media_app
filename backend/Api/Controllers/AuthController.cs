@@ -895,13 +895,21 @@ public class AuthController : BaseApiController
         [FromBody] RequestForgotUsernameDTO form
     )
     {
-        var userEmail = form.Email;
+        var user = await _userManager.FindByEmailAsync(form.Email);
 
-        var user = await _userManager.FindByEmailAsync(userEmail);
-
-        if (user != null)
+        if (user == null || !await _userManager.IsEmailConfirmedAsync(user))
         {
-            var canRequestUsernameRequestEmail = _authService.CanSendUsernameEmail(user);
+            return NotFound(
+                new
+                {
+                    NoAccountFoundMessage = "Please check your email to recover your username"
+                }
+            );
+        }
+
+        var canRequestUsernameRequestEmail = _authService.CanSendUsernameEmail(
+            user
+        );
 
         if (canRequestUsernameRequestEmail)
         {
@@ -922,7 +930,6 @@ public class AuthController : BaseApiController
                 user.UsernameRequestEmailSentCount,
                 user.Id
             );
-                // update password reset send count
 
             return Ok(
                 new
@@ -943,10 +950,6 @@ public class AuthController : BaseApiController
                 StatusCode = 429
             };
         }
-        }
-        var NoAccountFoundMessage =
-            "If an account associated with this email address exists, you will receive a username reset link momentarily";
-        return NotFound(new { NoAccountFoundMessage });
     }
 
     /*  [HttpPost("admin-signup")]
