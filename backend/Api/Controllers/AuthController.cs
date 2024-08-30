@@ -255,13 +255,10 @@ public class AuthController : BaseApiController
             return StatusCode(500);
         }
 
-        // * Commented out just for testing AddPasswordToHistory functionality
-
         var code = await _userManager.GenerateEmailConfirmationTokenAsync(
             newUser
         );
 
-        var baseUrl = _apiSettingsOptions.BaseUrl;
         var frontendURL = _apiSettingsOptions.FrontendUrl;
 
         var callbackURL =
@@ -277,7 +274,7 @@ public class AuthController : BaseApiController
         return Ok(new { UserId = newUser.Id });
     }
 
-    //[EnableRateLimiting("confirmEmailSlidingWindow")]
+    [EnableRateLimiting("confirmEmailSlidingWindow")]
     [HttpPost("confirm-email")]
     [AllowAnonymous]
     public async Task<IActionResult> ConfirmEmail(
@@ -348,7 +345,7 @@ public class AuthController : BaseApiController
         }
     }
 
-    // [EnableRateLimiting("signoutSlidingWindow")]
+    [EnableRateLimiting("signoutSlidingWindow")]
     [HttpPost("signout")]
     [Authorize]
     public async Task<IActionResult> Signout()
@@ -421,7 +418,11 @@ public class AuthController : BaseApiController
                     user.Email
                 );
 
-                await _memberService.UpdateEmailConfirmationSendDate(Guid.Parse(userId));
+                var userId = user.Id.ToString();
+
+                await _memberService.UpdateEmailConfirmationSendDate(
+                    Guid.Parse(userId)
+                );
 
                 await _memberService.UpdateEmailConfirmationSendCount(
                     user.EmailConfirmationSentCount,
@@ -454,7 +455,7 @@ public class AuthController : BaseApiController
         );
     }
 
-    // [EnableRateLimiting("signInSlidingWindow")]
+    [EnableRateLimiting("signInSlidingWindow")]
     [HttpGet("google-sign-in")]
     [AllowAnonymous]
     public IActionResult GoogleSignin(string? returnUrl = null)
@@ -470,7 +471,6 @@ public class AuthController : BaseApiController
     }
 
     [EnableRateLimiting("signInSlidingWindow")]
-    [DisableRateLimiting]
     [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GoogleResponse()
@@ -628,6 +628,7 @@ public class AuthController : BaseApiController
                         "CreateOrLinkError",
                         "We ran into an issue creating or linking your accounts"
                     );
+
                     return Redirect(redirectURL);
                 }
             }
@@ -836,7 +837,7 @@ public class AuthController : BaseApiController
         }
     }
 
-    // [EnableRateLimiting("passwordResetRequestSlidingWindow")]
+    [EnableRateLimiting("passwordResetRequestSlidingWindow")]
     [HttpPost("reset-password")]
     [AllowAnonymous]
     public async Task<IActionResult> ResetPassword(
@@ -898,37 +899,46 @@ public class AuthController : BaseApiController
         {
             var canRequestUsernameRequestEmail = _authService.CanSendUsernameEmail(user);
 
-            if (canRequestUsernameRequestEmail)
-            {
-                var emailHTML = await _authService.GenerateForgotUsernameEmailHtml(
-                    user.UserName!,
-                    "UsernameRequestTemplate.html"
-                );
+        if (canRequestUsernameRequestEmail)
+        {
+            var emailHTML = await _authService.GenerateForgotUsernameEmailHtml(
+                user.UserName!,
+                "UsernameRequestTemplate.html"
+            );
 
-                await _emailSender.SendEmailAsync(user.Email!, "Here is your Username", emailHTML);
+            await _emailSender.SendEmailAsync(
+                user.Email!,
+                "Here is your Username",
+                emailHTML
+            );
 
-                await _memberService.UpdateUsernameRequestSendDate(user.Id);
+            await _memberService.UpdateUsernameRequestSendDate(user.Id);
 
-                await _memberService.UpdateUsernameRequestSendCount(
-                    user.UsernameRequestEmailSentCount,
-                    user.Id
-                );
+            await _memberService.UpdateUsernameRequestSendCount(
+                user.UsernameRequestEmailSentCount,
+                user.Id
+            );
                 // update password reset send count
 
-                return Ok(new { ResponseMessage = "Check your email to recover your username" });
-            }
-            else
-            {
-                return new JsonResult(
-                    new
-                    {
-                        DailyLimitMessage = "Maximum username recovery attempts reached. Please try again tomorrow."
-                    }
-                )
+            return Ok(
+                new
                 {
-                    StatusCode = 429
-                };
-            }
+                    ResponseMessage = "Plese check your email to recover your username"
+                }
+            );
+        }
+        else
+        {
+            return new JsonResult(
+                new
+                {
+                    DailyLimitMessage = "Maximum username recovery attempts reached. Please try again tomorrow."
+                }
+            )
+            {
+                StatusCode = 429
+            };
+        }
         }
         var NoAccountFoundMessage =
             "If an account associated with this email address exists, you will receive a username reset link momentarily";
