@@ -17,11 +17,13 @@ export const iconNames = [
   "alert-circle",
   "check-circle-outline",
   "check",
+  "cross-1",
+  "default-avatar",
   "eye-none",
   "eye-open",
   "list",
-  "spinner",
   "timer-sand-empty",
+  "update",
   "web_light_sq_na",
 ] as const;
 export type IconName = (typeof iconNames)[number];
