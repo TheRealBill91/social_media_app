@@ -50,11 +50,12 @@ interface IProps {
 }
 
 export function Toast({ toastProps }: IProps) {
+  const { closeButton, position, toastOptions } = toastProps;
   return (
     <Toaster
-      closeButton={toastProps.closeButton}
-      position={toastProps.position}
-      toastOptions={toastProps.toastOptions}
+      closeButton={closeButton}
+      position={position}
+      toastOptions={toastOptions}
     />
   );
 }

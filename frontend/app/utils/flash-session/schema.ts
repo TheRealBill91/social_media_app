@@ -15,7 +15,9 @@ const toastMessageSchema = z.object({
   text: z.string(),
 
   // type of notification
-  type: z.custom<ToastTypes>(),
+  type: z
+    .enum(["message", "success", "info", "warning", "error", "loading"])
+    .default("message"),
 
   // duration for the toast (in milliseconds)
   duration: z.number().optional(),
