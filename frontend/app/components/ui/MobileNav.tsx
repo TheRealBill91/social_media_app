@@ -30,7 +30,7 @@ export function MobileNav({ userInfo }: HeaderProps) {
       <Sheet open={open} onOpenChange={setOpen} key={"right"}>
         <SheetTrigger asChild>
           <button className="lg:hidden">
-            <HamburgerMenu className="size-8" icon="list" />
+            <HamburgerMenu className="size-8" name="list" />
           </button>
         </SheetTrigger>
         <SheetContent side={"right"} className="bottom-0">

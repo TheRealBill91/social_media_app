@@ -18,7 +18,7 @@ export default function ConfirmSuccess() {
         <div className="mx-3 space-y-4">
           <div className="flex flex-col items-center space-y-3">
             <CheckCircleOutline
-              icon="check-circle-outline"
+              name="check-circle-outline"
               className="my-3 size-10 text-gray-700"
             />
             <p className="text-center text-gray-600 ">

@@ -13,8 +13,8 @@ export function ErrorAlertBanner({
 }: ErrorAlertBannerProps) {
   return (
     <Alert className="md-shadow max-w-[24rem] bg-white">
-      <AlertCircle icon="alert-circle" className="size-[22px] fill-red-400" />
-      <AlertTitle className={tw`pb-0 ${alertTitleFontSize}`}>
+      <AlertCircle name="alert-circle" className="size-[22px] fill-red-400" />
+      <AlertTitle className="pb-0 leading-normal">
         {requestPasswordResetError}
       </AlertTitle>
     </Alert>

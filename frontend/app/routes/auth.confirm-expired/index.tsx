@@ -87,7 +87,7 @@ export default function ConfirmExpired() {
         <div className="mx-3 space-y-4 px-2 md:px-4">
           <div className="my-2 flex flex-col items-center space-y-4">
             <TimerSandEmpty
-              icon="timer-sand-empty"
+              name="timer-sand-empty"
               className="my-3 size-10 text-gray-700"
             />
             <p className="text-center text-gray-600 ">

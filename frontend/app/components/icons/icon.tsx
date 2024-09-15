@@ -3,12 +3,14 @@ import href from "./icon.svg";
 export { href };
 
 export default function Icon({
-  icon,
+  name,
+  title,
   ...props
-}: SVGProps<SVGSVGElement> & { icon: IconName }) {
+}: SVGProps<SVGSVGElement> & { name: IconName; title?: string }) {
   return (
     <svg {...props}>
-      <use href={`${href}#${icon}`} />
+      {title ? <title>{title}</title> : null}
+      <use href={`${href}#${name}`} />
     </svg>
   );
 }

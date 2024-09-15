@@ -21,7 +21,7 @@ export function PasswordRevealBtn({
           title="hide password icon"
           className="absolute right-4 top-4"
         >
-          <EyeNone icon="eye-none" className="size-[22px] text-gray-800" />
+          <EyeNone name="eye-none" className="size-[22px] text-gray-800" />
         </button>
       ) : (
         <button
@@ -30,7 +30,7 @@ export function PasswordRevealBtn({
           title="reveal password icon"
           className="absolute right-4 top-4"
         >
-          <EyeOpen icon="eye-open" className="size-[22px] text-gray-800" />
+          <EyeOpen name="eye-open" className="size-[22px] text-gray-800" />
         </button>
       )}
     </>

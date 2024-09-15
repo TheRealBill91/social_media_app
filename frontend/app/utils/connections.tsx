@@ -34,7 +34,7 @@ export function ProviderConnectionForm({
         )}
       >
         <GoogleLight
-          icon="web_light_sq_na"
+          name="web_light_sq_na"
           className={cn("fill-transparent", iconClassName)}
         />
         {GOOGLE_PROVIDER_NAME}
