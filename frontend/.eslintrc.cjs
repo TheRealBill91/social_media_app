@@ -84,6 +84,14 @@ module.exports = {
         "plugin:import/recommended",
         "plugin:import/typescript",
       ],
+
+      // these protect against using `any`, and while we do not want to use
+      // `any` when we can avoid it, it is not worth having a lint rule
+      // for these rules
+      rules: {
+        "@typescript-eslint/no-unsafe-assignment": "off",
+        "@typescript-eslint/no-unsafe-member-access": "off",
+      },
     },
 
     // Node

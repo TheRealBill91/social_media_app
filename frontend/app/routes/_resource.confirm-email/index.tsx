@@ -3,7 +3,6 @@ import { confirmEmail } from "./confirm-email.server.ts";
 import { emailConfirmationFailure } from "~/utils/cookie.server";
 import { redirectWithErrorToast } from "~/utils/flash-session/flash-session.server.ts";
 import { EmailConfirmationResponse } from "./types.ts";
-import { getParsedCookie } from "~/utils/cookie-type-guard.ts";
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
   const { env } = context.cloudflare;
@@ -18,7 +17,8 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
 
   const cookieHeader: string | null = request.headers.get("Cookie");
 
-  const cookie = await getParsedCookie(cookieHeader);
+  const cookie = ((await emailConfirmationFailure.parse(cookieHeader)) ||
+    {}) as Record<string, string | null> | Record<string, never>;
 
   if (!emailConfirmationResponse.ok) {
     const emailConfirmationErrors: EmailConfirmationResponse =
