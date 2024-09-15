@@ -44,14 +44,34 @@ export function MobileNav({ userInfo }: HeaderProps) {
                 </Form>
               ) : (
                 <SheetClose asChild>
-                  <Link className="text-2xl" to="/auth/login">
+                  <Link
+                    prefetch="intent"
+                    className="text-2xl text-gray-700 transition-colors hover:text-black"
+                    to="/auth/login"
+                  >
                     Login
                   </Link>
                 </SheetClose>
-              )}
+              ) : null}
+
+              {location.pathname !== "/auth/signup" ? (
+                <SheetClose asChild>
+                  <Link
+                    prefetch="intent"
+                    className="text-2xl text-gray-700 transition-colors hover:text-black"
+                    to="/auth/signup"
+                  >
+                    Signup
+                  </Link>
+                </SheetClose>
+              ) : null}
               {userInfo ? (
                 <SheetClose asChild>
-                  <Link className="text-2xl" to="/settings">
+                  <Link
+                    prefetch="intent"
+                    className="text-2xl text-gray-700 transition-colors hover:text-black"
+                    to="/settings"
+                  >
                     Settings
                   </Link>
                 </SheetClose>

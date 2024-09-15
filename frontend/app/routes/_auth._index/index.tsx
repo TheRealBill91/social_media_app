@@ -28,6 +28,7 @@ export default function Index() {
           <div className="flex flex-col gap-4">
             {!userInfo ? (
               <Link
+              prefetch="intent"
                 className="rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus-visible:ring focus-visible:ring-gray-600 focus-visible:ring-offset-2"
                 to="/auth/login"
               >
@@ -45,6 +46,7 @@ export default function Index() {
             )}
 
             <Link
+            prefetch="intent"
               className="rounded-md bg-gray-700 px-4 py-2 text-center text-xl font-medium capitalize text-white outline-none transition-all hover:bg-gray-700/90 focus-visible:ring focus-visible:ring-slate-600 focus-visible:ring-offset-2"
               to="/auth/signup"
             >
