@@ -1,4 +1,4 @@
-import { Form, useNavigation, Link } from "@remix-run/react";
+import { Form, useNavigation, Link, useLocation } from "@remix-run/react";
 import { SheetTrigger, SheetContent, SheetClose, Sheet } from "./Sheet";
 import { useEffect, useState } from "react";
 import { default as HamburgerMenu } from "~/components/icons/icon.tsx";
@@ -15,6 +15,8 @@ export function MobileNav({ userInfo }: HeaderProps) {
   const [open, setOpen] = useState(false);
 
   const navigation = useNavigation();
+
+  const location = useLocation();
 
   const profileURL = userInfo?.Photo_url ? userInfo.Photo_url : default_avatar;
 
@@ -38,11 +40,14 @@ export function MobileNav({ userInfo }: HeaderProps) {
             <nav className="mt-12 flex flex-1 flex-col items-center gap-6">
               {userInfo ? (
                 <Form action="/auth/logout" method="POST">
-                  <button className="text-2xl" type="submit">
+                  <button
+                    className="text-2xl text-gray-700 hover:text-black"
+                    type="submit"
+                  >
                     Logout
                   </button>
                 </Form>
-              ) : (
+              ) : location.pathname !== "/auth/login" ? (
                 <SheetClose asChild>
                   <Link
                     prefetch="intent"
@@ -81,15 +86,27 @@ export function MobileNav({ userInfo }: HeaderProps) {
               <div className="flex items-center justify-center gap-4">
                 <p className="font-semibold">{userInfo?.UserName}</p>
                 <Separator orientation="vertical" />
-                <Avatar className="size-8">
-                  <AvatarImage src={profileURL} />
-                  <AvatarFallback>FILLER</AvatarFallback>
-                </Avatar>
+                <MobileNavAvatar className="size-8" src={profileURL} />
               </div>
             ) : null}
           </div>
         </SheetContent>
       </Sheet>
     </>
+  );
+}
+
+function MobileNavAvatar({
+  className,
+  src,
+}: {
+  className?: string;
+  src: string;
+}) {
+  return (
+    <Avatar className={className}>
+      <AvatarImage src={src} />
+      <AvatarFallback>FILLER</AvatarFallback>
+    </Avatar>
   );
 }
