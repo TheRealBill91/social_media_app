@@ -3,6 +3,7 @@ import { parse, serialize } from "cookie";
 import { logout } from "~/routes/auth.logout/logout.server";
 import { redirectWithSuccessToast } from "./flash-session/flash-session.server";
 import { getAuthCookie } from "./cookie.server";
+import { RedirectFunction } from "@remix-run/server-runtime/dist/responses";
 
 export function getUserId(request: Request) {
   const cookieHeader = request.headers.get("Cookie");
@@ -53,9 +54,10 @@ export interface ProfileSuccessResponse {
 type ProfileInfoResponse = ProfileErrorResponse | ProfileSuccessResponse;
 
 /**
- * A route that requires user to be unauthenticated
+ * A route that requires the user to be unauthenticated
+ *
  */
-export function requireAnonymous(request: Request) {
+export function requireAnonymous(request: Request): RedirectFunction | void {
   const userId = getUserId(request);
 
   if (userId) {
