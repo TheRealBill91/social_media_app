@@ -82,7 +82,7 @@ const toastProps: ToastProps = {
       toast:
         "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
       title: "text-gray-700 ml-3",
-      closeButton: "sm:hidden md:hidden ",
+      closeButton: "sm:hidden md:hidden",
     },
   },
 };
@@ -133,7 +133,7 @@ export function ErrorBoundary() {
           <Links />
         </head>
         <body>
-          <main className=" flex min-h-screen flex-col justify-center gap-5 bg-gray-100 p-6 text-slate-900 ">
+          <main className="flex min-h-screen flex-col justify-center gap-5 bg-gray-100 p-6 text-slate-900">
             <section className="mx-auto flex flex-col items-center justify-center gap-4 rounded-md bg-[#FFFFFF] p-8 shadow-md">
               <h1 className="text-center text-3xl font-bold md:text-4xl">
                 Uh oh!
@@ -144,12 +144,12 @@ export function ErrorBoundary() {
                 </p>
               )}
 
-              <div className="flex items-center gap-2 ">
+              <div className="flex items-center gap-2">
                 <p className="mr-2 text-lg lg:text-xl">{error.status} </p>
-                <div className=" h-8 border-r border-l-gray-800  text-lg"></div>
+                <div className="h-8 border-r border-l-gray-800 text-lg"></div>
                 <p className="ml-2 text-balance text-lg">{error.statusText}</p>
               </div>
-              <hr className="my-2 h-[2px] w-full bg-gray-500 " />
+              <hr className="my-2 h-[2px] w-full bg-gray-500" />
               <BackButton navTo={navTo} />
             </section>
           </main>
@@ -168,7 +168,7 @@ export function ErrorBoundary() {
           <Links />
         </head>
         <body>
-          <main className="flex min-h-screen flex-col items-center justify-center gap-4 text-slate-900 ">
+          <main className="flex min-h-screen flex-col items-center justify-center gap-4 text-slate-900">
             <h1 className="text-center text-3xl font-bold md:text-4xl">
               Uh oh!
             </h1>

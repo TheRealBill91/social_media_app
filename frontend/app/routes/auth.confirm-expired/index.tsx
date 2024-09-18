@@ -90,7 +90,7 @@ export default function ConfirmExpired() {
               name="timer-sand-empty"
               className="my-3 size-10 text-gray-700"
             />
-            <p className="text-center text-gray-600 ">
+            <p className="text-center text-gray-600">
               Your email confirmation link has{" "}
               <em className="font-[600]">expired</em>.
             </p>

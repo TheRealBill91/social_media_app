@@ -8,8 +8,8 @@ export const meta: MetaFunction = () => {
 
 export default function ConfirmSuccess() {
   return (
-    <main className="flex flex-1 flex-col items-center justify-center bg-gray-100 p-4 px-6 ">
-      <article className="mx-auto flex w-full max-w-md flex-col items-center gap-3 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-3  py-8 shadow-md ">
+    <main className="flex flex-1 flex-col items-center justify-center bg-gray-100 p-4 px-6">
+      <article className="mx-auto flex w-full max-w-md flex-col items-center gap-3 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-3 py-8 shadow-md">
         <div>
           <h3 className="text-center text-2xl font-bold capitalize">
             email confirmation
@@ -21,7 +21,7 @@ export default function ConfirmSuccess() {
               name="check-circle-outline"
               className="my-3 size-10 text-gray-700"
             />
-            <p className="text-center text-gray-600 ">
+            <p className="text-center text-gray-600">
               Your email has been successfully
               <em className="font-[600]"> confirmed</em>.
             </p>

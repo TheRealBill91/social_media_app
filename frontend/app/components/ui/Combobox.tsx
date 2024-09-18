@@ -48,7 +48,7 @@ export function Combobox({ className, disabled }: IProps) {
         >
           <CommandInput placeholder="Search state..." />
           <input type="hidden" name="stateValue" value={stateObj?.value} />
-          <CommandList className=" overflow-y-auto">
+          <CommandList className="overflow-y-auto">
             <CommandEmpty>No state found.</CommandEmpty>
 
             {us_states.map((state) => (

@@ -107,12 +107,12 @@ export default function SignupSuccess() {
 
           <Link
             to="/"
-            className="inline-flex w-full cursor-pointer  items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-primary-foreground text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+            className="inline-flex w-full cursor-pointer items-center justify-center rounded-md bg-gray-800 px-4 py-2 text-primary-foreground text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
             type="button"
           >
             Return to Home Page
           </Link>
-          <p className="text-center text-sm text-gray-800 ">
+          <p className="text-center text-sm text-gray-800">
             Didn&apos;t receive the email? Please check your spam folder
           </p>
         </div>

@@ -29,7 +29,7 @@ export default function Profile() {
   ];
 
   return (
-    <main className="flex flex-1 flex-col p-6 ">
+    <main className="flex flex-1 flex-col p-6">
       <h1 className="semi-bold text-2xl lg:my-3 lg:ml-2">Settings</h1>
       <Separator className="my-3" />
       <div className="flex flex-1 flex-col gap-3 p-4 pt-6 lg:flex-row lg:gap-0">
