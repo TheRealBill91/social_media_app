@@ -1,18 +1,14 @@
 import { createCookie } from "@remix-run/cloudflare";
 import { parse, serialize } from "cookie";
 
-// Used in allowing user to click 'resend email' after user signs up
+/**
+ * Used in allowing user to click `resend email` after user signs up
+ */
 export const postSignupEmail = createCookie("post-signup-email", {
   maxAge: 600, // 10 minutes in seconds
   httpOnly: true,
   path: "/auth",
 });
-
-// export const emailConfirmationFailuree = createCloudflareCookie(
-//   context,
-//   "email-confirmation-failure",
-
-// )
 
 export const emailConfirmationFailure = createCookie(
   "email-confirmation-failure",
