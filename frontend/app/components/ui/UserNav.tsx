@@ -33,7 +33,7 @@ export function UserNav({ userInfo }: { userInfo: UserInfo | undefined }) {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-white" align="end" forceMount>
+      <DropdownMenuContent className="w-52 bg-white" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-semibold">{userInfo?.UserName}</p>
@@ -59,9 +59,14 @@ export function UserNav({ userInfo }: { userInfo: UserInfo | undefined }) {
             }}
           >
             <Form action="/auth/logout" method="POST" ref={formRef}>
-              <button className="" type="submit">
+              <Button
+                variant="unstyled"
+                size="none"
+                className="flex-1 cursor-pointer content-stretch justify-start rounded font-normal hover:bg-gray-100"
+                type="submit"
+              >
                 Logout
-              </button>
+              </Button>
             </Form>
           </DropdownMenuItem>
         </DropdownMenuGroup>
