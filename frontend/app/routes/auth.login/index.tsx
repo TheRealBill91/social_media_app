@@ -143,72 +143,50 @@ export default function Login() {
           <Form replace method="post" className="w-full" {...form.props}>
             <input type="hidden" name="state" value={navigation.state} />
             <fieldset className="mt-5">
-              <div className="mb-4 flex flex-col items-center gap-[6px]">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.username.errors?.length
-                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
-                        : ""
-                    } signupInputAutofill peer block w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.username, {
-                      type: "text",
-                    })}
-                    placeholder="john"
-                    autoComplete="on"
-                  />
-                  <label
-                    htmlFor={fields.username.id}
-                    className={tw`${
-                      fields.username.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    } absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                  >
-                    Username
-                  </label>
-                </div>
+              <Field
+                labelProps={{
+                  children: "username",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-lg px-1 text-sm capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  field: fields.username,
+                  placeholder: "john",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.username.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="mb-4"
+              />
 
-                <ErrorList
-                  className="self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out"
-                  errors={fields.username.errors}
-                />
-              </div>
-
-              <div className="mt-8 flex flex-col items-center gap-[6px]">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.password.errors?.length
-                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
-                        : ""
-                    } signupInputAutofill peer block w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.password, {
-                      type: passwordInputType,
-                    })}
-                    placeholder="password"
-                  />
-                  <PasswordRevealBtn
-                    showPassword={passwordReveal.showPassword}
-                    togglePassword={passwordReveal.togglePassword}
-                  />
-
-                  <label
-                    htmlFor={fields.password.id}
-                    className={tw`${
-                      fields.password.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    } absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                  >
-                    password
-                  </label>
-                </div>
-
-                <ErrorList
-                  className="self-start pl-1 text-red-700"
-                  errors={fields.password.errors}
-                />
+              <RevealInputField
+                labelProps={{
+                  children: "password",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-lg px-1 text-sm capitalize  transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  passwordField: fields.password,
+                  placeholder: "password",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.password.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+              />
               </div>
             </fieldset>
             <div className="my-2 mt-3 flex justify-between pt-1 *:text-gray-600">
@@ -235,11 +213,14 @@ export default function Login() {
                 children: "Remember me",
               }}
             />
-            <AuthButton
-              name={loginButtonName}
-              submitting={submitting}
-              className="h-[54px] w-full"
-            />
+            <StatusButton
+              className="h-[54px] w-full gap-5 rounded-lg px-3 py-[14px]"
+              status={isPending ? "pending" : actionData?.status ?? "idle"}
+              type="submit"
+              disabled={isPending}
+            >
+              Login
+            </StatusButton>
           </Form>
           <AuthDivider />
           <ProviderConnectionForm

@@ -133,229 +133,149 @@ export default function Signup() {
           >
             <input type="hidden" name="state" value={navigation.state}></input>
             <fieldset className="mt-5">
-              <div className="mb-4 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.firstName.errors?.length
-                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
-                        : ""
-                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.firstName, { type: "text" })}
-                    placeholder="john"
-                  />
-                  <label
-                    className={tw`${
-                      fields.firstName.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                    htmlFor={fields.firstName.id}
-                  >
-                    First name
-                  </label>
-                </div>
-
-                <span
-                  className={tw`${
-                    fields.firstName.errors?.length
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                  id={fields.firstName.errorId}
-                >
-                  {fields.firstName.errors}
-                </span>
-              </div>
-
-              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.lastName.errors?.length
-                        ? "border-red-700 focus-visible:border-red-700"
-                        : ""
-                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.lastName, { type: "text" })}
-                    placeholder="appleseed"
-                  />
-                  <label
-                    className={tw`${
-                      fields.lastName.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                    htmlFor={fields.lastName.id}
-                  >
-                    Last name
-                  </label>
-                </div>
-
-                <span
-                  className={tw`${
-                    fields.lastName.errors?.length ? "opacity-100" : "opacity-0"
-                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                  id={fields.lastName.errorId}
-                >
-                  {fields.lastName.errors}
-                </span>
-              </div>
-
-              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.username.errors?.length
-                        ? "border-red-700 focus-visible:border-red-700"
-                        : ""
-                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.username, { type: "text" })}
-                    placeholder="bob1234"
-                  />
-                  <label
-                    className={tw`${
-                      fields.username.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                    htmlFor={fields.username.id}
-                  >
-                    username
-                  </label>
-                </div>
-
-                <span
-                  className={tw`${
-                    fields.username.errors?.length ? "opacity-100" : "opacity-0"
-                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                  id={fields.username.errorId}
-                >
-                  {fields.username.errors}
-                </span>
-              </div>
-
-              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full">
-                  <input
-                    className={cn(
-                      "signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none",
-                      fields.email.errors?.length
-                        ? "border-red-700 focus-visible:border-red-700"
-                        : "",
-                    )}
-                    {...conform.input(fields.email, { type: "email" })}
-                    placeholder="email@example.com"
-                  />
-                  <label
-                    className={cn(
-                      "absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
-                      fields.email.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : "",
-                    )}
-                    htmlFor={fields.email.id}
-                  >
-                    email
-                  </label>
-                </div>
-
-                <span
-                  className={cn(
+              <Field
+                labelProps={{
+                  children: "first name",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize  transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  field: fields.firstName,
+                  placeholder: "john",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.firstName.errors,
+                  errorClass:
                     "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
-                    fields.email.errors?.length ? "opacity-100" : "opacity-0",
-                  )}
-                >
-                  {fields.email.errors}
-                </span>
-              </div>
-
-              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.password.errors?.length
-                        ? "border-red-700 focus-visible:border-red-700"
-                        : ""
-                    } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.password, {
-                      type: passwordInputType,
-                    })}
-                    placeholder="password"
-                  />
-                  <PasswordRevealBtn
-                    togglePassword={passwordReveal.togglePassword}
-                    showPassword={passwordReveal.showPassword}
-                  />
-
-                  <label
-                    className={tw`${
-                      fields.password.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                    htmlFor={fields.password.id}
-                  >
-                    password
-                  </label>
-                </div>
-
-                <span
-                  className={tw`${
-                    fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                  id={fields.password.errorId}
-                >
-                  {fields.password.errors}
-                </span>
-              </div>
-
-              <div className="mt-8 flex w-full flex-col items-center gap-[6px] px-3">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.passwordConfirmation.errors?.length
-                        ? "border-red-700 focus-visible:border-red-700"
-                        : ""
-                    } peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                    {...conform.input(fields.passwordConfirmation, {
-                      type: passwordConfirmationInputType,
-                    })}
-                    placeholder="email@example.com"
-                  />
-                  <PasswordRevealBtn
-                    togglePassword={passwordConfirmationReveal.togglePassword}
-                    showPassword={passwordConfirmationReveal.showPassword}
-                  />
-                  <label
-                    className={tw`${
-                      fields.passwordConfirmation.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus-visible:-top-2.5 md:peer-focus-visible:text-sm`}
-                    htmlFor={fields.passwordConfirmation.id}
-                  >
-                    Password confirmation
-                  </label>
-                </div>
-
-                <span
-                  className={tw`${
-                    fields.passwordConfirmation.errors?.length
-                      ? "opacity-100"
-                      : "opacity-0"
-                  } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                  id={fields.passwordConfirmation.errorId}
-                >
-                  {fields.passwordConfirmation.errors}
-                </span>
-              </div>
-            </fieldset>
-            <div className="mt-3 flex flex-col justify-center gap-4 px-3 lg:gap-8 lg:px-2">
-              <AuthButton
-                name={signUpButtonName}
-                submitting={submitting}
-                className="w-full"
+                }}
+                className="mb-4 px-3"
               />
+              <Field
+                labelProps={{
+                  children: "last name",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  field: fields.lastName,
+                  placeholder: "appleseed",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.lastName.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="mt-8 px-3"
+              />
+
+              <Field
+                labelProps={{
+                  children: "username",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  field: fields.username,
+                  placeholder: "bob1234",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.username.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="mt-8 px-3"
+              />
+              <Field
+                labelProps={{
+                  children: "email",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1  capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  field: fields.email,
+                  placeholder: "email@example.com",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.email.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="mt-8 px-3"
+              />
+              <RevealInputField
+                labelProps={{
+                  children: "password",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1  capitalize  transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  passwordField: fields.password,
+                  placeholder: "password",
+                  baseClass:
+                    "signupInputAutofill  border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.password.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="px-3"
+              />
+              <RevealInputField
+                labelProps={{
+                  children: "password confirmation",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  passwordField: fields.passwordConfirmation,
+                  placeholder: "password",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.passwordConfirmation.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="px-3"
+              />
+            </fieldset>
+            <div className="mt-4 flex flex-1 items-center justify-between gap-6 px-3">
+              <StatusButton
+                className="h-[54px] w-full flex-1 gap-4 rounded-lg px-3 py-[14px]"
+                status={isPending ? "pending" : actionData?.status ?? "idle"}
+                type="submit"
+                disabled={isPending}
+              >
+                Sign up
+              </StatusButton>
             </div>
           </Form>
         </div>

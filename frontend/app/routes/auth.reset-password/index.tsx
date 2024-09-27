@@ -171,103 +171,77 @@ export default function ResetPassword() {
           reset your password
         </h2>
 
-        <Form method="post" {...form.props} className="w-full">
-          <input type="hidden" name="state" value={navigation.state} />
-          <input
-            type="hidden"
-            name="PasswordResetUserId"
-            value={passwordResetUserId}
-          />
-          <input type="hidden" name="Code" value={code} />
-          <fieldset>
-            <div className="mt-8 flex w-full flex-col items-center gap-[6px]">
-              <div className="relative w-full">
-                <input
-                  className={tw`${
-                    fields.password.errors?.length
-                      ? "border-red-700 focus-visible:border-red-700"
-                      : ""
-                  } signupInputAutofill peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                  {...conform.input(fields.password, {
-                    type: passwordInputType,
-                  })}
-                  placeholder="password"
-                />
-                <PasswordRevealBtn
-                  showPassword={passwordReveal.showPassword}
-                  togglePassword={passwordReveal.togglePassword}
-                />
-
-                <label
-                  className={tw`${
-                    fields.password.errors?.length
-                      ? "text-red-700 peer-focus-visible:text-red-700"
-                      : ""
-                  }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                  htmlFor={fields.password.id}
-                >
-                  password
-                </label>
-              </div>
-
-              <span
-                className={tw`${
-                  fields.password.errors?.length ? "opacity-100" : "opacity-0"
-                } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                id={fields.password.errorId}
-              >
-                {fields.password.error}
-              </span>
-            </div>
-
-            <div className="mt-8 flex w-full flex-col items-center gap-[6px]">
-              <div className="relative w-full">
-                <input
-                  className={tw`${
-                    fields.passwordConfirmation.errors?.length
-                      ? "border-red-700 focus-visible:border-red-700"
-                      : ""
-                  } peer block w-full rounded-md border border-gray-500 bg-[#ffffff] px-3 py-[14px] text-gray-700 placeholder-transparent focus-visible:border-gray-700 focus-visible:outline-none`}
-                  {...conform.input(fields.passwordConfirmation, {
-                    type: passwordConfirmationInputType,
-                  })}
-                  placeholder="email@example.com"
-                />
-                <PasswordRevealBtn
-                  togglePassword={passwordReveal.togglePassword}
-                  showPassword={passwordReveal.showPassword}
-                />
-                <label
-                  className={tw`${
-                    fields.passwordConfirmation.errors?.length
-                      ? "text-red-700 peer-focus-visible:text-red-700"
-                      : ""
-                  }absolute -top-2.5 left-2 bg-[#ffffff] px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-3.5 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-500 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700 md:peer-placeholder-shown:top-3.5 md:peer-placeholder-shown:text-[1.1rem] md:peer-focus-visible:-top-2.5 md:peer-focus-visible:text-sm`}
-                  htmlFor={fields.passwordConfirmation.id}
-                >
-                  Password confirmation
-                </label>
-              </div>
-
-              <span
-                className={tw`${
-                  fields.passwordConfirmation.errors?.length
-                    ? "opacity-100"
-                    : "opacity-0"
-                } self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out`}
-                id={fields.passwordConfirmation.errorId}
-              >
-                {fields.passwordConfirmation.error}
-              </span>
-            </div>
-          </fieldset>
-          <button
-            className="mt-6 h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-            type="submit"
+        <div className="flex-col items-center">
+          <Form
+            method="post"
+            {...form.props}
+            className="flex w-full flex-col gap-4"
           >
-            reset password
-          </button>
-        </Form>
+            <input type="hidden" name="state" value={navigation.state} />
+            <input
+              type="hidden"
+              name="PasswordResetUserId"
+              value={passwordResetUserId}
+            />
+            <input type="hidden" name="Code" value={code} />
+            <fieldset>
+              <RevealInputField
+                labelProps={{
+                  children: "Password",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  passwordField: fields.password,
+                  placeholder: "email@example.com",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.password.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+              />
+
+              <RevealInputField
+                labelProps={{
+                  children: "Password Confirmation",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  passwordField: fields.passwordConfirmation,
+                  placeholder: "email@example.com",
+                  baseClass:
+                    "signupInputAutofill  border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.passwordConfirmation.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+              />
+            </fieldset>
+
+            <div className="mt-4 flex w-full flex-1 items-center justify-between gap-6">
+              <StatusButton
+                className="h-[54px] w-full flex-1 gap-4 px-3 py-[14px] capitalize"
+                status={isPending ? "pending" : actionData?.status ?? "idle"}
+                type="submit"
+                disabled={isPending}
+              >
+                reset password
+              </StatusButton>
+            </div>
+          </Form>
+        </div>
       </div>
     </main>
   );

@@ -133,49 +133,44 @@ export default function ForgotPassword() {
         <div className="flex flex-col items-center">
           <forgotPassword.Form method="post" {...form.props} className="w-full">
             <input type="hidden" name="state" value={navigation.state} />
-            <fieldset className="mt-5">
-              <div className="mb-4 flex flex-col items-center gap-[6px]">
-                <div className="relative w-full">
-                  <input
-                    className={tw`${
-                      fields.email.errors?.length
-                        ? "border-red-700 caret-red-700 focus-visible:border-red-700"
-                        : ""
-                    }signupInputAutofill peer block w-full rounded-md  border border-gray-500 bg-white px-3 py-[14px]  text-gray-700 placeholder-transparent focus-visible:outline-none`}
-                    {...conform.input(fields.email, {
-                      type: "email",
-                    })}
-                    placeholder="placeholder"
-                    autoComplete="on"
-                  />
-                  <label
-                    htmlFor={fields.email.id}
-                    className={tw`${
-                      fields.email.errors?.length
-                        ? "text-red-700 peer-focus-visible:text-red-700"
-                        : ""
-                    } absolute -top-2.5 left-2 bg-white px-1 text-sm capitalize text-gray-700 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-600 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700`}
-                  >
-                    email
-                  </label>
-                </div>
-
-                <span
-                  className={tw`${
-                    fields.email.errors?.length ? "opacity-100" : "opacity-0"
-                  }    mb-2  self-start pl-1 text-sm text-red-700  transition-opacity duration-300 ease-in-out`}
-                  id={fields.email.errorId}
-                >
-                  {fields.email.error}
-                </span>
-              </div>
+            <fieldset>
+              <Field
+                labelProps={{
+                  children: "email",
+                  baseClass:
+                    "absolute -top-2.5 font-normal left-2 bg-[#ffffff] text-sm px-1 capitalize transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:align-baseline peer-placeholder-shown:text-[1.1rem] peer-placeholder-shown:text-gray-400 peer-focus-visible:-top-2.5 peer-focus-visible:text-sm peer-focus-visible:text-gray-700",
+                  errorsClass: "text-red-700 peer-focus-visible:text-red-700",
+                }}
+                inputProps={{
+                  field: fields.email,
+                  placeholder: "placeholder",
+                  baseClass:
+                    "signupInputAutofill border-color-[unset] placeholder:text-transparent focus-visible:ring-color-[unset] peer block h-[unset] w-full rounded-md border border-gray-400 bg-[#ffffff] px-3 py-[14px] text-base text-[unset] text-gray-700 placeholder-transparent ring-[unset] focus-visible:border-gray-700 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0",
+                  inputErrorsClass:
+                    "border-red-700 caret-red-700 focus-visible:border-red-700",
+                }}
+                errorProps={{
+                  errors: fields.email.errors,
+                  errorClass:
+                    "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
+                }}
+                className="mb-4 mt-2"
+              />
             </fieldset>
-            <button
-              className="h-[54px] w-full rounded-md bg-gray-700 px-4 py-2 text-lg capitalize text-white outline-none hover:bg-gray-600 focus-visible:outline-none focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
-              type="submit"
-            >
-              recover email
-            </button>
+            <div className="flex flex-1 items-center justify-between gap-6">
+              <StatusButton
+                className="h-[54px] w-full flex-1 gap-4 px-3 py-[14px] text-lg capitalize"
+                status={
+                  forgotPassword.state === "submitting"
+                    ? "pending"
+                    : forgotPassword.data?.status ?? "idle"
+                }
+                type="submit"
+                disabled={forgotPassword.state !== "idle"}
+              >
+                recover password
+              </StatusButton>
+            </div>
           </forgotPassword.Form>
         </div>
       </div>
