@@ -16,7 +16,7 @@ export function PasswordRevealBtn({
     <>
       {showPassword ? (
         <button
-          onClick={() => togglePassword()}
+          onClick={togglePassword}
           type="button"
           title="hide password icon"
           className="absolute right-4 top-4"
@@ -25,7 +25,7 @@ export function PasswordRevealBtn({
         </button>
       ) : (
         <button
-          onClick={() => togglePassword()}
+          onClick={togglePassword}
           type="button"
           title="reveal password icon"
           className="absolute right-4 top-4"
