@@ -1,8 +1,11 @@
 import { ReactNode, useId, useRef } from "react";
 import { Checkbox, type CheckboxProps } from "./ui/Checkbox.tsx";
-import { useInputEvent } from "@conform-to/react";
+import { FieldConfig, conform, useInputEvent } from "@conform-to/react";
 import { Label } from "./ui/Label.tsx";
 import { cn } from "~/utils/misc.tsx";
+import { PasswordRevealBtn } from "./ui/PasswordRevealBtn.tsx";
+import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal.ts";
+import { Input } from "./ui/Input.tsx";
 
 interface FormDescriptionTypes {
   children: ReactNode;
@@ -99,17 +102,203 @@ export function ErrorList({
   );
 }
 
-// function Field({
-//   labelProps,
-//   inputProps,
-//   errors,
-//   className,
-// }: {
-//   labelProps: React.LabelHTMLAttributes<HTMLLabelElement>;
-//   inputProps: React.InputHTMLAttributes<HTMLInputElement>;
-//   errors?: ListOfErrors;
-//   className?: string;
-// }) {
-//   const fallbackId = useId();
-//   const id = inputProps.id ?? fallbackId;
-// }
+/**
+ * @summary Props for the input in {@link RevealInputField}
+ *
+ * @extends React.InputHTMLAttributes<HTMLInputElement>
+ * @property {@link passwordField}
+ * @property {@link baseClass}
+ * @property {@link inputErrorsClass}
+ */
+interface RevealInputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  passwordField: FieldConfig<string>;
+  baseClass?: string;
+  inputErrorsClass?: string;
+}
+
+/**
+ * @summary Props for the label in {@link RevealInputField}
+ *
+ * @extends React.LabelHTMLAttributes<HTMLLabelElement>
+ * @property {@link children}
+ * @property {@link baseClass}
+ * @property {@link errorsClass}
+ */
+interface RevealLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
+  children: ReactNode;
+  baseClass?: string;
+  errorsClass?: string;
+}
+
+/**
+ * @summary Error props for the field input that uses the input reveal toggle
+ * @property {@link errors}
+ * @property {@link errorClass}
+ */
+interface RevealErrorProps {
+  errors?: ListOfErrors;
+  errorClass?: string;
+}
+
+/**
+ *
+ * @summary Commonly used for revealing sensitive information in the user input
+ * like with passwords
+ *
+ * @param {RevealLabelProps} {@link RevealLabelProps}
+ * @param {InputProps} {@link RevealInputProps}
+ * @param {RevealErrorProps} {@link RevealErrorProps}
+ *
+ */
+export function RevealInputField({
+  labelProps,
+  inputProps,
+  errorProps,
+  className,
+}: {
+  labelProps: RevealLabelProps;
+  inputProps: RevealInputProps;
+  errorProps: RevealErrorProps;
+  className?: string;
+}) {
+  const passwordReveal = usePasswordReveal();
+  const passwordInputType = passwordReveal.showPassword ? "text" : "password";
+
+  const fallbackId = useId();
+
+  const id = inputProps.id ?? fallbackId;
+  const errorId = errorProps.errors?.length ? `${id}-error` : undefined;
+
+  return (
+    <div className={cn("mt-8 flex flex-col items-center gap-[6px]", className)}>
+      <div className="relative w-full">
+        <Input
+          {...conform.input(inputProps.passwordField, {
+            type: passwordInputType,
+          })}
+          id={id}
+          className={cn(
+            inputProps.baseClass,
+            errorProps.errors?.length ? inputProps.inputErrorsClass : "",
+          )}
+          placeholder="test"
+          aria-invalid={errorId ? true : undefined}
+          aria-describedby={errorId}
+        />
+        <PasswordRevealBtn
+          showPassword={passwordReveal.showPassword}
+          togglePassword={passwordReveal.togglePassword}
+        />
+        <Label
+          htmlFor={id}
+          className={cn(
+            labelProps.baseClass,
+            errorProps.errors?.length ? labelProps.errorsClass : "",
+          )}
+        >
+          {labelProps.children}
+        </Label>
+      </div>
+      {errorId ? (
+        <ErrorList
+          className={errorProps.errorClass}
+          errors={errorProps.errors}
+          id={errorId}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+/**
+ * @summary Props for the input in {@link Field}
+ *
+ * @extends React.InputHTMLAttributes<HTMLInputElement>
+ * @property {@link passwordField}
+ * @property {@link baseClass}
+ * @property {@link inputErrorsClass}
+ */
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  field: FieldConfig<string>;
+  baseClass?: string;
+  inputErrorsClass?: string;
+}
+
+/**
+ * @summary Props for the label in {@link Field}
+ *
+ * @extends React.LabelHTMLAttributes<HTMLLabelElement>
+ * @property {@link children}
+ * @property {@link baseClass}
+ * @property {@link errorsClass}
+ */
+interface LabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
+  children: ReactNode;
+  baseClass?: string;
+  errorsClass?: string;
+}
+
+/**
+ * @summary Error props for {@link Field}
+ * @property {@link errors}
+ * @property {@link errorClass}
+ */
+interface ErrorProps {
+  errors?: ListOfErrors;
+  errorClass?: string;
+}
+
+export function Field({
+  labelProps,
+  inputProps,
+  errorProps,
+  className,
+}: {
+  labelProps: LabelProps;
+  inputProps: InputProps;
+  errorProps: ErrorProps;
+  className?: string;
+}) {
+  const fallbackId = useId();
+
+  const id = inputProps.id ?? fallbackId;
+  const errorId = errorProps.errors?.length ? `${id}-error` : undefined;
+
+  return (
+    <div className={cn("flex flex-col items-center gap-[6px]", className)}>
+      <div className="relative w-full">
+        <Input
+          {...conform.input(inputProps.field, {
+            type: "text",
+          })}
+          id={id}
+          className={cn(
+            inputProps.baseClass,
+            errorProps.errors?.length ? inputProps.inputErrorsClass : "",
+          )}
+          placeholder={inputProps.placeholder}
+          aria-invalid={errorId ? true : undefined}
+          aria-describedby={errorId}
+        />
+
+        <Label
+          htmlFor={id}
+          className={cn(
+            labelProps.baseClass,
+            errorProps.errors?.length ? labelProps.errorsClass : "",
+          )}
+        >
+          {labelProps.children}
+        </Label>
+      </div>
+
+      {errorId ? (
+        <ErrorList
+          className={errorProps.errorClass}
+          errors={errorProps.errors}
+          id={errorId}
+        />
+      ) : null}
+    </div>
+  );
+}
