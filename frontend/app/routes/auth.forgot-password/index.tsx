@@ -1,66 +1,63 @@
-import { conform, useForm } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
+import { useForm } from "@conform-to/react";
+import { getFieldsetConstraint, parse } from "@conform-to/zod";
 import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/cloudflare";
 import { useFetcher, useNavigation } from "@remix-run/react";
 import { z } from "zod";
-import { tw } from "~/utils/tw-identity-helper";
-import { useId } from "react";
 import { requestPasswordReset } from "./request-password-reset.server";
 import { ErrorAlertBanner } from "./ErrorAlertBanner";
+import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server";
+import { Field } from "~/components/Forms";
+import { StatusButton } from "~/components/ui/StatusButton";
+import { emailSchema } from "../auth.signup/signup-schema";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Password Recovery" }];
 };
 
-const email = z
-  .string({ required_error: "Email is required" })
-  .email({
-    message:
-      "Please enter a valid email address in the format: example@domain.com.",
-  })
-  .min(3, { message: "Email is too short " })
-  .max(50, { message: "Email is too long" });
-
-export const forgotPasswordSchema = z.object({ email: email });
+export const forgotPasswordSchema = z.object({ email: emailSchema });
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { env } = context.cloudflare;
   const formData = await request.formData();
 
-  const email = String(formData.get("email"));
   const state = String(formData.get("state"));
 
   if (state === "submitting") return null;
 
   const submission = parse(formData, { schema: forgotPasswordSchema });
 
-  if (submission.intent !== "submit" || !submission.value) {
-    return json(submission);
+  if (submission.intent !== "submit") {
+    return json({ status: "idle", submission } as const);
   }
 
-  const requestPasswordResetResult = await requestPasswordReset(env, email);
+  if (!submission.value) {
+    return json({ status: "error", submission } as const, { status: 400 });
+  }
 
-  if (
-    !requestPasswordResetResult.ok &&
-    requestPasswordResetResult.status === 429
-  ) {
+  const requestPasswordResetResult = await requestPasswordReset(env, formData);
+
+  if (requestPasswordResetResult.status === 429) {
     const passwordResetRequestError: { DailyLimitMessage: string } =
       await requestPasswordResetResult.json();
+    submission.error[""] = [passwordResetRequestError.DailyLimitMessage];
 
-    return json(passwordResetRequestError);
-  } else if (
-    !requestPasswordResetResult.ok &&
-    requestPasswordResetResult.status === 404
-  ) {
+    return json({ status: "error", submission } as const, { status: 429 });
+  } else if (requestPasswordResetResult.status === 404) {
     const passwordResetRequestError: { NoAccountFoundMessage: string } =
       await requestPasswordResetResult.json();
+    submission.error[""] = [passwordResetRequestError.NoAccountFoundMessage];
 
-    return json(passwordResetRequestError);
+    return json({ status: "error", submission } as const, { status: 404 });
   }
 
   const passwordResetRequestResult: { ResponseMessage: string } =
     await requestPasswordResetResult.json();
-  return json(passwordResetRequestResult);
+
+  return await redirectWithSuccessToast(
+    "/auth/login",
+    passwordResetRequestResult.ResponseMessage,
+    env,
+  );
 }
 
 export default function ForgotPassword() {
@@ -68,42 +65,12 @@ export default function ForgotPassword() {
 
   const forgotPassword = useFetcher<typeof action>();
 
-  const id = useId();
-
-  const submissionData = forgotPassword.data;
-
-  const lastSubmission =
-    submissionData && "intent" in submissionData ? submissionData : null;
-
-  const dailyLimitMessage =
-    submissionData && "DailyLimitMessage" in submissionData
-      ? submissionData
-      : null;
-
-  const noAccountFoundMessage =
-    submissionData && "NoAccountFoundMessage" in submissionData
-      ? submissionData
-      : null;
-
-  const requestPasswordResetSuccess =
-    submissionData && "ResponseMessage" in submissionData
-      ? submissionData
-      : null;
-
-  const requestPasswordResetError =
-    dailyLimitMessage?.DailyLimitMessage ||
-    noAccountFoundMessage?.NoAccountFoundMessage;
-
-  // used to dynamically change the error alert callout font size
-  const alertTitleFontSize = dailyLimitMessage
-    ? tw`text-sm`
-    : noAccountFoundMessage
-      ? tw`text-lg`
-      : null;
+  forgotPassword.data;
 
   const [form, fields] = useForm({
-    id,
-    lastSubmission,
+    id: "forgot-password-form",
+    constraint: getFieldsetConstraint(forgotPasswordSchema),
+    lastSubmission: forgotPassword.data?.submission,
     shouldValidate: "onBlur",
 
     onValidate({ formData }) {
@@ -113,17 +80,8 @@ export default function ForgotPassword() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
-      {requestPasswordResetError ? (
-        <ErrorAlertBanner
-          alertTitleFontSize={alertTitleFontSize}
-          requestPasswordResetError={requestPasswordResetError}
-        />
-      ) : requestPasswordResetSuccess ? (
-        <div className="w-full max-w-[24rem] p-3 pb-0">
-          <p className="text-sm ">
-            {requestPasswordResetSuccess.ResponseMessage}
-          </p>
-        </div>
+      {form.error ? (
+        <ErrorAlertBanner requestPasswordResetError={form.error} />
       ) : null}
       <div className="mx-auto flex w-full max-w-[24rem] flex-col justify-start gap-6 rounded-lg border border-white bg-white p-6 px-8 py-6 shadow-md md:px-12">
         <h2 className="mt-4 text-center text-2xl capitalize">

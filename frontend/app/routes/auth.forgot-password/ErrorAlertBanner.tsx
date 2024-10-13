@@ -1,14 +1,11 @@
 import { default as AlertCircle } from "~/components/icons/icon.tsx";
 import { Alert, AlertTitle } from "~/components/ui/Alert";
-import { tw } from "~/utils/tw-identity-helper";
 
 interface ErrorAlertBannerProps {
-  alertTitleFontSize: string | null;
   requestPasswordResetError: string;
 }
 
 export function ErrorAlertBanner({
-  alertTitleFontSize,
   requestPasswordResetError,
 }: ErrorAlertBannerProps) {
   return (

@@ -1,70 +1,73 @@
 import { ActionFunctionArgs, MetaFunction, json } from "@remix-run/cloudflare";
 import { useFetcher, useNavigation } from "@remix-run/react";
-import { useId } from "react";
 import { z } from "zod";
-import { parse } from "@conform-to/zod";
-import { tw } from "~/utils/tw-identity-helper";
-import { conform, useForm } from "@conform-to/react";
-import { requestUsername } from "./request-username-reset.server";
-import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server";
-import { default as AlertCircle } from "~/components/icons/icon.tsx";
-import { Alert, AlertTitle } from "~/components/ui/Alert";
+import { getFieldsetConstraint, parse } from "@conform-to/zod";
+import { useForm } from "@conform-to/react";
+import { requestUsernameReset } from "./request-username-reset.server";
+import { redirectWithToast } from "~/utils/flash-session/flash-session.server";
+import { AlertWithCircle } from "./AlertWithCircle";
+import { Field } from "~/components/Forms";
+import { StatusButton } from "~/components/ui/StatusButton";
+import { emailSchema } from "../auth.signup/signup-schema";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Username Recovery" }];
 };
 
-const email = z
-  .string({ required_error: "Email is required" })
-  .email({
-    message:
-      "Please enter a valid email address in the format: example@domain.com.",
-  })
-  .min(3, { message: "Email is too short " })
-  .max(50, { message: "Email is too long" });
-
-const requestUsernameSchema = z.object({ email: email });
+const requestUsernameSchema = z.object({ email: emailSchema });
 
 export async function action({ request, context }: ActionFunctionArgs) {
   const { env } = context.cloudflare;
   const formData = await request.formData();
 
-  const email = String(formData.get("email"));
   const state = String(formData.get("state"));
 
   if (state === "submitting") return null;
 
   const submission = parse(formData, { schema: requestUsernameSchema });
 
-  if (submission.intent !== "submit" || !submission.value) {
-    return json(submission);
+  if (submission.intent !== "submit") {
+    return json({ status: "idle", submission } as const);
   }
 
-  const requestUsernameResult = await requestUsername(env, email);
+  if (!submission.value) {
+    return json({ status: "error", submission } as const, { status: 400 });
+  }
 
-  if (!requestUsernameResult.ok && requestUsernameResult.status === 429) {
+  const requestUsernameResetResult = await requestUsernameReset(env, formData);
+
+  if (requestUsernameResetResult.status === 429) {
     const requestUsernameError: { DailyLimitMessage: string } =
-      await requestUsernameResult.json();
+      await requestUsernameResetResult.json();
+    submission.error[""] = [requestUsernameError.DailyLimitMessage];
 
-    return json(requestUsernameError);
-  } else if (
-    !requestUsernameResult.ok &&
-    requestUsernameResult.status === 404
-  ) {
+    return json({ status: "error", submission } as const, { status: 429 });
+  } else if (requestUsernameResetResult.status === 404) {
     const requestUsernameError: { NoAccountFoundMessage: string } =
-      await requestUsernameResult.json();
-    return json(requestUsernameError);
+      await requestUsernameResetResult.json();
+
+    return redirectWithToast(
+      "/auth/login",
+      {
+        type: "success",
+        text: requestUsernameError.NoAccountFoundMessage,
+        duration: 8000,
+      },
+      env,
+    );
   }
 
-  const requestUsernameResultMessage: { ResponseMessage: string } =
-    await requestUsernameResult.json();
+  const requestUsernameResult: { ResponseMessage: string } =
+    await requestUsernameResetResult.json();
 
-  return redirectWithSuccessToast(
+  return redirectWithToast(
     "/auth/login",
-    requestUsernameResultMessage.ResponseMessage,
+    {
+      type: "success",
+      text: requestUsernameResult.ResponseMessage,
+      duration: 8000,
+    },
     env,
-    undefined,
-    8000,
   );
 }
 
@@ -73,37 +76,10 @@ export default function ForgotUsername() {
 
   const forgotUsername = useFetcher<typeof action>();
 
-  const id = useId();
-
-  const submissionData = forgotUsername.data;
-
-  const lastSubmission =
-    submissionData && "intent" in submissionData ? submissionData : null;
-
-  const dailyLimitMessage =
-    submissionData && "DailyLimitMessage" in submissionData
-      ? submissionData
-      : null;
-
-  const noAccountFoundMessage =
-    submissionData && "NoAccountFoundMessage" in submissionData
-      ? submissionData
-      : null;
-
-  const requestUsernameError =
-    dailyLimitMessage?.DailyLimitMessage ||
-    noAccountFoundMessage?.NoAccountFoundMessage;
-
-  // used to dynamically change the error alert callout font size
-  const alertTitleFontSize = dailyLimitMessage
-    ? tw`text-sm`
-    : noAccountFoundMessage
-      ? tw`text-lg`
-      : null;
-
   const [form, fields] = useForm({
-    id,
-    lastSubmission,
+    id: "forgot-username-form",
+    constraint: getFieldsetConstraint(requestUsernameSchema),
+    lastSubmission: forgotUsername.data?.submission,
     shouldValidate: "onBlur",
 
     onValidate({ formData }) {
@@ -113,16 +89,8 @@ export default function ForgotUsername() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
-      {requestUsernameError ? (
-        <Alert className="md-shadow max-w-[24rem] bg-white">
-          <AlertCircle
-            icon="alert-circle"
-            className="size-[22px] fill-red-400"
-          />
-          <AlertTitle className={tw`pb-0 ${alertTitleFontSize}`}>
-            {requestUsernameError}
-          </AlertTitle>
-        </Alert>
+      {form.error ? (
+        <AlertWithCircle className="pl-2" requestUsernameError={form.error} />
       ) : null}
 
       <div className="mx-auto flex w-full max-w-[24rem] flex-col justify-start gap-6 rounded-lg border border-white bg-white p-6 px-8 py-6 shadow-md md:px-12">

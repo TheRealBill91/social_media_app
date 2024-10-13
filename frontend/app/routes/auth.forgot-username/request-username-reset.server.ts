@@ -1,4 +1,6 @@
-export async function requestUsername(env: Env, email: string) {
+export async function requestUsernameReset(env: Env, formData: FormData) {
+  const email = String(formData.get("email"));
+
   const requestUsernameResponse = await fetch(
     `${env.API_URL}/api/auth/username-recovery-request`,
     {
