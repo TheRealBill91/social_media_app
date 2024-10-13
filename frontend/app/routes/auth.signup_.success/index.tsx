@@ -2,6 +2,7 @@ import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   json,
+  redirect,
 } from "@remix-run/cloudflare";
 import {
   Link,
@@ -14,18 +15,19 @@ import { resendConfirmationEmail } from "~/utils/resend-confirmation-email.serve
 import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
 import { resendEmailErrorResponse } from "types/resend-email-error.ts";
 import {
-  getToast,
   jsonWithError,
   jsonWithSuccess,
 } from "~/utils/flash-session/flash-session.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
 import { resendEmailSuccessResponse } from "./types.ts";
+import { requireAnonymous } from "~/utils/auth.server.ts";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup Success" }];
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  requireAnonymous(request);
   const { env } = context.cloudflare;
   const formData = await request.formData();
 
@@ -34,11 +36,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const state = String(formData.get("state"));
 
   if (state === "submitting") {
-    return null;
+    return json({ status: null } as const);
   }
 
   if (!email) {
-    return jsonWithError(null, "Email is missing", env);
+    return jsonWithError({ status: "error" } as const, "Email is missing", env);
   }
 
   const resendEmailResponse = await resendConfirmationEmail(env, email);
@@ -47,48 +49,57 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return jsonWithError(null, serverError.ErrorMessage, env, {
-      headers: {
-        "Set-Cookie": await postSignupEmail.serialize("", {
-          maxAge: 1,
-        }),
+    return jsonWithError(
+      { status: "error" } as const,
+      serverError.ErrorMessage,
+      env,
+      {
+        headers: {
+          "Set-Cookie": await postSignupEmail.serialize("", {
+            maxAge: 1,
+          }),
+        },
       },
-    });
+    );
   }
   const serverSuccessResponse: resendEmailSuccessResponse =
     await resendEmailResponse.json();
 
-  return jsonWithSuccess(null, serverSuccessResponse.successMessage, env);
+  return jsonWithSuccess(
+    { status: null } as const,
+    serverSuccessResponse.successMessage,
+    env,
+  );
 }
 
-export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { env } = context.cloudflare;
-
+export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const cookie = (await postSignupEmail.parse(cookieHeader)) as Record<
-    string,
-    string
-  >;
 
-  const { toast, headers } = await getToast(request, env);
+  const postSignupCookie = (await postSignupEmail.parse(
+    cookieHeader,
+  )) as Record<string, string>;
 
-  return json({ toast, postSignUpCookie: cookie }, { headers });
+  // prevents user from accessing this page unless they come from the
+  // the signup route
+  if (!postSignupCookie) {
+    throw redirect("/auth/signup");
+  }
+
+  return json({ postSignupCookie });
 }
 
 export default function SignupSuccess() {
-  const { postSignUpCookie } = useLoaderData<typeof loader>();
+  const { postSignupCookie } = useLoaderData<typeof loader>();
 
-  const email: string = postSignUpCookie.email || "";
+  const email = postSignupCookie?.email;
 
   const emailMissing = email ? false : true;
 
-  const fetcher = useFetcher();
-
-  const submitting = fetcher.state === "submitting";
+  const signUpSuccess = useFetcher<typeof action>();
 
   return (
-    <main className="flex h-screen w-full flex-1  items-center justify-center bg-gray-100">
-      <div className="mx-auto flex w-[350px] flex-col gap-2 space-y-6 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-10 shadow-md md:w-[400px]">
+    <main className="flex h-screen w-full flex-1 items-center justify-center bg-gray-100">
+      <article className="mx-auto flex w-[350px] flex-col gap-2 space-y-6 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-10 shadow-md md:w-[400px]">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Account Created!</h1>
           <p className="text-gray-600">
@@ -96,14 +107,19 @@ export default function SignupSuccess() {
           </p>
         </div>
         <div className="space-y-4">
-          <fetcher.Form method="post">
+          <signUpSuccess.Form method="post">
             <input type="hidden" name="email" value={email}></input>
-            <input type="hidden" name="state" value={fetcher.state}></input>
+            <input
+              type="hidden"
+              name="state"
+              value={signUpSuccess.state}
+            ></input>
             <ResendConfirmationEmailBtn
-              submitting={submitting}
               emailMissing={emailMissing}
+              state={signUpSuccess.state}
+              data={signUpSuccess.data}
             />
-          </fetcher.Form>
+          </signUpSuccess.Form>
 
           <Link
             to="/"
@@ -116,7 +132,7 @@ export default function SignupSuccess() {
             Didn&apos;t receive the email? Please check your spam folder
           </p>
         </div>
-      </div>
+      </article>
     </main>
   );
 }
