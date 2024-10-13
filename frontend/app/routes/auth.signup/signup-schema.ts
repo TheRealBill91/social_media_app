@@ -20,14 +20,14 @@ const usernameSchema = z
   })
   .trim();
 
-const emailSchema = z
+export const emailSchema = z
   .string({ required_error: "Email is required" })
   .email({
     message:
       "Please enter a valid email address in the format: example@domain.com.",
   })
-  .min(3, { message: "Username is too short " })
-  .max(50, { message: "Username is too long" });
+  .min(3, { message: "Email is too short " })
+  .max(50, { message: "Email is too long" });
 
 const passwordSchema = z
   .string({ required_error: "Password is required" })

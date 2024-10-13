@@ -1,38 +1,41 @@
+import z from "zod";
+
 export function transformSignupErrors(
-  serverErrors: Record<string, string[]>,
-): Record<string, string[]> {
+  serverErrors: Record<"DuplicateEmail" | "DuplicateUserName", string[]>, // this type will only be for last two switch case statements
+  ctx: z.RefinementCtx,
+): void {
   const PasswordErrorMessage =
     "Password must be 8-20 characters with mixed case, a digit, and a symbol.";
 
-  const transformedErrors: Record<string, string[]> = {};
+  // const transformedErrors: Record<string, string[]> = {};
   for (const value in serverErrors) {
     switch (value) {
       case "Password":
       case "PasswordRequiresDigit":
       case "PasswordRequiresUpper":
       case "PasswordRequiresLower":
-        if (!transformedErrors.password?.includes(PasswordErrorMessage)) {
-          transformedErrors.password = [PasswordErrorMessage];
-          transformedErrors.passwordConfirmation = [PasswordErrorMessage];
-        }
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: PasswordErrorMessage,
+          path: ["password"],
+        });
 
         break;
       case "DuplicateEmail":
-        if (!transformedErrors.email) {
-          transformedErrors.email = [];
-        }
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverErrors[value][0],
+          path: ["email"],
+        });
 
-        transformedErrors.email = [...serverErrors[value]];
         break;
       case "DuplicateUserName":
-        if (!transformedErrors.username) {
-          transformedErrors.username = [];
-        }
-
-        transformedErrors.username = [...serverErrors[value]];
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: serverErrors[value][0],
+          path: ["username"],
+        });
         break;
     }
   }
-
-  return transformedErrors;
 }

@@ -1,22 +1,20 @@
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { signUpSchema } from "~/routes/auth.signup/signup-schema.ts";
-import { Submission, conform, useForm } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
+import { useForm } from "@conform-to/react";
+import { getFieldsetConstraint, parse } from "@conform-to/zod";
 import {
   ActionFunctionArgs,
   MetaFunction,
   json,
   redirect,
 } from "@remix-run/cloudflare";
-import { tw } from "~/utils/tw-identity-helper.ts";
-import { AuthButton } from "~/components/ui/AuthButton.tsx";
-import { useId } from "react";
+import { StatusButton } from "~/components/ui/StatusButton.tsx";
 import { createAccount } from "./create-account.server.ts";
 import { transformSignupErrors } from "./transform-signup-errors.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
-import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal.ts";
-import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn.tsx";
-import { cn } from "~/utils/misc.tsx";
+import { Field, RevealInputField } from "~/components/Forms.tsx";
+import { useIsPending } from "~/utils/misc.tsx";
+import z from "zod";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Signup" }];
@@ -25,46 +23,37 @@ export const meta: MetaFunction = () => {
 export async function action({ request, context }: ActionFunctionArgs) {
   const { env } = context.cloudflare;
   const formData = await request.formData();
-  const username = String(formData.get("username"));
-  const email = String(formData.get("email"));
-  const firstName = String(formData.get("firstName"));
-  const lastName = String(formData.get("lastName"));
-  const password = String(formData.get("password"));
-  const passwordConfirmation = String(formData.get("passwordConfirmation"));
 
   const state = String(formData.get("state"));
 
   if (state === "submitting") return null;
 
-  const submission = parse(formData, { schema: signUpSchema });
+  const submission = await parse(formData, {
+    schema: (intent) =>
+      signUpSchema.transform(async (data, ctx) => {
+        if (intent !== "submit") return { ...data, signUpResponse: null };
 
-  const signUpResponse = await createAccount(
-    env,
-    username,
-    email,
-    firstName,
-    lastName,
-    password,
-    passwordConfirmation,
-  );
+        const signUpResponse = await createAccount(env, formData);
 
-  if (!signUpResponse.ok) {
-    const serverErrors: Record<string, string[]> = await signUpResponse.json();
+        if (!signUpResponse.ok) {
+          const serverErrors: Record<string, string[]> =
+            await signUpResponse.json();
+          transformSignupErrors(serverErrors, ctx);
 
-    const transformedErrors = transformSignupErrors(serverErrors);
+          return z.NEVER;
+        }
 
-    //  Create an object that matches the SubmissionResult type
-    const submissionResult: Submission = {
-      intent: submission.intent,
-      payload: submission.payload,
-      error: transformedErrors,
-    };
+        return { ...data, signUpResponse };
+      }),
+    async: true,
+  });
 
-    return submissionResult;
+  if (submission.intent !== "submit") {
+    return json({ status: "idle", submission } as const);
   }
 
-  if (submission.intent !== "submit" || !submission.value) {
-    return json(submission);
+  if (!submission.value?.signUpResponse) {
+    return json({ status: "error", submission } as const, { status: 400 });
   }
 
   const cookieHeader = request.headers.get("Cookie");
@@ -77,7 +66,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
     ? parsedCookie
     : {};
 
-  cookie.email = email;
+  cookie.email = String(formData.get("email"));
 
   return redirect("/auth/signup/success", {
     headers: {
@@ -89,25 +78,14 @@ export async function action({ request, context }: ActionFunctionArgs) {
 export default function Signup() {
   const navigation = useNavigation();
 
-  const submitting = navigation.state === "submitting";
+  const isPending = useIsPending();
 
-  const passwordReveal = usePasswordReveal();
-  const passwordConfirmationReveal = usePasswordReveal();
-
-  const passwordInputType = passwordReveal.showPassword ? "text" : "password";
-  const passwordConfirmationInputType = passwordConfirmationReveal.showPassword
-    ? "text"
-    : "password";
-
-  const signUpButtonName = submitting ? "Signing up..." : "Sign up";
-
-  const lastSubmission = useActionData<typeof action>();
-
-  const id = useId();
+  const actionData = useActionData<typeof action>();
 
   const [form, fields] = useForm({
-    id,
-    lastSubmission,
+    id: "signup-form",
+    lastSubmission: actionData?.submission,
+    constraint: getFieldsetConstraint(signUpSchema),
     shouldValidate: "onBlur",
 
     onValidate({ formData }) {
