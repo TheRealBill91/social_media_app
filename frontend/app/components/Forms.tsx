@@ -47,7 +47,7 @@ export function RememberMeCheckbox({
   const id = checkBoxProps.id ?? checkBoxProps.name ?? fallbackId;
 
   return (
-    <div className="my-6 flex items-center px-2">
+    <div className="flex items-center px-2">
       <Checkbox
         id={id}
         ref={buttonRef}

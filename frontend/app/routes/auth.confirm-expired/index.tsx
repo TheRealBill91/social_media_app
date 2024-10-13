@@ -85,7 +85,7 @@ export default function ConfirmExpired() {
           </h3>
         </div>
         <div className="mx-3 space-y-4 px-2 md:px-4">
-          <div className="my-2 flex flex-col items-center space-y-4">
+          <div className="mb-2 flex flex-col items-center space-y-4">
             <TimerSandEmpty
               name="timer-sand-empty"
               className="my-3 size-10 text-gray-700"
@@ -106,7 +106,7 @@ export default function ConfirmExpired() {
 
           <Link
             to="/"
-            className="inline-block w-full rounded-md bg-gray-800 px-4 py-2 text-center text-white outline-0 transition-all hover:bg-gray-800/90 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
+            className="inline-block w-full rounded-md bg-gray-700 px-4 py-2 text-center text-white outline-0 transition-all hover:bg-gray-600 focus-visible:ring focus-visible:ring-gray-500 focus-visible:ring-offset-2"
           >
             Go Home
           </Link>

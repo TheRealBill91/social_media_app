@@ -91,7 +91,7 @@ export default function SignupSuccess() {
       <div className="mx-auto flex w-[350px] flex-col gap-2 space-y-6 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-10 shadow-md md:w-[400px]">
         <div className="space-y-2 text-center">
           <h1 className="text-3xl font-bold">Account Created!</h1>
-          <p className="text-gray-600 ">
+          <p className="text-gray-600">
             Please check your email to confirm your account before signing in.
           </p>
         </div>

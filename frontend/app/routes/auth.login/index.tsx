@@ -189,10 +189,10 @@ export default function Login() {
               />
               </div>
             </fieldset>
-            <div className="my-2 mt-3 flex justify-between pt-1 *:text-gray-600">
+            <div className="my-2 mt-3 flex justify-between pl-1 pt-1 *:text-gray-600">
               <Link
                 to="/auth/forgot-password"
-                className="transition-color text-sm capitalize hover:text-gray-800 hover:underline hover:decoration-gray-800 hover:underline-offset-2"
+                className="transition-color text-sm capitalize hover:text-gray-800 hover:underline hover:decoration-gray-800 hover:underline-offset-4"
               >
                 forgot password?
               </Link>
