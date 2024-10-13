@@ -3,6 +3,7 @@ import {
   LoaderFunctionArgs,
   MetaFunction,
   json,
+  redirect,
 } from "@remix-run/cloudflare";
 import { parse as cookieParse } from "cookie";
 import { expiredResetTokenResponse } from "./process-forgot-password-responses.server";
@@ -14,16 +15,14 @@ import {
 } from "@remix-run/react";
 import { requireAnonymous } from "~/utils/auth.server";
 import { PasswordAndConfirmPasswordSchema } from "./reset-password-schema";
-import { useId } from "react";
-import { useForm, conform } from "@conform-to/react";
-import { parse } from "@conform-to/zod";
-import { tw } from "~/utils/tw-identity-helper";
-import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal";
-import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn";
+import { useForm } from "@conform-to/react";
+import { getFieldsetConstraint, parse } from "@conform-to/zod";
 import { resetPassword } from "./reset-password-action.server";
-import { Alert, AlertTitle } from "~/components/ui/Alert";
-import { default as AlertCircle } from "~/components/icons/icon.tsx";
 import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server";
+import { z } from "zod";
+import { RevealInputField } from "~/components/Forms";
+import { StatusButton } from "~/components/ui/StatusButton";
+import { useIsPending } from "~/utils/misc";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Password Reset" }];
@@ -32,6 +31,7 @@ export const meta: MetaFunction = () => {
 const ResetPasswordSchema = PasswordAndConfirmPasswordSchema;
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  requireAnonymous(request);
   const { env } = context.cloudflare;
   const formData = await request.formData();
 
@@ -39,44 +39,57 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
   if (state === "submitting") return null;
 
-  const submission = parse(formData, {
-    schema: PasswordAndConfirmPasswordSchema,
+  const submission = await parse(formData, {
+    schema: (intent) =>
+      ResetPasswordSchema.transform(async (data, ctx) => {
+        if (intent !== "submit")
+          return { ...data, resetPasswordResponse: null };
+
+        const resetPasswordResponse = await resetPassword(env, formData);
+
+        if (!resetPasswordResponse.ok && resetPasswordResponse.status === 409) {
+          // password already exists
+
+          const resetPasswordError: { Message: string } =
+            await resetPasswordResponse.json();
+
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: resetPasswordError.Message,
+            path: ["password"],
+          });
+          return z.NEVER;
+        }
+
+        return { ...data, resetPasswordResponse };
+      }),
+    async: true,
   });
 
-  if (submission.intent !== "submit" || !submission.value) {
-    return json(submission);
+  if (submission.intent !== "submit") {
+    return json({ status: "idle", submission } as const);
   }
 
-  const passwordResetUserId = String(formData.get("PasswordResetUserId"));
-  const code = String(formData.get("Code"));
-  const password = String(formData.get("password"));
-  const passwordConfirmation = String(formData.get("passwordConfirmation"));
+  if (!submission.value?.resetPasswordResponse) {
+    return json({ status: "error", submission } as const);
+  }
 
-  const resetPasswordResult = await resetPassword(
-    env,
-    passwordResetUserId,
-    code,
-    password,
-    passwordConfirmation,
-  );
+  const { resetPasswordResponse } = submission.value;
 
-  if (!resetPasswordResult.ok && resetPasswordResult.status === 409) {
-    const resetPasswordError: { Message: string } =
-      await resetPasswordResult.json();
-
-    return json(resetPasswordError);
-  } else if (!resetPasswordResult.ok && resetPasswordResult.status === 400) {
-    // temporarily throw a generic error, but need to look at the BadRequest response
-    // from the ResetPassword endpoint so we can give the user more specific and better
-    // error messages
+  if (
+    !submission.value?.resetPasswordResponse &&
+    resetPasswordResponse.status === 400
+  ) {
+    // Because of the validate reset password token endpoint, and the new password
+    // validation in this action, this point should not be reached
     throw new Response("", {
       status: 500,
-      statusText: "We ran into an issue logging you out",
+      statusText: "We ran into an issue resetting the password",
     });
   }
 
   const resetPasswordSuccessMessage: { SuccessMessage: string } =
-    await resetPasswordResult.json();
+    await resetPasswordResponse.json();
 
   return redirectWithSuccessToast(
     "/auth/login",
@@ -86,8 +99,8 @@ export async function action({ request, context }: ActionFunctionArgs) {
 }
 
 export async function loader({ request, context }: LoaderFunctionArgs) {
-  const { env } = context.cloudflare;
   requireAnonymous(request);
+  const { env } = context.cloudflare;
   const cookieHeaders = request.headers.get("Cookie");
 
   const cookieObj = cookieParse(cookieHeaders || "");
@@ -96,9 +109,9 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   // is missing, redirect to the login page. This should only happen
   // if the user tries to access this route without going through
   // the password reset email link
-  // if (!cookieObj["PasswordResetUserId"] || !cookieObj["Code"]) {
-  //   throw redirect("/auth/login");
-  // }
+  if (!cookieObj["PasswordResetUserId"] || !cookieObj["Code"]) {
+    throw redirect("/auth/login");
+  }
 
   const validTokenResponseValues: Record<string, string> = {};
 
@@ -124,29 +137,18 @@ export default function ResetPassword() {
 
   const code = data.validTokenResponseValues["Code"];
 
-  const passwordReveal = usePasswordReveal();
-
-  const passwordInputType = passwordReveal.showPassword ? "text" : "password";
-  const passwordConfirmationInputType = passwordReveal.showPassword
-    ? "text"
-    : "password";
-
   const actionData = useActionData<typeof action>();
-
-  const lastSubmission =
-    actionData && "intent" in actionData ? actionData : null;
-
-  const passwordExistsError =
-    actionData && "Message" in actionData ? actionData.Message : null;
 
   const navigation = useNavigation();
 
-  const id = useId();
+  const isPending = useIsPending();
 
   const [form, fields] = useForm({
-    id,
-    lastSubmission,
+    id: "reset-password-form",
+    lastSubmission: actionData?.submission,
+    constraint: getFieldsetConstraint(ResetPasswordSchema),
     shouldValidate: "onBlur",
+    shouldRevalidate: "onSubmit",
 
     onValidate({ formData }) {
       return parse(formData, { schema: ResetPasswordSchema });
@@ -155,17 +157,6 @@ export default function ResetPassword() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-5 bg-gray-100 px-8 py-12 md:p-12">
-      {passwordExistsError ? (
-        <Alert className="md-shadow max-w-[24rem] bg-white">
-          <AlertCircle
-            icon="alert-circle"
-            className="size-[22px] fill-red-400 pt-[2px]"
-          />
-          <AlertTitle className="pb-0 text-lg font-normal">
-            {passwordExistsError}
-          </AlertTitle>
-        </Alert>
-      ) : null}
       <div className="mx-auto flex w-full max-w-[24rem] flex-col justify-start gap-4 rounded-lg border border-white bg-white p-6 px-8 py-6 shadow-md md:px-12">
         <h2 className="mt-4 text-center text-2xl capitalize">
           reset your password
