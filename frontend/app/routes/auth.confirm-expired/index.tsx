@@ -1,25 +1,34 @@
 import { default as TimerSandEmpty } from "~/components/icons/icon.tsx";
-import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn";
+import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
 import {
   ActionFunctionArgs,
   LoaderFunctionArgs,
   MetaFunction,
   json,
+  redirect,
 } from "@remix-run/cloudflare";
 import { resendConfirmationEmail } from "../../utils/resend-confirmation-email.server";
 import { resendEmailErrorResponse } from "types/resend-email-error";
-import { postSignupEmail } from "~/utils/cookie.server";
+import {
+  emailConfirmationFailure,
+  postSignupEmail,
+} from "~/utils/cookie.server";
 import { Link, useFetcher, useLoaderData } from "@remix-run/react";
 import {
   jsonWithError,
   jsonWithSuccess,
+  redirectWithErrorToast,
 } from "~/utils/flash-session/flash-session.server";
+import { requireAnonymous } from "~/utils/auth.server";
+import { combineHeaders } from "~/utils/misc";
+import { ResendEmailSuccessResponse } from "../auth.signup_.success/types";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Email Confirmation Expired" }];
 };
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  requireAnonymous(request);
   const { env } = context.cloudflare;
 
   const formData = await request.formData();
@@ -29,11 +38,11 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const state = String(formData.get("state"));
 
   if (state === "submitting") {
-    return null;
+    return json({ status: null } as const);
   }
 
   if (!email) {
-    return jsonWithError(null, "Email is missing", env);
+    return jsonWithError({ status: "error" } as const, "Email is missing", env);
   }
 
   const resendEmailResponse = await resendConfirmationEmail(env, email);
@@ -42,43 +51,73 @@ export async function action({ request, context }: ActionFunctionArgs) {
     const serverError: resendEmailErrorResponse =
       await resendEmailResponse.json();
 
-    return jsonWithError(null, serverError.ErrorMessage, env, {
-      headers: {
-        "Set-Cookie": await postSignupEmail.serialize("", {
-          maxAge: 1,
-        }),
+    return redirectWithErrorToast(
+      "/",
+      serverError.ErrorMessage,
+      env,
+      {
+        headers: combineHeaders(
+          {
+            "Set-Cookie": await postSignupEmail.serialize("", {
+              maxAge: 1,
+            }),
+          },
+          {
+            "Set-Cookie": await emailConfirmationFailure.serialize("", {
+              maxAge: 1,
+            }),
+          },
+        ),
       },
-    });
+      10000,
+    );
   }
 
-  const serverSuccessMessage: string = await resendEmailResponse.json();
-  return jsonWithSuccess(null, serverSuccessMessage, env);
+  const serverSuccessMessage: ResendEmailSuccessResponse =
+    await resendEmailResponse.json();
+  return jsonWithSuccess(
+    { status: null } as const,
+    serverSuccessMessage.successMessage,
+    env,
+  );
 }
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const cookieHeader = request.headers.get("Cookie");
-  const cookie = (await postSignupEmail.parse(cookieHeader)) as Record<
-    string,
-    string
-  > | null;
 
-  return json({ postSignupCookie: cookie });
+  // checking if user has recently signed up or accessed
+  // the expired email confirmation link
+  const emailConfirmationExpiredCookie =
+    ((await postSignupEmail.parse(cookieHeader)) as Record<
+      string,
+      string
+    > | null) ||
+    ((await emailConfirmationFailure.parse(cookieHeader)) as Record<
+      string,
+      string
+    > | null);
+
+  // prevents user from accessing this page unless they come from
+  // the email confirmation link
+  if (!emailConfirmationExpiredCookie) {
+    throw redirect("/auth/signup");
+  }
+
+  return json({ emailConfirmationExpiredCookie });
 }
 
 export default function ConfirmExpired() {
-  const { postSignupCookie } = useLoaderData<typeof loader>();
+  const { emailConfirmationExpiredCookie } = useLoaderData<typeof loader>();
 
-  const email = postSignupCookie?.email;
+  const email = emailConfirmationExpiredCookie?.email;
 
   const emailMissing = email ? false : true;
 
-  const fetcher = useFetcher();
-
-  const submitting = fetcher.state === "submitting";
+  const confirmExpired = useFetcher<typeof action>();
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center bg-gray-100 p-4 px-6 ">
-      <article className="mx-auto flex w-full max-w-md flex-col gap-3 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-3  py-8 shadow-md ">
+    <main className="flex flex-1 flex-col items-center justify-center bg-gray-100 p-4 px-6">
+      <article className="mx-auto flex w-[350px] flex-col gap-3 rounded-md border border-gray-200/80 bg-[#FFFFFF] p-3 py-8 shadow-md md:w-[400px]">
         <div>
           <h3 className="text-center text-2xl font-bold capitalize">
             email confirmation
@@ -95,14 +134,15 @@ export default function ConfirmExpired() {
               <em className="font-[600]">expired</em>.
             </p>
           </div>
-          <fetcher.Form className="mt-2" method="post">
+          <confirmExpired.Form className="mt-2" method="post">
             <input type="hidden" name="email" value={email} />
-            <input type="hidden" name="state" value={fetcher.state} />
+            <input type="hidden" name="state" value={confirmExpired.state} />
             <ResendConfirmationEmailBtn
-              submitting={submitting}
               emailMissing={emailMissing}
+              state={confirmExpired.state}
+              data={confirmExpired.data}
             />
-          </fetcher.Form>
+          </confirmExpired.Form>
 
           <Link
             to="/"

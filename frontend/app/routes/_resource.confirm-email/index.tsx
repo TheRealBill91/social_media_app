@@ -31,11 +31,13 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
         emailConfirmationErrors.ErrorMessage,
         env,
       );
-      // expiration error
+      // this is for the change informing whether or not the frontend can
+      // request a new email confirmation based on the the daily limit
     } else if ("Email" in emailConfirmationErrors) {
-      cookie.email = emailConfirmationErrors.Email;
+      cookie.email = emailConfirmationErrors.CanRequestNewEmailConfirmation
+        ? emailConfirmationErrors.Email
+        : null;
       throw redirect("/auth/confirm-expired", {
-        status: 302,
         headers: {
           "Set-Cookie": await emailConfirmationFailure.serialize(cookie),
         },
