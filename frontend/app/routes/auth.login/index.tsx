@@ -8,13 +8,14 @@ import {
 } from "@remix-run/cloudflare";
 import { Form, useActionData, useNavigation, Link } from "@remix-run/react";
 import { loginSchema } from "./login-schema.ts";
-import { tw } from "~/utils/tw-identity-helper";
-import { AuthButton } from "~/components/ui/AuthButton";
-import { ErrorList, RememberMeCheckbox } from "~/components/Forms.tsx";
+import { StatusButton } from "~/components/ui/StatusButton.tsx";
+import {
+  Field,
+  RememberMeCheckbox,
+  RevealInputField,
+} from "~/components/Forms.tsx";
 import { login } from "./login.server.ts";
-import { usePasswordReveal } from "~/utils/hooks/usePasswordReveal.ts";
-import { PasswordRevealBtn } from "~/components/ui/PasswordRevealBtn.tsx";
-import { LoginErrorResponse, LoginSuccessResponse } from "./types.ts";
+import { LoginSuccessResponse } from "./types.ts";
 import { redirectWithSuccessToast } from "~/utils/flash-session/flash-session.server.ts";
 import { createCloudflareCookie } from "~/utils/cookie.server.ts";
 import { requireAnonymous } from "~/utils/auth.server.ts";
@@ -22,6 +23,7 @@ import { AuthDivider } from "~/components/ui/AuthDivider.tsx";
 import { ProviderConnectionForm } from "~/utils/connections.tsx";
 import z from "zod";
 import { FormError } from "./FormError.tsx";
+import { useIsPending } from "~/utils/misc.tsx";
 
 export const meta: MetaFunction = () => {
   return [{ title: "Disengage | Log in" }];
@@ -33,6 +35,7 @@ export function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request, context }: ActionFunctionArgs) {
+  requireAnonymous(request);
   const { env } = context.cloudflare;
   const formData = await request.formData();
 
@@ -47,11 +50,13 @@ export async function action({ request, context }: ActionFunctionArgs) {
 
         const loginResponse = await login({ ...data, env });
         if (!loginResponse.ok) {
-          const loginError: LoginErrorResponse = await loginResponse.json();
+          const loginError: { ErrorMessage: string } =
+            await loginResponse.json();
           ctx.addIssue({
             code: z.ZodIssueCode.custom,
             message: loginError.ErrorMessage,
           });
+
           return z.NEVER;
         }
 
@@ -105,15 +110,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
 export default function Login() {
   const navigation = useNavigation();
 
-  const submitting =
-    navigation.state === "submitting" &&
-    navigation.formAction === "/auth/login";
-
-  const passwordReveal = usePasswordReveal();
-
-  const passwordInputType = passwordReveal.showPassword ? "text" : "password";
-
-  const loginButtonName = submitting ? "Authenticating..." : "Login";
+  const isPending = useIsPending();
 
   const actionData = useActionData<typeof action>();
 
@@ -187,7 +184,6 @@ export default function Login() {
                     "self-start pl-1 text-sm text-red-700 transition-opacity duration-300 ease-in-out",
                 }}
               />
-              </div>
             </fieldset>
             <div className="my-2 mt-3 flex justify-between pl-1 pt-1 *:text-gray-600">
               <Link
@@ -207,7 +203,7 @@ export default function Login() {
               checkBoxProps={conform.input(fields.rememberMe, {
                 type: "checkbox",
               })}
-              className="size-5"
+              className="my-6 size-5"
               labelProps={{
                 htmlFor: fields.rememberMe.id,
                 children: "Remember me",
