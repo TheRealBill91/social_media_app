@@ -1,0 +1,9 @@
+**/node_modules
+
+/.wrangler
+/.husky
+/public/build
+
+package-lock.json
+
+

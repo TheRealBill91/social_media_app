@@ -9,9 +9,10 @@
     "build": "remix vite:build",
     "preview": "wrangler pages dev ./build/client",
     "deploy": "wrangler pages deploy ./build/client",
+    "format": "prettier --write .",
     "lint": "eslint --cache --cache-location ./node_modules/.cache/eslint .",
     "start": "wrangler pages dev  --compatibility-date=2023-06-21 ./public -kv=SOCIAL_MEDIA_APP",
-    "typecheck": "tsc",
+    "typecheck": "wrangler types && tsc",
     "gen-svg-sprite": "rmx svg-sprite assets/svg/icons app/components/icons",
     "prepare": "cd .. && husky install frontend/.husky"
   },
