@@ -45,11 +45,21 @@ export interface ToastProps {
   toastOptions: ToastOptions;
 }
 
-interface IProps {
-  toastProps: ToastProps;
-}
+const toastProps: ToastProps = {
+  closeButton: true,
+  position: "top-center",
+  toastOptions: {
+    unstyled: true,
+    classNames: {
+      toast:
+        "bg-white border border-gray-50 shadow-md min-w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center",
+      title: "text-gray-700 ml-3",
+      closeButton: "sm:hidden md:hidden",
+    },
+  },
+};
 
-export function Toast({ toastProps }: IProps) {
+export function Toast() {
   const { closeButton, position, toastOptions } = toastProps;
   return (
     <Toaster

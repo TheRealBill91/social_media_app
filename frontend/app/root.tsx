@@ -31,7 +31,7 @@ import { BackButton } from "./components/ui/BackButton.tsx";
 import { getToast } from "./utils/flash-session/flash-session.server.ts";
 import { getProfileInfo } from "./utils/auth.server.ts";
 import { Header } from "./components/ui/Header.tsx";
-import { Toast, ToastProps } from "./components/ui/Toast.tsx";
+import { Toast } from "./components/ui/Toast.tsx";
 import { useToast } from "./utils/hooks/useToast.ts";
 import default_avatar from "../assets/default-avatar.png";
 
@@ -73,20 +73,6 @@ export function shouldRevalidate({ formAction }: ShouldRevalidateFunctionArgs) {
   return formAction;
 }
 
-const toastProps: ToastProps = {
-  closeButton: true,
-  position: "top-center",
-  toastOptions: {
-    unstyled: true,
-    classNames: {
-      toast:
-        "bg-white border border-gray-50 shadow-md w-[350px] lg:w-[400px] rounded-md p-4 flex justify-center items-center ",
-      title: "text-gray-700 ml-3",
-      closeButton: "sm:hidden md:hidden",
-    },
-  },
-};
-
 export default function App() {
   const data = useLoaderData<typeof loader>();
   const toast = data.toast;
@@ -106,7 +92,7 @@ export default function App() {
       <body>
         <div className="flex min-h-screen flex-col">
           <Header userInfo={userInfo} />
-          <Toast toastProps={toastProps} />
+          <Toast />
           <Outlet />
           <ScrollRestoration />
           <Scripts />

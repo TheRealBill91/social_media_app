@@ -1,15 +1,5 @@
 import { z } from "zod";
 
-type ToastTypes =
-  | "normal"
-  | "action"
-  | "success"
-  | "info"
-  | "warning"
-  | "error"
-  | "loading"
-  | "default";
-
 const toastMessageSchema = z.object({
   // message to diplay to the user
   text: z.string(),
