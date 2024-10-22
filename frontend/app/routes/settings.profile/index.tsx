@@ -1,5 +1,5 @@
 import { Label } from "~/components/ui/Label";
-import { useRouteLoaderData } from "@remix-run/react";
+import { json, useRouteLoaderData } from "@remix-run/react";
 import { Combobox } from "~/components/ui/Combobox";
 import { FormDescription } from "~/components/Forms";
 import { Input } from "~/components/ui/Input";
@@ -9,7 +9,7 @@ import { ProfileSuccessResponse as UserInfo } from "~/utils/auth.server";
 import { Separator } from "~/components/ui/Separator";
 
 export function loader() {
-  return null;
+  return json({});
 }
 
 export default function ProfileSettings() {
