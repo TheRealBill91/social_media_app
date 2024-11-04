@@ -13,13 +13,13 @@ import {
 import { resendConfirmationEmail } from "~/utils/resend-confirmation-email.server.ts";
 
 import { ResendConfirmationEmailBtn } from "~/components/ui/ResendConfirmationEmailBtn.tsx";
-import { resendEmailErrorResponse } from "types/resend-email-error.ts";
+import { ResendEmailErrorResponse } from "types/resend-email-error.ts";
 import {
   jsonWithError,
   jsonWithSuccess,
 } from "~/utils/flash-session/flash-session.server.ts";
 import { postSignupEmail } from "~/utils/cookie.server.ts";
-import { resendEmailSuccessResponse } from "./types.ts";
+import { ResendEmailSuccessResponse } from "./types.ts";
 import { requireAnonymous } from "~/utils/auth.server.ts";
 
 export const meta: MetaFunction = () => {
@@ -46,7 +46,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
   const resendEmailResponse = await resendConfirmationEmail(env, email);
 
   if (!resendEmailResponse.ok) {
-    const serverError: resendEmailErrorResponse =
+    const serverError: ResendEmailErrorResponse =
       await resendEmailResponse.json();
 
     return jsonWithError(
@@ -62,7 +62,7 @@ export async function action({ request, context }: ActionFunctionArgs) {
       },
     );
   }
-  const serverSuccessResponse: resendEmailSuccessResponse =
+  const serverSuccessResponse: ResendEmailSuccessResponse =
     await resendEmailResponse.json();
 
   return jsonWithSuccess(

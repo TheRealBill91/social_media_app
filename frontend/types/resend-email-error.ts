@@ -3,7 +3,7 @@
  * when resending the email confirmation fails
  */
 
-export interface resendEmailErrorResponse {
+export interface ResendEmailErrorResponse {
   /**
    * The error message when resending the email confirmation fails
    */
