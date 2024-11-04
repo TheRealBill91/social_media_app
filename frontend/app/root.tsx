@@ -18,7 +18,6 @@ import {
 } from "@remix-run/react";
 
 import {
-  href as Spinner,
   href as EyeOpen,
   href as EyeNone,
   href as TimerSandEmpty,
@@ -38,7 +37,6 @@ import default_avatar from "../assets/default-avatar.png";
 export const links: LinksFunction = () => {
   return [
     { rel: "stylesheet", href: styles, as: "style" },
-    { rel: "preload", href: Spinner, as: "image" },
     { rel: "preload", href: EyeOpen, as: "image" },
     { rel: "preload", href: EyeNone, as: "image" },
     { rel: "preload", href: TimerSandEmpty, as: "image" },
